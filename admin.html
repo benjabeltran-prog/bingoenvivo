@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Administración · Bingo en vivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --tinta:#0e1a40; --papel:#f2f5fb; --blanco:#ffffff; --azul:#2f5bff; --azul-osc:#2246d4;
+    --gris:#5b6676; --linea:#d8deea; --verde:#12806a; --ambar:#8a5a00; --rojo:#b3261e;
+    --verde-fondo:#e3f5ee; --ambar-fondo:#fff3d1; --rojo-fondo:#fdeceb;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:'Instrument Sans', system-ui, sans-serif; background:var(--papel); color:var(--tinta); line-height:1.45; min-height:100vh; }
+  h1,h2{ font-family:'Bricolage Grotesque', 'Instrument Sans', sans-serif; font-weight:800; letter-spacing:-0.01em; }
+  button{ font:inherit; cursor:pointer; }
+  [hidden]{ display:none !important; }
+  :focus-visible{ outline:3px solid var(--azul); outline-offset:2px; }
+
+  /* acceso */
+  .login{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .login form{ width:100%; max-width:380px; background:var(--blanco); border:1px solid var(--linea); border-radius:14px; padding:28px; }
+  .login h1{ font-size:1.6rem; margin-bottom:4px; }
+  .login p.sub{ color:var(--gris); margin-bottom:20px; }
+  label{ display:block; font-weight:600; font-size:.9rem; margin:12px 0 5px; }
+  input, select, textarea{ width:100%; font:inherit; padding:10px 12px; border:1px solid var(--linea); border-radius:9px; background:var(--blanco); color:var(--tinta); }
+  textarea{ resize:vertical; min-height:150px; font-size:.92rem; }
+  .btn{ border:0; border-radius:9px; padding:10px 18px; font-weight:600; background:var(--azul); color:#fff; }
+  .btn:hover{ background:var(--azul-osc); }
+  .btn.sec{ background:transparent; color:var(--tinta); border:1px solid var(--linea); }
+  .btn.sec:hover{ background:var(--papel); }
+  .btn.peligro{ background:transparent; color:var(--rojo); border:1px solid #e8b4b0; }
+  .btn.peligro:hover{ background:var(--rojo-fondo); }
+  .btn.chico{ padding:6px 11px; font-size:.84rem; font-weight:600; }
+  .btn:disabled{ opacity:.5; cursor:default; }
+  .error{ color:var(--rojo); font-size:.9rem; min-height:1.3em; margin-top:10px; }
+  .ok{ color:var(--verde); font-size:.9rem; }
+
+  /* panel */
+  header.barra{ display:flex; align-items:center; gap:14px; padding:14px 24px; background:var(--blanco); border-bottom:1px solid var(--linea); position:sticky; top:0; z-index:5; }
+  header.barra h1{ font-size:1.15rem; }
+  header.barra .quien{ margin-left:auto; color:var(--gris); font-size:.88rem; }
+  main{ max-width:1100px; margin:0 auto; padding:22px 24px 60px; }
+  .pestanas{ display:flex; gap:6px; margin-bottom:18px; border-bottom:1px solid var(--linea); }
+  .pestanas button{ background:none; border:0; padding:10px 14px; font-weight:600; color:var(--gris); border-bottom:3px solid transparent; margin-bottom:-1px; }
+  .pestanas button[aria-selected="true"]{ color:var(--tinta); border-bottom-color:var(--azul); }
+  .pestanas .cuenta{ display:inline-block; min-width:20px; padding:0 6px; margin-left:6px; border-radius:99px; background:var(--azul); color:#fff; font-size:.75rem; text-align:center; }
+  section.bloque{ background:var(--blanco); border:1px solid var(--linea); border-radius:14px; padding:20px; margin-bottom:20px; }
+  section.bloque h2{ font-size:1.15rem; margin-bottom:12px; }
+  .rejilla{ display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:4px 16px; }
+  .fila-codigo{ display:flex; gap:8px; }
+  .fila-codigo input{ font-family:ui-monospace, Menlo, Consolas, monospace; letter-spacing:.06em; }
+  .acciones{ margin-top:16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .ayuda{ color:var(--gris); font-size:.84rem; margin-top:4px; }
+  .entrega{ margin-top:16px; padding:16px; background:var(--verde-fondo); border-radius:12px; }
+  .entrega h3{ font-size:1rem; margin-bottom:8px; }
+
+  /* tabla de bingos */
+  .tabla-caja{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:760px; }
+  th{ text-align:left; font-size:.82rem; font-weight:600; color:var(--gris); padding:8px 10px; border-bottom:1px solid var(--linea); }
+  td{ padding:12px 10px; border-bottom:1px solid var(--linea); vertical-align:top; }
+  tr:last-child td{ border-bottom:0; }
+  .sala a{ color:var(--azul); font-weight:600; text-decoration:none; }
+  .sala a:hover{ text-decoration:underline; }
+  .cliente{ color:var(--gris); font-size:.86rem; }
+  .estado{ display:inline-block; padding:3px 10px; border-radius:99px; font-size:.82rem; font-weight:600; }
+  .estado.vigente{ background:var(--verde-fondo); color:var(--verde); }
+  .estado.pronto{ background:var(--ambar-fondo); color:var(--ambar); }
+  .estado.vencido{ background:var(--rojo-fondo); color:var(--rojo); }
+  .vence{ display:block; color:var(--gris); font-size:.82rem; margin-top:3px; }
+  .botones{ display:flex; flex-wrap:wrap; gap:6px; }
+  .codigo-visible{ font-family:ui-monospace, Menlo, Consolas, monospace; background:var(--papel); padding:3px 8px; border-radius:6px; font-size:.9rem; display:inline-block; margin-top:6px; }
+  .vacio{ color:var(--gris); padding:18px 4px; }
+
+  /* solicitudes */
+  .solicitud{ padding:14px 0; border-bottom:1px solid var(--linea); }
+  .solicitud:last-child{ border-bottom:0; }
+  .solicitud .cab{ display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; }
+  .solicitud .cab strong{ font-size:1.02rem; }
+  .solicitud .meta{ color:var(--gris); font-size:.86rem; }
+  .solicitud p{ margin:6px 0 8px; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .etiqueta{ font-size:.78rem; font-weight:600; padding:2px 9px; border-radius:99px; background:var(--ambar-fondo); color:var(--ambar); }
+  .etiqueta.hecha{ background:var(--verde-fondo); color:var(--verde); }
+
+  dialog{ border:0; border-radius:14px; padding:22px; max-width:440px; width:calc(100% - 32px); box-shadow:0 20px 60px rgba(14,26,64,.3); }
+  dialog::backdrop{ background:rgba(14,26,64,.45); }
+  dialog h2{ font-size:1.1rem; margin-bottom:6px; }
+  dialog .acciones{ justify-content:flex-end; }
+  .toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--tinta); color:#fff; padding:10px 18px; border-radius:99px; font-size:.9rem; z-index:50; }
+  @media (max-width:640px){ main{ padding:16px 14px 50px; } header.barra{ padding:12px 14px; } }
+</style>
+</head>
+<body>
+
+<div class="login" id="login">
+  <form id="formLogin">
+    <h1>Administración</h1>
+    <p class="sub">Bingo en vivo. Entra con tu cuenta de administrador.</p>
+    <label for="loginCorreo">Correo</label>
+    <input id="loginCorreo" type="email" autocomplete="username" value="admin@bingoenvivo.cl" required>
+    <label for="loginClave">Contraseña</label>
+    <input id="loginClave" type="password" autocomplete="current-password" required>
+    <p class="error" id="loginError" role="alert"></p>
+    <div class="acciones"><button class="btn" type="submit" id="loginBoton">Entrar</button></div>
+  </form>
+</div>
+
+<div id="panel" hidden>
+  <header class="barra">
+    <h1>Bingo en vivo · Administración</h1>
+    <span class="quien" id="quien"></span>
+    <button class="btn sec chico" id="salir" type="button">Salir</button>
+  </header>
+  <main>
+    <div class="pestanas" role="tablist">
+      <button role="tab" id="tabBingos" aria-selected="true" type="button">Bingos</button>
+      <button role="tab" id="tabSolicitudes" aria-selected="false" type="button">Solicitudes<span class="cuenta" id="cuentaSolicitudes" hidden>0</span></button>
+    </div>
+
+    <div id="vistaBingos">
+      <section class="bloque" id="bloqueCrear">
+        <h2>Crear un bingo</h2>
+        <div class="rejilla">
+          <div>
+            <label for="nuevoSala">Nombre en la dirección</label>
+            <input id="nuevoSala" type="text" maxlength="41" placeholder="colegio-los-aromos" autocomplete="off" autocapitalize="none" spellcheck="false">
+            <p class="ayuda" id="ayudaSala">Quedará como <b>nombre</b>.bingoenvivo.cl</p>
+          </div>
+          <div>
+            <label for="nuevoCliente">Cliente</label>
+            <input id="nuevoCliente" type="text" maxlength="80" placeholder="Colegio Los Aromos" autocomplete="off">
+          </div>
+          <div>
+            <label for="nuevoContacto">Contacto (opcional)</label>
+            <input id="nuevoContacto" type="text" maxlength="120" placeholder="correo o teléfono" autocomplete="off">
+          </div>
+          <div>
+            <label for="nuevoDuracion">El acceso dura</label>
+            <select id="nuevoDuracion">
+              <option value="1">1 día</option>
+              <option value="3">3 días</option>
+              <option value="7" selected>7 días</option>
+              <option value="15">15 días</option>
+              <option value="30">30 días</option>
+              <option value="90">90 días</option>
+              <option value="fecha">Hasta una fecha…</option>
+            </select>
+            <input id="nuevoFecha" type="date" hidden style="margin-top:8px">
+          </div>
+          <div>
+            <label for="nuevoCodigo">Código de acceso</label>
+            <div class="fila-codigo">
+              <input id="nuevoCodigo" type="text" maxlength="64" autocomplete="off" spellcheck="false">
+              <button class="btn sec" type="button" id="otroCodigo" title="Generar otro código">Otro</button>
+            </div>
+            <p class="ayuda">Largo y aleatorio: Firebase no limita los intentos.</p>
+          </div>
+        </div>
+        <p class="error" id="crearError" role="alert"></p>
+        <div class="acciones"><button class="btn" type="button" id="crear">Crear bingo</button></div>
+        <div class="entrega" id="entrega" hidden>
+          <h3 id="entregaTitulo">Mensaje para tu cliente</h3>
+          <textarea id="entregaTexto" readonly></textarea>
+          <div class="acciones"><button class="btn" type="button" id="copiarMensaje">Copiar mensaje</button></div>
+        </div>
+      </section>
+
+      <section class="bloque">
+        <h2>Bingos <span class="cliente" id="totalBingos"></span></h2>
+        <div class="tabla-caja">
+          <table>
+            <thead><tr><th>Bingo</th><th>Acceso</th><th>Acciones</th></tr></thead>
+            <tbody id="filas"></tbody>
+          </table>
+        </div>
+        <p class="vacio" id="sinBingos" hidden>Aún no hay bingos. Crea el primero arriba.</p>
+      </section>
+    </div>
+
+    <div id="vistaSolicitudes" hidden>
+      <section class="bloque">
+        <h2>Solicitudes desde la página</h2>
+        <div id="listaSolicitudes"></div>
+        <p class="vacio" id="sinSolicitudes" hidden>Todavía no llegan solicitudes.</p>
+      </section>
+    </div>
+  </main>
+</div>
+
+<dialog id="dlgFecha">
+  <h2>Cambiar la fecha de término</h2>
+  <p class="ayuda" id="dlgFechaSala"></p>
+  <label for="dlgFechaInput">Nueva fecha y hora</label>
+  <input id="dlgFechaInput" type="datetime-local">
+  <div class="acciones">
+    <button class="btn sec" type="button" id="dlgFechaCancelar">Cancelar</button>
+    <button class="btn" type="button" id="dlgFechaGuardar">Guardar</button>
+  </div>
+</dialog>
+
+<dialog id="dlgConfirmar">
+  <h2 id="dlgConfirmarTitulo"></h2>
+  <p id="dlgConfirmarTexto" class="ayuda" style="font-size:.95rem; color:var(--tinta); margin-top:6px"></p>
+  <div class="acciones">
+    <button class="btn sec" type="button" id="dlgConfirmarNo">Cancelar</button>
+    <button class="btn peligro" type="button" id="dlgConfirmarSi">Confirmar</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+(function(){
+  // ---- configuración: reemplaza estos datos si usas otro proyecto de Firebase ----
+  const firebaseConfig = {
+    apiKey: "AIzaSyCqzLZ2lYvjkJi8zKFdId5eknfm5yA6xKA",
+    authDomain: "bingo-oxford-school.firebaseapp.com",
+    databaseURL: "https://bingo-oxford-school-default-rtdb.firebaseio.com",
+    projectId: "bingo-oxford-school",
+    storageBucket: "bingo-oxford-school.firebasestorage.app",
+    messagingSenderId: "465865636119",
+    appId: "1:465865636119:web:d2261f0090b3e5b9cd1f52"
+  };
+  const DOMINIO = 'bingoenvivo.cl';
+  const CORREO_ADMIN = 'admin@bingoenvivo.cl';      // debe coincidir con el de las reglas de seguridad
+  const RESERVADOS = ['www', 'app', 'admin', 'api', 'demo-landing'];
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+  if(location.hostname === 'localhost' && new URLSearchParams(location.search).get('emulador') === '1'){
+    db.useEmulator('127.0.0.1', 9000);
+    auth.useEmulator('http://127.0.0.1:9099', { disableWarnings: true });
+  }
+  const $ = (id) => document.getElementById(id);
+  const DIA = 86400000;
+
+  let licencias = {}, clientes = {}, claves = {}, solicitudes = {};
+  let verCodigo = {};            // salas con el código a la vista
+  let oyentes = [];
+
+  // ---------- utilidades ----------
+  function toast(texto){
+    const t = $('toast'); t.textContent = texto; t.hidden = false;
+    clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 2600);
+  }
+  function fecha(ms){
+    const d = new Date(Number(ms));
+    return d.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
+           d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+  function aLocalInput(ms){
+    const d = new Date(Number(ms)); const p = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function duracionTexto(ms){
+    const a = Math.abs(ms), h = a / 3600000, d = a / DIA;
+    if(h < 1) return Math.max(1, Math.round(a / 60000)) + ' min';
+    if(h < 48) return Math.round(h) + ' h';
+    return Math.round(d) + ' días';
+  }
+  function estadoDe(sala){
+    const l = licencias[sala]; const ahora = Date.now();
+    if(!l) return { clase: 'vencido', texto: 'Sin licencia' };
+    const resta = Number(l.vence) - ahora;
+    if(resta <= 0) return { clase: 'vencido', texto: 'Venció hace ' + duracionTexto(resta) };
+    if(resta < 2 * DIA) return { clase: 'pronto', texto: 'Quedan ' + duracionTexto(resta) };
+    return { clase: 'vigente', texto: 'Vigente · quedan ' + duracionTexto(resta) };
+  }
+  function urlPublica(sala){ return 'https://' + sala + '.' + DOMINIO + '/'; }
+  function urlOrganizador(sala){ return urlPublica(sala) + '?admin=1'; }
+  function codigoNuevo(){
+    const alfabeto = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';     // sin letras que se confunden (I, O, L, 0, 1)
+    const buf = new Uint32Array(12); crypto.getRandomValues(buf);
+    const c = Array.from(buf, n => alfabeto[n % alfabeto.length]).join('');
+    return c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8, 12);
+  }
+  function mensajeCliente(sala, codigo, vence){
+    return '¡Hola! Tu bingo está listo.\n\n' +
+      'Enlace para el público (compártelo o imprímelo en un QR):\n' + urlPublica(sala) + '\n\n' +
+      'Panel del organizador (solo para ti):\n' + urlOrganizador(sala) + '\n' +
+      'Código de acceso: ' + codigo + '\n\n' +
+      'Tu acceso está vigente hasta el ' + fecha(vence) + '.\n' +
+      'Dentro del panel toca ⚙ para poner el nombre, los colores, las rondas y los premios.';
+  }
+  function copiar(texto, aviso){
+    const fin = () => toast(aviso || 'Copiado');
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(texto).then(fin, fin); return; }
+    const t = document.createElement('textarea'); t.value = texto; document.body.appendChild(t); t.select();
+    try{ document.execCommand('copy'); } catch(e){}
+    t.remove(); fin();
+  }
+  function confirmar(titulo, texto){
+    return new Promise(resolve => {
+      const d = $('dlgConfirmar');
+      $('dlgConfirmarTitulo').textContent = titulo; $('dlgConfirmarTexto').textContent = texto;
+      const cerrar = (v) => { d.close(); resolve(v); };
+      $('dlgConfirmarSi').onclick = () => cerrar(true);
+      $('dlgConfirmarNo').onclick = () => cerrar(false);
+      d.oncancel = () => resolve(false);
+      d.showModal();
+    });
+  }
+
+  // ---------- acceso ----------
+  $('formLogin').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    $('loginError').textContent = ''; $('loginBoton').disabled = true;
+    try{
+      await auth.signInWithEmailAndPassword($('loginCorreo').value.trim(), $('loginClave').value);
+    } catch(err){
+      const c = err && err.code || '';
+      $('loginError').textContent = (c.indexOf('wrong-password') >= 0 || c.indexOf('invalid-credential') >= 0 || c.indexOf('user-not-found') >= 0 || c.indexOf('invalid-email') >= 0)
+        ? 'Correo o contraseña incorrectos.' : 'No se pudo entrar. Revisa tu conexión e intenta de nuevo.';
+    }
+    $('loginBoton').disabled = false;
+  });
+  $('salir').addEventListener('click', () => auth.signOut());
+
+  auth.onAuthStateChanged((u) => {
+    detener();
+    if(u && u.email === CORREO_ADMIN){
+      $('login').hidden = true; $('panel').hidden = false; $('quien').textContent = u.email;
+      iniciar();
+    } else {
+      if(u) auth.signOut();                                   // una sesión que no es de administrador no sirve aquí
+      $('login').hidden = false; $('panel').hidden = true; $('loginClave').value = '';
+    }
+  });
+
+  // ---------- datos en vivo ----------
+  function escuchar(ruta, alCambiar){
+    const r = db.ref(ruta);
+    const cb = (snap) => { alCambiar(snap.val() || {}); };
+    r.on('value', cb, () => toast('No se pudo leer ' + ruta + ' (revisa las reglas de seguridad)'));
+    oyentes.push(() => r.off('value', cb));
+  }
+  function detener(){ oyentes.forEach(f => f()); oyentes = []; }
+  function iniciar(){
+    escuchar('licencias', v => { licencias = v; dibujarBingos(); });
+    escuchar('clientes', v => { clientes = v; dibujarBingos(); });
+    escuchar('claves', v => { claves = v; dibujarBingos(); });
+    escuchar('solicitudes', v => { solicitudes = v; dibujarSolicitudes(); });
+    clearInterval(iniciar.reloj); iniciar.reloj = setInterval(dibujarBingos, 60000);
+    if(!$('nuevoCodigo').value) $('nuevoCodigo').value = codigoNuevo();
+  }
+
+  // ---------- tabla de bingos ----------
+  function dibujarBingos(){
+    const salas = Object.keys(licencias);
+    salas.sort((a, b) => {
+      const va = Number(licencias[a].vence) > Date.now(), vb = Number(licencias[b].vence) > Date.now();
+      if(va !== vb) return va ? -1 : 1;
+      return va ? Number(licencias[a].vence) - Number(licencias[b].vence) : Number(licencias[b].vence) - Number(licencias[a].vence);
+    });
+    $('totalBingos').textContent = salas.length ? '(' + salas.length + ')' : '';
+    $('sinBingos').hidden = salas.length > 0;
+    const tbody = $('filas'); tbody.innerHTML = '';
+    salas.forEach(sala => {
+      const l = licencias[sala], c = clientes[sala] || {}, est = estadoDe(sala);
+      const tr = document.createElement('tr');
+      // columna 1: bingo
+      const td1 = document.createElement('td'); td1.className = 'sala';
+      const a = document.createElement('a'); a.href = urlPublica(sala); a.target = '_blank'; a.rel = 'noopener'; a.textContent = sala + '.' + DOMINIO;
+      td1.appendChild(a);
+      const cl = document.createElement('div'); cl.className = 'cliente'; cl.textContent = (c.nombre || 'Sin nombre') + (c.contacto ? ' · ' + c.contacto : ''); td1.appendChild(cl);
+      // columna 2: estado
+      const td2 = document.createElement('td');
+      const chip = document.createElement('span'); chip.className = 'estado ' + est.clase; chip.textContent = est.texto; td2.appendChild(chip);
+      const ven = document.createElement('span'); ven.className = 'vence'; ven.textContent = 'hasta ' + fecha(l.vence); td2.appendChild(ven);
+      if(verCodigo[sala]){ const k = document.createElement('span'); k.className = 'codigo-visible'; k.textContent = claves[sala] || '(sin código)'; td2.appendChild(k); }
+      // columna 3: acciones
+      const td3 = document.createElement('td');
+      const caja = document.createElement('div'); caja.className = 'botones';
+      const boton = (texto, fn, clase) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn chico ' + (clase || 'sec'); b.textContent = texto; b.addEventListener('click', fn); caja.appendChild(b); };
+      boton('+1 día', () => extender(sala, 1)); boton('+7 días', () => extender(sala, 7)); boton('+30 días', () => extender(sala, 30));
+      boton('Fecha…', () => abrirFecha(sala));
+      boton(verCodigo[sala] ? 'Ocultar código' : 'Ver código', () => { verCodigo[sala] = !verCodigo[sala]; dibujarBingos(); });
+      boton('Copiar mensaje', () => { copiar(mensajeCliente(sala, claves[sala] || '(sin código)', l.vence), 'Mensaje copiado'); });
+      boton('Código nuevo', () => cambiarCodigo(sala));
+      boton('Cerrar accesos', () => cerrarAccesos(sala));
+      boton('Eliminar', () => eliminar(sala), 'peligro');
+      td3.appendChild(caja);
+      tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tbody.appendChild(tr);
+    });
+  }
+
+  async function extender(sala, dias){
+    const base = Math.max(Date.now(), Number(licencias[sala].vence));
+    try{ await db.ref('licencias/' + sala + '/vence').set(base + dias * DIA); toast('Acceso extendido ' + dias + (dias === 1 ? ' día' : ' días')); }
+    catch(e){ toast('No se pudo guardar'); }
+  }
+  function abrirFecha(sala){
+    const d = $('dlgFecha');
+    $('dlgFechaSala').textContent = sala + '.' + DOMINIO;
+    $('dlgFechaInput').value = aLocalInput(licencias[sala].vence);
+    $('dlgFechaCancelar').onclick = () => d.close();
+    $('dlgFechaGuardar').onclick = async () => {
+      const ms = new Date($('dlgFechaInput').value).getTime();
+      if(!ms){ return; }
+      try{ await db.ref('licencias/' + sala + '/vence').set(ms); d.close(); toast('Fecha guardada'); } catch(e){ toast('No se pudo guardar'); }
+    };
+    d.showModal();
+  }
+  async function cambiarCodigo(sala){
+    const si = await confirmar('¿Cambiar el código de ' + sala + '?', 'El código anterior deja de funcionar y se cierran los accesos actuales. El organizador tendrá que ingresar el código nuevo.');
+    if(!si) return;
+    const nuevo = codigoNuevo();
+    try{
+      await db.ref('claves/' + sala).set(nuevo);
+      await db.ref('claims/' + sala).remove();
+      verCodigo[sala] = true;
+      copiar(mensajeCliente(sala, nuevo, licencias[sala].vence), 'Código nuevo creado y mensaje copiado');
+    } catch(e){ toast('No se pudo cambiar el código'); }
+  }
+  async function cerrarAccesos(sala){
+    const si = await confirmar('¿Cerrar los accesos de ' + sala + '?', 'Todos los dispositivos del organizador tendrán que volver a ingresar el código. El código sigue siendo el mismo.');
+    if(!si) return;
+    try{ await db.ref('claims/' + sala).remove(); toast('Accesos cerrados'); } catch(e){ toast('No se pudo cerrar'); }
+  }
+  async function eliminar(sala){
+    const si = await confirmar('¿Eliminar ' + sala + '?', 'Se borra el acceso, el código y también el tablero, los logos y la configuración de este bingo. No se puede deshacer.');
+    if(!si) return;
+    try{
+      await Promise.all(['licencias/' + sala, 'claves/' + sala, 'clientes/' + sala, 'claims/' + sala, 'salasBingo/' + sala, 'logosBingo/' + sala].map(r => db.ref(r).remove()));
+      toast('Bingo eliminado');
+    } catch(e){ toast('No se pudo eliminar'); }
+  }
+
+  // ---------- crear ----------
+  function validarSala(s){
+    if(!/^[a-z0-9][a-z0-9-]{1,40}$/.test(s)) return 'Usa solo minúsculas, números y guiones (mínimo 2 caracteres, sin empezar con guion).';
+    if(RESERVADOS.indexOf(s) >= 0) return '«' + s + '» está reservado. Elige otro nombre.';
+    if(licencias[s]) return 'Ya existe un bingo llamado «' + s + '».';
+    return '';
+  }
+  $('nuevoSala').addEventListener('input', () => {
+    const s = $('nuevoSala').value.trim().toLowerCase();
+    $('ayudaSala').innerHTML = '';
+    $('ayudaSala').append('Quedará como ');
+    const b = document.createElement('b'); b.textContent = (s || 'nombre') + '.' + DOMINIO; $('ayudaSala').appendChild(b);
+  });
+  $('nuevoDuracion').addEventListener('change', () => { $('nuevoFecha').hidden = $('nuevoDuracion').value !== 'fecha'; });
+  $('otroCodigo').addEventListener('click', () => { $('nuevoCodigo').value = codigoNuevo(); });
+  $('crear').addEventListener('click', async () => {
+    const err = $('crearError'); err.textContent = '';
+    const sala = $('nuevoSala').value.trim().toLowerCase();
+    const cliente = $('nuevoCliente').value.trim();
+    const codigo = $('nuevoCodigo').value.trim();
+    const e1 = validarSala(sala);
+    if(e1){ err.textContent = e1; $('nuevoSala').focus(); return; }
+    if(!cliente){ err.textContent = 'Escribe el nombre del cliente.'; $('nuevoCliente').focus(); return; }
+    if(codigo.length < 6){ err.textContent = 'El código debe tener al menos 6 caracteres.'; return; }
+    let vence;
+    if($('nuevoDuracion').value === 'fecha'){
+      const f = $('nuevoFecha').value;
+      if(!f){ err.textContent = 'Elige la fecha de término.'; return; }
+      vence = new Date(f + 'T23:59:00').getTime();
+      if(vence <= Date.now()){ err.textContent = 'La fecha debe ser futura.'; return; }
+    } else vence = Date.now() + Number($('nuevoDuracion').value) * DIA;
+    $('crear').disabled = true;
+    try{
+      await db.ref('licencias/' + sala).set({ vence: vence, creada: Date.now() });
+      await db.ref('claves/' + sala).set(codigo);
+      await db.ref('clientes/' + sala).set({ nombre: cliente, contacto: $('nuevoContacto').value.trim(), creada: Date.now() });
+      $('entregaTitulo').textContent = 'Listo: ' + sala + '.' + DOMINIO + ' · mensaje para tu cliente';
+      $('entregaTexto').value = mensajeCliente(sala, codigo, vence);
+      $('entrega').hidden = false;
+      $('nuevoSala').value = ''; $('nuevoCliente').value = ''; $('nuevoContacto').value = ''; $('nuevoCodigo').value = codigoNuevo();
+      $('nuevoSala').dispatchEvent(new Event('input'));
+    } catch(e){ err.textContent = 'No se pudo crear el bingo. Revisa tu sesión y las reglas de seguridad.'; }
+    $('crear').disabled = false;
+  });
+  $('copiarMensaje').addEventListener('click', () => copiar($('entregaTexto').value, 'Mensaje copiado'));
+
+  // ---------- solicitudes ----------
+  function dibujarSolicitudes(){
+    const ids = Object.keys(solicitudes).sort((a, b) => Number(solicitudes[b].ts) - Number(solicitudes[a].ts));
+    const nuevas = ids.filter(id => solicitudes[id].estado !== 'contactada').length;
+    $('cuentaSolicitudes').hidden = !nuevas; $('cuentaSolicitudes').textContent = nuevas;
+    $('sinSolicitudes').hidden = ids.length > 0;
+    const caja = $('listaSolicitudes'); caja.innerHTML = '';
+    ids.forEach(id => {
+      const s = solicitudes[id];
+      const div = document.createElement('div'); div.className = 'solicitud';
+      const cab = document.createElement('div'); cab.className = 'cab';
+      const n = document.createElement('strong'); n.textContent = s.nombre; cab.appendChild(n);
+      const m = document.createElement('span'); m.className = 'meta'; m.textContent = s.contacto + ' · ' + fecha(s.ts); cab.appendChild(m);
+      const et = document.createElement('span'); et.className = 'etiqueta' + (s.estado === 'contactada' ? ' hecha' : ''); et.textContent = s.estado === 'contactada' ? 'Contactada' : 'Nueva'; cab.appendChild(et);
+      div.appendChild(cab);
+      if(s.evento){ const ev = document.createElement('div'); ev.className = 'meta'; ev.textContent = 'Evento: ' + s.evento; div.appendChild(ev); }
+      if(s.mensaje){ const p = document.createElement('p'); p.textContent = s.mensaje; div.appendChild(p); }
+      const bt = document.createElement('div'); bt.className = 'botones';
+      const b = (texto, fn, clase) => { const x = document.createElement('button'); x.type = 'button'; x.className = 'btn chico ' + (clase || 'sec'); x.textContent = texto; x.addEventListener('click', fn); bt.appendChild(x); };
+      b('Crear bingo con estos datos', () => { $('nuevoCliente').value = s.evento || s.nombre; $('nuevoContacto').value = s.contacto; irA('bingos'); $('nuevoSala').focus(); window.scrollTo(0, 0); }, '');
+      b(s.estado === 'contactada' ? 'Marcar como nueva' : 'Marcar como contactada', () => db.ref('solicitudes/' + id + '/estado').set(s.estado === 'contactada' ? 'nueva' : 'contactada'));
+      b('Eliminar', async () => { if(await confirmar('¿Eliminar esta solicitud?', s.nombre + ' · ' + s.contacto)) db.ref('solicitudes/' + id).remove(); }, 'peligro');
+      div.appendChild(bt);
+      caja.appendChild(div);
+    });
+  }
+
+  // ---------- pestañas ----------
+  function irA(cual){
+    const b = cual === 'bingos';
+    $('vistaBingos').hidden = !b; $('vistaSolicitudes').hidden = b;
+    $('tabBingos').setAttribute('aria-selected', String(b)); $('tabSolicitudes').setAttribute('aria-selected', String(!b));
+  }
+  $('tabBingos').addEventListener('click', () => irA('bingos'));
+  $('tabSolicitudes').addEventListener('click', () => irA('solicitudes'));
+})();
+</script>
+</body>
+</html>

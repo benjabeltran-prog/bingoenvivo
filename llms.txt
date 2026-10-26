@@ -1,0 +1,73 @@
+# Bingo en vivo
+
+> Bingo en vivo es un tablero de bingo digital para eventos. El organizador canta los números desde su celular y aparecen al instante en el proyector y en el celular de cada asistente. Cada bingo tiene su propio enlace (nombre.bingoenvivo.cl), sus colores, sus rondas con premio y un código de acceso por las fechas que se contraten. Servicio ofrecido desde Chile, en español.
+
+Sitio: https://bingoenvivo.cl/
+Contacto de ventas: benjabeltran@gmail.com · WhatsApp +56 9 6657 4792
+Última actualización: 2026-10-26
+
+## Qué incluye
+- Tablero en vivo del 1 al 75 para proyectar, con el último número, los anteriores, el premio de la ronda y los auspiciadores.
+- Rondas con hora, premio y letra del binguito, configurables por el organizador.
+- Binguito (completar la línea de una letra: B, I, N, G u O) y bingo (completar todo el cartón).
+- Cartones del público: cada asistente anota los números de su cartón impreso y su teléfono avisa con sonido y vibración cuando completa el binguito o el bingo. Los cartones se guardan solo en su teléfono. La organización valida el premio con el cartón físico.
+- Pantalla de espera para pausas, con logo, motivo, próximo bingo, auspiciadores en rotación y código QR.
+- Nombre, logo y colores propios; temas claros y oscuros.
+- Acceso por fechas: el organizador entra con un código mientras dure el acceso contratado; al vencer, el tablero se sigue viendo pero ya no se puede modificar.
+- Funciona en el navegador de cualquier computador o teléfono con internet. No hay nada que instalar.
+
+## Cómo funciona
+1. **Te creamos tu bingo.** Recibes un enlace propio, como tu-bingo.bingoenvivo.cl, y un código de acceso por las fechas que necesites.
+2. **Lo dejas a tu medida.** Pones el nombre, los colores, el logo y los auspiciadores. Defines las rondas con su hora, su premio y la letra del binguito.
+3. **Proyectas el tablero.** Abres tu enlace en el computador conectado al proyector. Los asistentes entran escaneando un código QR.
+4. **Cantas desde el celular.** Marcas cada número en tu teléfono y aparece al instante en el proyector y en todos los celulares.
+
+## Para quién
+Colegios, clubes, juntas de vecinos, empresas y campañas solidarias. Se usó por primera vez en el Bingo Oxford School 2026.
+
+## Cómo contratar
+Se cotiza según las fechas de acceso y el tamaño del evento. Se solicita desde https://bingoenvivo.cl/#pedir, por WhatsApp al +56 9 6657 4792 o por correo a benjabeltran@gmail.com.
+
+## Preguntas frecuentes
+### ¿Qué es Bingo en vivo?
+Es un tablero de bingo digital para eventos. El organizador canta los números desde su teléfono y aparecen al instante en el proyector y en el celular de cada asistente. Cada bingo tiene su propio enlace, sus colores, sus rondas y sus premios.
+
+### ¿Para quién es?
+Para quien organiza un bingo: colegios, clubes, juntas de vecinos, empresas y campañas solidarias. Se usó por primera vez en el Bingo Oxford School 2026.
+
+### ¿Cuánto cuesta?
+Se cotiza según las fechas de acceso y el tamaño del evento. Escríbenos por WhatsApp al +56 9 6657 4792 o a benjabeltran@gmail.com con los datos de tu evento y te enviamos una propuesta.
+
+### ¿Cómo se gana el binguito y el bingo?
+El binguito se gana completando la línea de una letra (B, I, N, G u O) en el cartón; el bingo, completando todo el cartón. La letra del binguito la defines tú para cada ronda.
+
+### ¿Necesito instalar algo?
+No. Abres el enlace en el navegador del computador y del teléfono.
+
+### ¿Qué necesito el día del evento?
+Un computador con internet conectado al proyector (por cable o con un wifi estable) y tu teléfono para cantar los números. Los asistentes usan sus propios datos o el wifi del lugar.
+
+### ¿Puedo usar mis cartones impresos?
+Sí. Los cartones físicos siguen siendo los que valen. Quien quiera, anota los números de su cartón en la app para recibir avisos.
+
+### ¿Quién valida el premio?
+La organización, con el cartón en la mano. Los avisos de la app son una ayuda para el público.
+
+### ¿Se puede cambiar algo durante el evento?
+Sí. El nombre, los colores, las rondas y los premios se editan desde el ícono ⚙ y se actualizan al instante en todas las pantallas.
+
+### ¿Qué pasa con los datos de los asistentes?
+La app no pide datos personales. Los cartones se guardan solo en el teléfono de cada persona.
+
+### ¿Para cuántas personas sirve?
+Está pensado para eventos con cientos de personas conectadas a la vez. Si el tuyo es más grande, cuéntanos y lo revisamos juntos.
+
+### ¿Funciona fuera de Chile?
+Lo ofrecemos desde Chile y funciona en cualquier lugar con internet, porque todo corre en el navegador.
+
+## Enlaces
+- [Página principal](https://bingoenvivo.cl/)
+- [Cómo funciona](https://bingoenvivo.cl/#como)
+- [Cartones y avisos](https://bingoenvivo.cl/#cartones)
+- [Qué incluye](https://bingoenvivo.cl/#incluye)
+- [Pedir cotización](https://bingoenvivo.cl/#pedir)

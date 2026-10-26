@@ -1449,9 +1449,15 @@
       fondo = mezclar(fondo, extremo, 0.06);
       panel = panelDe(fondo);
     }
-    // si el acento es un tono medio, se afina un poco para que el número sobre él se lea bien
-    for(let i = 0; i < 30 && Math.max(contraste(acento, '#10141c'), contraste(acento, '#ffffff')) < 4.7; i++){
-      acento = mezclar(acento, luminancia(acento) > 0.179 ? blanco : negro, 0.05);
+    // el color principal se afina si hace falta para que (A) la casilla marcada se distinga claramente de la
+    // casilla sin marcar y (B) el número que va encima se lea bien
+    const celdaAcento = celdaDe(panel);
+    const extremoAcento = contraste(celdaAcento, blanco) >= contraste(celdaAcento, negro) ? blanco : negro;   // hacia donde se aleja más de la casilla sin marcar
+    for(let i = 0; i < 40; i++){
+      const A = contraste(acento, celdaAcento) >= 2.2;
+      const B = Math.max(contraste(acento, '#10141c'), contraste(acento, '#ffffff')) >= 4.7;
+      if(A && B) break;
+      acento = mezclar(acento, extremoAcento, 0.06);
     }
     const p = {};
     p.claro = claro;

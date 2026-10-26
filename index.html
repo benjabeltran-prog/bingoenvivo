@@ -188,7 +188,10 @@
   form.pedir .trampa{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
   .estado{ min-height:1.5em; font-weight:600; }
   .estado.ok{ color:#7ae0b8; } .estado.mal{ color:#ffb3ad; }
-  .wsp{ display:inline-block; margin-top:20px; color:#fff; font-weight:600; }
+  .contacto{ display:grid; gap:2px; margin-top:22px; justify-items:start; }
+  .wsp{ display:inline-block; padding:10px 0; color:#fff; font-weight:600; overflow-wrap:anywhere; }
+  .pie-contacto{ display:flex; flex-wrap:wrap; gap:4px 22px; }
+  .pie-contacto a{ padding:10px 0; }
 
   /* preguntas */
   .preguntas{ max-width:820px; }
@@ -573,6 +576,7 @@
     .elegir .tema{ min-height:44px; }
     .elegir input[type=color]{ width:48px; height:44px; }
     .bola{ white-space:nowrap; }
+    .pantalla .bola.grande{ width:12cqw; height:12cqw; font-size:3.2cqw; letter-spacing:-.03em; }
     section.seccion{ padding:52px 0; }
     .intro{ margin-bottom:26px; }
     .sub{ font-size:1.02rem; }
@@ -874,7 +878,10 @@
       <div class="lado rev">
         <h2>Pide tu cotización</h2>
         <p>Cuéntanos qué evento tienes, para cuándo y cuántas personas esperas. Te escribimos con una propuesta y los pasos para dejarlo listo.</p>
-        <a class="wsp" id="wsp" href="#" hidden>Escríbenos por WhatsApp</a>
+        <div class="contacto">
+          <a class="wsp" id="wsp" href="#" hidden>Escríbenos por WhatsApp</a>
+          <a class="wsp" id="correo" href="#" hidden>Escríbenos a su correo</a>
+        </div>
       </div>
       <form class="pedir rev" id="formulario" novalidate>
         <div class="par">
@@ -913,7 +920,7 @@
 <footer class="pie">
   <div class="contenedor">
     <span>© 2026 Bingo en vivo · Hecho en Chile</span>
-    <a href="#pedir">Pedir cotización</a>
+    <span class="pie-contacto"><a id="pieWsp" href="#" hidden>WhatsApp</a><a id="pieCorreo" href="#" hidden>Correo</a><a href="#pedir">Pedir cotización</a></span>
   </div>
 </footer>
 
@@ -923,11 +930,17 @@
 (function(){
   // ---------------- configuración de la página ----------------
   const DB_URL = 'https://bingo-oxford-school-default-rtdb.firebaseio.com';   // misma base de datos que usa la app
-  const WHATSAPP = '';                                                       // ej. '56912345678' para mostrar el botón de WhatsApp
+  const WHATSAPP = '56966574792';                                            // número con código de país, sin + ni espacios
+  const CORREO = 'benjabeltran@gmail.com';
+  const MENSAJE_WSP = 'Hola, quiero cotizar un bingo en vivo para mi evento.';
   const $ = (id) => document.getElementById(id);
   const reducir = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   $('dominioEjemplo').textContent = (/^(localhost|[\d.]+)$/.test(location.hostname) || !location.hostname) ? 'bingoenvivo.cl' : location.hostname.replace(/^www\./, '');
-  if(WHATSAPP){ const w = $('wsp'); w.href = 'https://wa.me/' + WHATSAPP; w.hidden = false; }
+  function telLindo(n){ const d = String(n).replace(/\D/g, ''); return d.length === 11 ? '+' + d.slice(0, 2) + ' ' + d.slice(2, 3) + ' ' + d.slice(3, 7) + ' ' + d.slice(7) : '+' + d; }
+  const urlWsp = WHATSAPP ? 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(MENSAJE_WSP) : '';
+  const urlCorreo = CORREO ? 'mailto:' + CORREO + '?subject=' + encodeURIComponent('Cotización de Bingo en vivo') + '&body=' + encodeURIComponent('Hola, quiero cotizar un bingo en vivo.\n\nEvento:\nFecha aproximada:\nPersonas que esperamos:\n') : '';
+  if(urlWsp){ const w = $('wsp'); w.href = urlWsp; w.target = '_blank'; w.rel = 'noopener'; w.textContent = 'WhatsApp ' + telLindo(WHATSAPP); w.hidden = false; const f = $('pieWsp'); f.href = urlWsp; f.target = '_blank'; f.rel = 'noopener'; f.hidden = false; }
+  if(urlCorreo){ const c = $('correo'); c.href = urlCorreo; c.textContent = CORREO; c.hidden = false; const f = $('pieCorreo'); f.href = urlCorreo; f.hidden = false; }
 
   // ---------------- motor de temas (el mismo de la app) ----------------
   function hexARgb(h){ h = String(h || '').replace('#', '').trim(); if(h.length === 3) h = h.split('').map(c => c + c).join(''); if(!/^[0-9a-fA-F]{6}$/.test(h)) return null; const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
@@ -1706,7 +1719,7 @@
     const cta = $('ctaFija'), pedir = $('pedir');
     if(cta && pedir){
       let enForm = false;
-      const act = () => cta.classList.toggle('v', window.scrollY > 650 && !enForm);
+      const act = () => cta.classList.toggle('v', window.scrollY > 650 && !enForm && window.scrollY + window.innerHeight < document.documentElement.scrollHeight - 220);
       window.addEventListener('scroll', act, { passive: true });
       if('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(x => { enForm = x.isIntersecting; act(); }), { threshold: 0.08 }).observe(pedir);
       act();
@@ -1758,7 +1771,7 @@
       try{ localStorage.setItem('bingoSolicitud', String(Date.now())); } catch(err){}
       form.reset(); estado.className = 'estado ok'; estado.textContent = '¡Recibido! Te escribimos pronto.';
     } catch(err){
-      estado.className = 'estado mal'; estado.textContent = 'No pudimos enviar tu solicitud. Revisa tu conexión e intenta de nuevo.';
+      estado.className = 'estado mal'; estado.textContent = 'No pudimos enviar tu solicitud. Intenta de nuevo' + (CORREO ? ' o escríbenos a ' + CORREO : '') + (WHATSAPP ? ' o por WhatsApp al ' + telLindo(WHATSAPP) : '') + '.';
     }
     $('fEnviar').disabled = false;
   });

@@ -989,6 +989,108 @@
   .c-gear{ margin-left: auto; flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid rgb(var(--tinta) / 0.18); background: transparent; color: var(--gris-texto); font-size: 1.15rem; cursor: pointer; }
   .m-admin{ text-align: center; margin-top: 10px; }
   .m-admin a{ color: var(--gris-suave); font-size: 0.78rem; text-decoration: underline; }
+
+  /* ===== acceso del organizador: tarjeta centrada ===== */
+  #accesoModal.acc-modal{ inset:0; overflow:hidden;
+    background: radial-gradient(90% 70% at 50% 0%, rgb(var(--acento-rgb) / 0.30), transparent 70%), rgba(6,10,24,0.72);
+    -webkit-backdrop-filter: blur(12px) saturate(120%); backdrop-filter: blur(12px) saturate(120%); }
+  #accesoModal.abierto{ animation: accFondo .3s ease-out both; }
+  .acc-zona{ position:absolute; left:0; width:100%; top:var(--vv-top, 0px); height:var(--vv-alto, 100%); box-sizing:border-box; padding:16px; display:flex; align-items:center; justify-content:center; }
+  .acc-fondo{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+  .acc-fondo i{ position:absolute; display:block; border-radius:50%; opacity:.55; background: radial-gradient(circle at 32% 30%, rgba(255,255,255,0.55), var(--c) 46%, transparent 72%); animation: accFlota 16s ease-in-out infinite alternate; }
+  .acc-fondo i:nth-child(1){ left:-30px; top:9%; width:150px; height:150px; --c: rgb(var(--acento-rgb) / 0.85); }
+  .acc-fondo i:nth-child(2){ right:-20px; top:16%; width:96px; height:96px; --c: rgb(var(--dorado-rgb) / 0.9); animation-duration:12s; animation-delay:-3s; }
+  .acc-fondo i:nth-child(3){ left:12%; bottom:6%; width:110px; height:110px; --c: rgb(var(--dorado-rgb) / 0.75); animation-duration:18s; animation-delay:-6s; }
+  .acc-fondo i:nth-child(4){ right:8%; bottom:10%; width:170px; height:170px; --c: rgb(var(--acento-rgb) / 0.75); animation-duration:20s; animation-delay:-2s; }
+  .acc-fondo i:nth-child(5){ left:44%; top:-40px; width:70px; height:70px; --c: rgba(255,255,255,0.75); animation-duration:11s; }
+  .acc-fondo i:nth-child(6){ left:30%; bottom:-34px; width:64px; height:64px; --c: rgb(var(--acento-rgb) / 0.65); animation-duration:13s; animation-delay:-8s; }
+  @keyframes accFlota{ from{ transform: translate3d(0,0,0) scale(1); } to{ transform: translate3d(18px,-26px,0) scale(1.12); } }
+  @keyframes accFondo{ from{ opacity:0; } to{ opacity:1; } }
+
+  .acc-tarjeta{ position:relative; width:100%; max-width:392px; max-height:100%; overflow-y:auto; box-sizing:border-box; text-align:center; padding:30px 24px 18px; border-radius:28px; background: var(--verde-panel); color: var(--gris-texto);
+    box-shadow: 0 34px 90px rgba(0,0,0,0.5), 0 0 0 1px rgb(var(--tinta) / 0.09), inset 0 1px 0 rgba(255,255,255,0.35); animation: accEntra .55s cubic-bezier(.2,.9,.25,1.12) both; }
+  .acc-tarjeta::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background: radial-gradient(120% 60% at 50% -8%, rgb(var(--acento-rgb) / 0.16), transparent 62%); }
+  .acc-tarjeta > *{ position:relative; }
+  .acc-tarjeta.sacude{ animation: accEntra .55s cubic-bezier(.2,.9,.25,1.12) both, accSacude .5s cubic-bezier(.36,.07,.19,.97) both; }
+  @keyframes accEntra{ from{ opacity:0; transform: translateY(28px) scale(.92); } to{ opacity:1; transform:none; } }
+  @keyframes accSacude{ 10%,90%{ translate:-2px 0; } 20%,80%{ translate:4px 0; } 30%,50%,70%{ translate:-8px 0; } 40%,60%{ translate:8px 0; } }
+
+  .acc-candado{ --acc-badge: var(--verde-acento); position:relative; width:78px; height:78px; margin:0 auto 14px; border-radius:50%; display:grid; place-items:center; color: var(--sobre-acento);
+    background: var(--acc-badge); background: linear-gradient(150deg, var(--acc-badge), color-mix(in srgb, var(--acc-badge) 72%, #000));
+    box-shadow: 0 12px 28px rgb(var(--acento-rgb) / 0.38), inset 0 2px 0 rgba(255,255,255,0.3); transition: background .3s, box-shadow .3s; }
+  .acc-aro{ position:absolute; inset:-7px; border-radius:50%; border:2px solid var(--acc-badge); opacity:0; pointer-events:none; animation: accAro 2.6s ease-out infinite; }
+  @keyframes accAro{ 0%{ transform:scale(.88); opacity:.55; } 100%{ transform:scale(1.5); opacity:0; } }
+  .acc-candado svg{ display:block; overflow:visible; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.22)); }
+  .acc-llave{ fill: var(--acc-badge); transition: fill .3s; }
+  .acc-grillete{ transform-origin: 32px 21px; transition: transform .5s cubic-bezier(.3,1.6,.5,1); }
+  #accesoModal.ok .acc-candado{ --acc-badge:#12a06e; box-shadow: 0 12px 28px rgba(18,160,110,0.42), inset 0 2px 0 rgba(255,255,255,0.3); }
+  #accesoModal.ok .acc-grillete{ transform: translate(0,-4px) rotate(30deg); }
+  #accesoModal.mal .acc-candado{ --acc-badge: var(--peligro); box-shadow: 0 12px 28px rgba(192,57,43,0.4), inset 0 2px 0 rgba(255,255,255,0.3); }
+  #accesoModal.mal .acc-candado svg{ animation: accTiembla .45s linear; }
+  @keyframes accTiembla{ 0%,100%{ transform:rotate(0); } 25%{ transform:rotate(-10deg); } 75%{ transform:rotate(10deg); } }
+
+  .acc-titulo{ margin:0 0 8px; font-family:'Archivo Black', sans-serif; font-weight:400; font-size:1.32rem; line-height:1.15; color: var(--blanco); }
+  .acc-sala{ display:inline-flex; align-items:center; gap:8px; max-width:100%; margin:0 0 12px; padding:6px 14px; border-radius:99px; background: rgb(var(--tinta) / 0.07); font-size:.9rem; color: var(--gris-texto); }
+  .acc-sala b{ color: var(--blanco); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .acc-punto{ flex:none; width:8px; height:8px; border-radius:50%; background: var(--verde-acento); animation: accLatido 2s ease-out infinite; }
+  @keyframes accLatido{ 0%{ box-shadow:0 0 0 0 rgb(var(--acento-rgb) / 0.55); } 70%,100%{ box-shadow:0 0 0 8px rgb(var(--acento-rgb) / 0); } }
+  .acc-ayuda{ margin:0 0 18px; font-size:.93rem; line-height:1.45; }
+
+  .acc-campo{ position:relative; }
+  .acc-input{ display:block; width:100%; height:56px; box-sizing:border-box; padding:0 54px; border-radius:16px; border:2px solid rgb(var(--tinta) / 0.14); background: var(--fondo-profundo); color: var(--blanco);
+    font-family:'Space Grotesk', sans-serif; font-size:1.18rem; font-weight:700; letter-spacing:.16em; text-align:center; text-transform:uppercase; outline:none; transition: border-color .2s, box-shadow .2s; }
+  .acc-input::placeholder{ color: var(--gris-suave); font-size:1rem; font-weight:500; letter-spacing:.02em; text-transform:none; }
+  .acc-input:focus{ border-color: var(--verde-acento); box-shadow: 0 0 0 5px rgb(var(--acento-rgb) / 0.2); }
+  #accesoModal.mal .acc-input{ border-color: var(--peligro); box-shadow: 0 0 0 5px rgba(192,57,43,0.16); }
+  .acc-ojo{ position:absolute; right:6px; top:6px; width:44px; height:44px; display:grid; place-items:center; border:0; border-radius:12px; background:transparent; color: var(--gris-suave); cursor:pointer; transition: color .2s, background .2s; }
+  .acc-ojo:hover{ color: var(--blanco); background: rgb(var(--tinta) / 0.07); }
+  .acc-ojo .acc-ojo-ocultar{ display:none; }
+  .acc-ojo[aria-pressed="true"]{ color: var(--verde-acento); }
+  .acc-ojo[aria-pressed="true"] .acc-ojo-ver{ display:none; }
+  .acc-ojo[aria-pressed="true"] .acc-ojo-ocultar{ display:block; }
+
+  .acc-ranuras{ display:flex; justify-content:center; gap:12px; margin:14px 0 2px; }
+  .acc-ranuras span{ display:flex; gap:5px; }
+  .acc-ranuras i{ display:block; width:9px; height:9px; border-radius:50%; background: rgb(var(--tinta) / 0.15); transition: background .2s, transform .3s cubic-bezier(.3,1.8,.5,1); }
+  .acc-ranuras i.on{ background: var(--verde-acento); transform: scale(1.3); }
+
+  #accesoModal .acc-error{ min-height:1.35em; margin:8px 0 14px; font-size:.88rem; font-weight:600; line-height:1.35; color: var(--peligro-texto); opacity:0; transform: translateY(-4px); transition: opacity .2s, transform .2s; }
+  #accesoModal .acc-error:not(:empty){ opacity:1; transform:none; }
+
+  .acc-entrar{ position:relative; overflow:hidden; width:100%; height:56px; border:0; border-radius:16px; cursor:pointer; color: var(--sobre-acento); font-family:'Archivo Black', sans-serif; font-size:1.02rem; letter-spacing:.02em;
+    background: var(--verde-acento); background: linear-gradient(135deg, var(--verde-acento), color-mix(in srgb, var(--verde-acento) 74%, #000)); box-shadow: 0 12px 26px rgb(var(--acento-rgb) / 0.36); transition: transform .15s, box-shadow .2s, filter .2s, background .3s; }
+  .acc-entrar::after{ content:''; position:absolute; top:0; bottom:0; left:-60%; width:40%; transform: skewX(-20deg); pointer-events:none; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent); animation: accBrillo 3.4s ease-in-out infinite; }
+  @keyframes accBrillo{ 0%,55%{ left:-60%; } 100%{ left:130%; } }
+  .acc-entrar:hover{ filter: brightness(1.07); }
+  .acc-entrar:active{ transform: scale(.98); }
+  .acc-entrar:disabled{ cursor:default; }
+  .acc-txt{ display:inline-block; transition: opacity .15s; }
+  .acc-giro{ position:absolute; inset:0; margin:auto; width:22px; height:22px; border-radius:50%; border:3px solid currentColor; border-top-color:transparent; opacity:0; animation: accGira .7s linear infinite; }
+  @keyframes accGira{ to{ transform: rotate(360deg); } }
+  #accesoModal.cargando .acc-giro{ opacity:1; }
+  #accesoModal.cargando .acc-txt{ opacity:0; }
+  #accesoModal.ok .acc-entrar{ background:#12a06e; color:#fff; box-shadow: 0 12px 26px rgba(18,160,110,0.4); }
+  .acc-publico{ display:inline-block; margin-top:8px; min-height:44px; padding:10px 16px; border:0; border-radius:12px; background:transparent; color: var(--gris-texto); font:inherit; font-size:.92rem; font-weight:600; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+  .acc-publico:hover{ color: var(--blanco); }
+  .acc-entrar:focus-visible, .acc-publico:focus-visible, .acc-ojo:focus-visible{ outline:3px solid var(--verde-acento); outline-offset:3px; }
+  /* poca altura (celular horizontal o con el teclado abierto): la tarjeta se compacta */
+  #accesoModal.compacto .acc-tarjeta{ padding:16px 20px 8px; }
+  #accesoModal.compacto .acc-candado{ width:56px; height:56px; margin-bottom:8px; }
+  #accesoModal.compacto .acc-candado svg{ width:31px; height:31px; }
+  #accesoModal.compacto .acc-titulo{ font-size:1.12rem; margin-bottom:6px; }
+  #accesoModal.compacto .acc-sala{ margin-bottom:8px; padding:4px 12px; }
+  #accesoModal.compacto .acc-ayuda{ margin-bottom:10px; font-size:.86rem; }
+  #accesoModal.compacto .acc-input{ height:50px; }
+  #accesoModal.compacto .acc-ojo{ top:3px; }
+  #accesoModal.compacto .acc-ranuras{ margin-top:10px; }
+  #accesoModal.compacto .acc-error{ margin:6px 0 10px; }
+  #accesoModal.compacto .acc-entrar{ height:50px; }
+  #accesoModal.compacto .acc-publico{ margin-top:2px; min-height:40px; padding:6px 14px; }
+  #accesoModal.compacto .acc-fondo{ display:none; }
+  #accesoModal.compacto.minimo .acc-ayuda, #accesoModal.compacto.minimo .acc-ranuras{ display:none; }
+  @media (prefers-reduced-motion: reduce){
+    #accesoModal, #accesoModal *, #accesoModal *::after{ animation: none !important; transition: none !important; }
+  }
 </style>
 </head>
 <body class="cargando">
@@ -1219,16 +1321,34 @@
 
   <!-- ======================= EDITOR DE CARTÓN Y AVISO (espectador) ======================= -->
   <!-- ======================= ACCESO DEL ORGANIZADOR, CONFIGURACIÓN Y SIN SALA ======================= -->
-  <div class="mc-modal" id="accesoModal">
-    <div class="mc-hoja">
-      <div class="mc-hoja-cab"><strong>Acceso del organizador</strong></div>
-      <p class="acc-texto">Ingresa el código de acceso de tu bingo <b id="accesoSala"></b>.</p>
-      <input class="mc-texto" id="accesoClave" type="password" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de acceso">
-      <p class="acc-error" id="accesoError" role="alert"></p>
-      <div class="mc-pie">
-        <button class="mc-btn sec" id="accesoPublico" type="button">Ver como público</button>
-        <button class="mc-btn prim" id="accesoEntrar" type="button">Entrar</button>
+  <div class="mc-modal acc-modal" id="accesoModal" role="dialog" aria-modal="true" aria-labelledby="accTitulo" aria-describedby="accAyuda">
+    <div class="acc-fondo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="acc-zona" id="accZona">
+    <div class="acc-tarjeta" id="accTarjeta">
+      <div class="acc-candado" aria-hidden="true">
+        <span class="acc-aro"></span>
+        <svg viewBox="0 0 48 48" width="42" height="42" focusable="false">
+          <path class="acc-grillete" d="M16 21v-6a8 8 0 0 1 16 0v6" fill="none" stroke="currentColor" stroke-width="3.8" stroke-linecap="round"/>
+          <rect x="9" y="21" width="30" height="21" rx="6" fill="currentColor"/>
+          <circle class="acc-llave" cx="24" cy="30.5" r="3.1"/>
+          <rect class="acc-llave" x="22.7" y="31.5" width="2.6" height="5.6" rx="1.3"/>
+        </svg>
       </div>
+      <h2 class="acc-titulo" id="accTitulo">Acceso del organizador</h2>
+      <p class="acc-sala"><span class="acc-punto"></span><b id="accesoSala"></b></p>
+      <p class="acc-ayuda" id="accAyuda">Escribe el código que recibiste para manejar este bingo.</p>
+      <div class="acc-campo">
+        <input class="acc-input" id="accesoClave" type="password" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go" maxlength="60" placeholder="Código de acceso" aria-label="Código de acceso" aria-describedby="accesoError">
+        <button class="acc-ojo" id="accesoVer" type="button" aria-label="Mostrar el código" aria-pressed="false">
+          <svg class="acc-ojo-ver" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="acc-ojo-ocultar" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.9 17.9A10.9 10.9 0 0 1 12 19c-6.4 0-10-7-10-7a18.5 18.5 0 0 1 5.1-5.9M9.9 5.2A10 10 0 0 1 12 5c6.4 0 10 7 10 7a18.6 18.6 0 0 1-2.2 3.2M1 1l22 22"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+        </button>
+      </div>
+      <div class="acc-ranuras" id="accesoRanuras" aria-hidden="true"><span><i></i><i></i><i></i><i></i></span><span><i></i><i></i><i></i><i></i></span><span><i></i><i></i><i></i><i></i></span></div>
+      <p class="acc-error" id="accesoError" role="alert"></p>
+      <button class="acc-entrar" id="accesoEntrar" type="button"><span class="acc-txt">Entrar</span><span class="acc-giro" aria-hidden="true"></span></button>
+      <button class="acc-publico" id="accesoPublico" type="button">Ver como público</button>
+    </div>
     </div>
   </div>
 
@@ -1618,28 +1738,87 @@
       return { ok: false, motivo: 'Código incorrecto. Revísalo e intenta de nuevo.' };
     }
   }
-  function pedirAcceso(uid){
+  // Antes de pedir el código se cargan el nombre y los colores del bingo: la ventana de acceso ya lleva la marca del cliente.
+  // Si la conexión es lenta no se espera más de un instante.
+  async function marcaDelBingo(){
+    try{
+      const leer = rutaSala().child('config').once('value').then(snap => snap.val());
+      const cfg = await Promise.race([leer, new Promise(r => setTimeout(() => r(null), 1400))]);
+      if(cfg && typeof cfg === 'object') aplicarConfig(cfg);
+    } catch(e){}
+  }
+  async function pedirAcceso(uid){
+    await marcaDelBingo();
     return new Promise(resolve => {
-      const modal = $('accesoModal'), inp = $('accesoClave'), err = $('accesoError'), btn = $('accesoEntrar');
+      const modal = $('accesoModal'), tarjeta = $('accTarjeta'), inp = $('accesoClave'), err = $('accesoError'), btn = $('accesoEntrar'), txt = btn.querySelector('.acc-txt');
+      const ver = $('accesoVer'), publico = $('accesoPublico'), ranuras = Array.from($('accesoRanuras').querySelectorAll('i'));
+      const calmado = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      const pausa = (ms) => new Promise(r => setTimeout(r, ms));
+      // estado inicial limpio
+      modal.classList.remove('ok', 'mal', 'cargando'); btn.disabled = false; txt.textContent = 'Entrar';
+      inp.value = ''; inp.type = 'password'; ver.setAttribute('aria-pressed', 'false'); ver.setAttribute('aria-label', 'Mostrar el código');
       $('accesoSala').textContent = room;
       if(licencia && !accesoVigente()) err.textContent = 'El acceso de este bingo venció el ' + fechaCorta(licencia.vence) + '.';
       else if(!licencia) err.textContent = 'No existe un bingo llamado «' + room + '».';
+      // los 12 puntitos se llenan a medida que se escribe el código
+      function ranurasAhora(){ const n = Math.min(12, inp.value.replace(/[^A-Za-z0-9]/g, '').length); ranuras.forEach((r, i) => r.classList.toggle('on', i < n)); }
+      ranurasAhora();
+      inp.addEventListener('input', ranurasAhora);
+      // centrar en la parte VISIBLE de la pantalla (así no lo tapa el teclado del celular)
+      const vv = window.visualViewport;
+      function ajustar(){
+        const alto = vv ? vv.height : window.innerHeight;
+        if(vv){ modal.style.setProperty('--vv-top', vv.offsetTop + 'px'); modal.style.setProperty('--vv-alto', vv.height + 'px'); }
+        modal.classList.toggle('compacto', alto < 620); modal.classList.toggle('minimo', alto < 470);
+      }
+      if(vv){ vv.addEventListener('resize', ajustar); vv.addEventListener('scroll', ajustar); } else window.addEventListener('resize', ajustar);
+      ajustar();
+      // Tab se queda dentro de la ventana
+      function teclas(e){
+        if(e.key !== 'Tab') return;
+        const lista = [inp, ver, btn, publico].filter(x => !x.disabled);
+        const k = lista.indexOf(document.activeElement);
+        e.preventDefault();
+        lista[(k + (e.shiftKey ? -1 : 1) + lista.length) % lista.length].focus();
+      }
+      document.addEventListener('keydown', teclas);
+      function cerrar(){
+        modal.classList.remove('abierto');
+        document.removeEventListener('keydown', teclas);
+        if(vv){ vv.removeEventListener('resize', ajustar); vv.removeEventListener('scroll', ajustar); } else window.removeEventListener('resize', ajustar);
+        modal.style.removeProperty('--vv-top'); modal.style.removeProperty('--vv-alto'); modal.classList.remove('compacto', 'minimo');
+      }
+      function sacudir(){
+        tarjeta.classList.remove('sacude'); void tarjeta.offsetWidth; tarjeta.classList.add('sacude'); modal.classList.add('mal');
+        setTimeout(() => { tarjeta.classList.remove('sacude'); modal.classList.remove('mal'); }, 650);
+      }
       modal.classList.add('abierto');
-      setTimeout(() => inp.focus(), 80);
+      setTimeout(() => inp.focus(), 140);
       let ocupado = false;
       async function entrar(){
         if(ocupado) return;
         const clave = inp.value.trim();
-        if(!clave){ err.textContent = 'Escribe el código de acceso.'; return; }
-        ocupado = true; btn.disabled = true; err.textContent = '';
+        if(!clave){ err.textContent = 'Escribe el código de acceso.'; sacudir(); inp.focus(); return; }
+        ocupado = true; btn.disabled = true; modal.classList.add('cargando'); err.textContent = '';
         const r = await reclamarAcceso(uid, clave);
-        ocupado = false; btn.disabled = false;
-        if(r.ok){ modal.classList.remove('abierto'); resolve(true); }
-        else { err.textContent = r.motivo; inp.select(); }
+        ocupado = false; modal.classList.remove('cargando');
+        if(r.ok){
+          modal.classList.add('ok'); txt.textContent = '¡Listo!';           // el candado se abre
+          await pausa(calmado ? 0 : 550);
+          cerrar(); resolve(true);
+        } else {
+          btn.disabled = false; err.textContent = r.motivo; sacudir(); inp.select();
+        }
       }
       btn.onclick = entrar;
       inp.onkeydown = (e) => { if(e.key === 'Enter') entrar(); };
-      $('accesoPublico').onclick = () => { modal.classList.remove('abierto'); resolve(false); };
+      ver.onclick = () => {
+        const mostrar = inp.type === 'password';
+        inp.type = mostrar ? 'text' : 'password';
+        ver.setAttribute('aria-pressed', String(mostrar)); ver.setAttribute('aria-label', mostrar ? 'Ocultar el código' : 'Mostrar el código');
+        inp.focus();
+      };
+      publico.onclick = () => { cerrar(); resolve(false); };
     });
   }
 

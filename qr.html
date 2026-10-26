@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Código QR del bingo</title>
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:system-ui, -apple-system, 'Segoe UI', sans-serif; color:#0e1a40; background:#fff; display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:32px 20px; text-align:center; }
+  h1{ font-size:clamp(1.8rem, 5vw, 3rem); line-height:1.1; margin-bottom:8px; max-width:18ch; overflow-wrap:anywhere; }
+  .sub{ font-size:clamp(1.05rem, 2.6vw, 1.5rem); color:#38445f; margin-bottom:26px; }
+  #qr{ background:#fff; padding:18px; border:3px solid #0e1a40; border-radius:18px; line-height:0; margin-bottom:22px; }
+  #qr img, #qr canvas{ width:min(70vw, 420px) !important; height:auto !important; }
+  .enlace{ font-family:ui-monospace, Menlo, Consolas, monospace; font-size:clamp(.95rem, 2.4vw, 1.3rem); overflow-wrap:anywhere; max-width:30ch; }
+  .error{ color:#b3261e; max-width:40ch; margin-bottom:18px; }
+  button{ margin-top:26px; font:inherit; font-weight:700; background:#2f5bff; color:#fff; border:0; border-radius:99px; padding:.8em 1.8em; cursor:pointer; }
+  button:hover{ background:#2246d4; }
+  @media print{ button{ display:none; } body{ padding:10mm; } #qr img, #qr canvas{ width:90mm !important; } }
+</style>
+</head>
+<body>
+  <h1 id="titulo">Bingo en vivo</h1>
+  <p class="sub">Escanea para seguir el bingo en tu celular</p>
+  <div id="qr"></div>
+  <p class="error" id="error" hidden></p>
+  <p class="enlace" id="enlace"></p>
+  <button type="button" onclick="window.print()">Imprimir</button>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  const p = new URLSearchParams(location.search);
+  const url = p.get('u') || '';
+  const titulo = (p.get('t') || '').trim();
+  if(titulo){ document.getElementById('titulo').textContent = titulo; document.title = 'QR · ' + titulo; }
+  let valida = false;
+  try{ const u = new URL(url); valida = u.protocol === 'https:' || u.protocol === 'http:'; } catch(e){}
+  const err = document.getElementById('error');
+  if(!valida){ err.hidden = false; err.textContent = 'Falta la dirección del bingo. Abre esta página desde el botón de imprimir QR del tablero.'; document.getElementById('qr').style.display = 'none'; return; }
+  document.getElementById('enlace').textContent = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  if(window.QRCode){ new QRCode(document.getElementById('qr'), { text: url, width: 420, height: 420, colorDark: '#0e1a40', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M }); }
+  else { err.hidden = false; err.textContent = 'No se pudo generar el código QR (sin conexión). Comparte esta dirección:'; document.getElementById('qr').style.display = 'none'; }
+})();
+</script>
+</body>
+</html>

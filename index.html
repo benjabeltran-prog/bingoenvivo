@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bingo en vivo · Tablero de bingo para el proyector y los celulares</title>
+<meta name="description" content="Canta los números desde tu teléfono y todos los ven al instante en el proyector y en el celular de cada asistente. Con tus colores, tus premios y tu propio enlace.">
+<meta property="og:title" content="Bingo en vivo">
+<meta property="og:description" content="El tablero de tu bingo en el proyector y en cada celular.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='31' fill='%232f5bff'/%3E%3Ccircle cx='32' cy='32' r='22' fill='%23fff'/%3E%3Ctext x='32' y='42' font-family='Arial' font-size='28' font-weight='900' fill='%232f5bff' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<noscript><style>.rev{ opacity:1 !important; transform:none !important; }</style></noscript>
+<style>
+  :root{
+    --tinta:#0e1a40; --tinta-2:#1b2a5c; --papel:#f2f5fb; --blanco:#ffffff;
+    --azul:#2f5bff; --azul-osc:#2246d4; --ambar:#f5b400; --verde:#12a06e; --rojo:#e8453c;
+    --gris:#5b6676; --linea:#d5dcea; --linea-osc:rgba(255,255,255,.18);
+    --display:'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+    --texto:'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    /* colores de las maquetas (los cambian los selectores de la portada) */
+    --m-fondo:#f4f6fa; --m-panel:#e6e8ed; --m-acento:#2f5bff; --m-header:#1b3384; --m-celda:#ffffff;
+    --m-texto:#1a2235; --m-suave:#4a566a; --m-titulo:#0b1220; --m-sobre-acento:#ffffff;
+    --m-gris:#aeb8c5; --m-gris-osc:#5b6676; --m-dorado:#f5b400; --m-sobre-dorado:#10141c; --m-sobre-gris:#10141c;
+    --m-linea:rgb(11 18 32 / .16); --m-borde-celda:rgb(11 18 32 / .22); --m-dorado-texto:#8a5a00;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  [hidden]{ display:none !important; }
+  html{ scroll-behavior:smooth; }
+  body{ font-family:var(--texto); color:var(--tinta); background:var(--papel); line-height:1.55; font-size:1.0625rem; -webkit-font-smoothing:antialiased; }
+  img,svg{ display:block; max-width:100%; }
+  a{ color:inherit; }
+  button,input,textarea,select{ font:inherit; }
+  :focus-visible{ outline:3px solid var(--azul); outline-offset:3px; }
+  .en-oscuro :focus-visible{ outline-color:var(--ambar); }
+  .contenedor{ width:min(1160px, 100% - 48px); margin-inline:auto; }
+  h1,h2,h3{ font-family:var(--display); font-weight:800; letter-spacing:-0.02em; line-height:1.05; }
+  h2{ font-size:clamp(1.9rem, 3.8vw, 3rem); max-width:18ch; }
+  .solo-lectores{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+  /* botones */
+  .boton{ display:inline-flex; align-items:center; justify-content:center; gap:8px; border:2px solid transparent; border-radius:999px; padding:.8em 1.5em; font-weight:700; text-decoration:none; cursor:pointer; transition:background-color .15s, color .15s, border-color .15s; }
+  .boton.primario{ background:var(--azul); color:#fff; }
+  .boton.primario:hover{ background:var(--azul-osc); }
+  .boton.contorno{ border-color:var(--tinta); color:var(--tinta); background:transparent; }
+  .boton.contorno:hover{ background:var(--tinta); color:#fff; }
+  .en-oscuro .boton.primario{ background:var(--ambar); color:var(--tinta); }
+  .en-oscuro .boton.primario:hover{ background:#ffc933; }
+
+  /* encabezado */
+  .cabecera{ padding:22px 0; }
+  .cabecera .contenedor{ display:flex; align-items:center; gap:28px; }
+  .marca{ display:flex; align-items:center; gap:10px; font-family:var(--display); font-weight:800; font-size:1.25rem; text-decoration:none; letter-spacing:-0.01em; }
+  .marca i{ width:30px; height:30px; border-radius:50%; background:var(--azul); display:grid; place-items:center; color:#fff; font-style:normal; font-size:.95rem; box-shadow:inset 0 -3px 5px rgba(0,0,0,.25), inset 0 3px 5px rgba(255,255,255,.35); }
+  .cabecera nav{ margin-left:auto; display:flex; align-items:center; gap:26px; }
+  .cabecera nav a:not(.boton){ text-decoration:none; font-weight:500; }
+  .cabecera nav a:not(.boton):hover{ text-decoration:underline; text-underline-offset:5px; }
+  .cabecera .boton{ padding:.55em 1.2em; font-size:.95rem; }
+
+  /* portada */
+  .portada{ padding:30px 0 70px; }
+  .portada .contenedor{ display:grid; grid-template-columns:minmax(0,5.4fr) minmax(0,6.6fr); gap:48px; align-items:center; }
+  .portada h1{ font-size:clamp(2.5rem, 4.7vw, 4.1rem); margin-bottom:22px; }
+  .portada .bajada{ font-size:1.2rem; color:#2b3757; max-width:34ch; margin-bottom:30px; }
+  .portada .botones{ display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px; }
+  .portada .nota{ color:var(--gris); font-size:.95rem; }
+
+  /* ---------- maquetas (proyector y celulares) ---------- */
+  .escena{ position:relative; container-type:inline-size; }
+  .pantalla{ container-type:inline-size; background:var(--m-fondo); border:3px solid var(--tinta); border-radius:12px; padding:2.4cqw; color:var(--m-texto); box-shadow:0 30px 60px -30px rgba(14,26,64,.55); transition:background-color .4s, border-color .4s; }
+  .p-arriba{ display:grid; grid-template-columns:auto 1fr auto auto; gap:2cqw; align-items:stretch; margin-bottom:2cqw; }
+  .p-panel{ background:var(--m-panel); border:1px solid var(--m-linea); border-radius:1.4cqw; padding:1.6cqw 2cqw; display:flex; align-items:center; gap:1.6cqw; transition:background-color .4s; }
+  .bola{ border-radius:50%; display:grid; place-items:center; font-family:var(--display); font-weight:800; color:var(--m-sobre-acento); background:var(--m-acento); box-shadow:inset 0 .5cqw 1cqw rgba(255,255,255,.35), inset 0 -1cqw 1.6cqw rgba(0,0,0,.25), 0 .6cqw 1.4cqw rgba(0,0,0,.25); transition:background-color .4s, color .4s; }
+  .bola.grande{ width:9cqw; height:9cqw; font-size:3.6cqw; }
+  .bola.chica{ width:4.2cqw; height:4.2cqw; font-size:1.7cqw; }
+  .L-B{ background:var(--m-acento); color:var(--m-sobre-acento); }
+  .L-I{ background:var(--m-dorado); color:var(--m-sobre-dorado); }
+  .L-N{ background:var(--m-gris); color:var(--m-sobre-gris); }
+  .L-G{ background:var(--m-header); color:#fff; }
+  .L-O{ background:var(--m-gris-osc); color:#fff; }
+  .p-rotulo{ font-size:1.25cqw; color:var(--m-suave); line-height:1.2; }
+  .p-ultimas{ display:flex; gap:.9cqw; align-items:center; }
+  .p-premio{ flex-direction:column; justify-content:center; gap:.3cqw; text-align:center; }
+  .p-premio b{ font-family:var(--display); font-weight:800; font-size:3.2cqw; color:var(--m-dorado-texto); line-height:1; }
+  .p-premio span{ font-size:1.25cqw; color:var(--m-suave); }
+  .patron{ display:grid; grid-template-columns:repeat(5, 1.3cqw); gap:.35cqw; }
+  .patron i{ height:1.3cqw; border-radius:.25cqw; background:rgb(from var(--m-suave) r g b / .25); background:var(--m-linea); }
+  .patron i.on{ background:var(--m-dorado); }
+  .tablero{ display:grid; grid-template-columns:3.6cqw repeat(15, 1fr); gap:.55cqw; }
+  .tablero .letra{ border-radius:.7cqw; display:grid; place-items:center; font-family:var(--display); font-weight:800; font-size:2cqw; }
+  .tablero .n{ aspect-ratio:1/.88; border-radius:.7cqw; display:grid; place-items:center; background:var(--m-celda); border:1px solid var(--m-borde-celda); font-weight:600; font-size:1.55cqw; color:var(--m-texto); transition:background-color .25s, color .25s; }
+  .tablero .n.marcada{ background:var(--m-acento); color:var(--m-sobre-acento); border-color:var(--m-acento); }
+  .tablero .n.reciente{ box-shadow:0 0 0 .35cqw var(--m-dorado); }
+
+  .celular{ container-type:inline-size; width:var(--ancho,200px); background:var(--tinta); border-radius:28px; padding:8px; box-shadow:0 26px 50px -22px rgba(14,26,64,.6); flex-shrink:0; }
+  .celular .pant{ background:var(--m-fondo); border-radius:21px; overflow:hidden; padding:5cqw 5cqw 24cqw; color:var(--m-texto); min-height:100%; transition:background-color .4s; position:relative; }
+  .c-titulo{ font-family:var(--display); font-weight:800; font-size:6.5cqw; color:var(--m-titulo); line-height:1.1; margin-bottom:4cqw; }
+  .c-hero{ background:var(--m-panel); border:1px solid var(--m-linea); border-radius:4cqw; padding:4cqw; display:flex; align-items:center; gap:4cqw; margin-bottom:3.5cqw; }
+  .c-hero .bola.grande{ width:21cqw; height:21cqw; font-size:9cqw; }
+  .c-hero .texto{ font-size:4.2cqw; color:var(--m-suave); line-height:1.25; }
+  .c-hero .texto b{ display:block; font-family:var(--display); font-size:8cqw; color:var(--m-titulo); }
+  .c-carton{ background:var(--m-panel); border:1px solid var(--m-linea); border-radius:4cqw; padding:3.5cqw; }
+  .c-carton .cab{ display:grid; grid-template-columns:repeat(5,1fr); gap:1.6cqw; margin-bottom:1.6cqw; }
+  .c-carton .cab span{ text-align:center; font-weight:700; font-size:3.4cqw; color:var(--m-suave); }
+  .c-carton .cab span.on{ color:var(--m-dorado-texto); }
+  .c-carton .cuad{ display:grid; grid-template-columns:repeat(5,1fr); gap:1.6cqw; }
+  .c-carton .cuad span{ aspect-ratio:1; display:grid; place-items:center; border-radius:2cqw; background:var(--m-celda); border:1px solid var(--m-borde-celda); font-size:4cqw; font-weight:600; color:var(--m-texto); transition:background-color .25s, color .25s; }
+  .c-carton .cuad span.marcada{ background:var(--m-acento); color:var(--m-sobre-acento); border-color:var(--m-acento); }
+  .c-carton .cuad span.linea{ box-shadow:inset 0 0 0 .7cqw var(--m-dorado); }
+  .c-carton .cuad span.libre{ font-size:2.8cqw; color:var(--m-dorado-texto); }
+  .aviso{ position:absolute; left:4cqw; right:4cqw; bottom:4cqw; background:linear-gradient(135deg,#cba135,#ecd07a); color:#2a2205; border-radius:4cqw; padding:3.2cqw 4cqw; font-weight:700; font-size:5cqw; text-align:center; box-shadow:0 3cqw 8cqw rgba(0,0,0,.35); transform:translateY(130%); opacity:0; transition:transform .45s cubic-bezier(.2,.9,.3,1.2), opacity .3s; }
+  .aviso small{ display:block; font-weight:500; font-size:3.4cqw; }
+  .aviso.visible{ transform:none; opacity:1; }
+  .c-tabs{ display:grid; grid-template-columns:repeat(5,1fr); gap:1.6cqw; margin-bottom:3cqw; }
+  .c-tabs span{ border-radius:2.4cqw; padding:2cqw 0; text-align:center; font-family:var(--display); font-weight:800; font-size:5cqw; background:var(--m-panel); color:var(--m-texto); border:1px solid var(--m-linea); }
+  .c-tabs span.on{ background:var(--m-acento); color:var(--m-sobre-acento); border-color:var(--m-acento); }
+  .c-cuad15{ display:grid; grid-template-columns:repeat(5,1fr); gap:1.8cqw; }
+  .c-cuad15 span{ aspect-ratio:1; display:grid; place-items:center; border-radius:2.4cqw; background:var(--m-celda); border:1px solid var(--m-borde-celda); font-weight:700; font-size:4.6cqw; color:var(--m-texto); }
+  .c-cuad15 span.marcada{ background:var(--m-acento); color:var(--m-sobre-acento); border-color:var(--m-acento); }
+  .c-barra{ display:flex; gap:2cqw; margin-top:3.5cqw; }
+  .c-barra span{ flex:1; text-align:center; border-radius:99px; padding:2.4cqw 0; font-weight:700; font-size:3.8cqw; border:1.5px solid var(--m-linea); color:var(--m-texto); }
+  .c-barra span.dor{ border-color:var(--m-dorado-texto); color:var(--m-dorado-texto); }
+
+  .debajo{ display:flex; gap:30px; align-items:flex-start; margin-top:-1.8cqw; padding-left:3.4cqw; position:relative; }
+  .debajo .celular.flota{ --ancho:178px; position:relative; z-index:2; }
+  .elegir{ margin-top:52px; display:flex; flex-wrap:wrap; align-items:center; gap:10px 12px; flex:1; min-width:0; }
+  .elegir p{ font-weight:600; margin-right:4px; }
+  .elegir .tema{ display:flex; align-items:center; gap:8px; border:1.5px solid var(--linea); background:var(--blanco); border-radius:99px; padding:5px 14px 5px 5px; cursor:pointer; font-weight:600; font-size:.9rem; color:var(--tinta); }
+  .elegir .tema i{ width:24px; height:24px; border-radius:50%; border:2px solid rgba(14,26,64,.2); }
+  .elegir .tema[aria-pressed="true"]{ border-color:var(--tinta); box-shadow:0 0 0 1px var(--tinta); }
+  .elegir label.color{ display:flex; align-items:center; gap:8px; font-weight:600; font-size:.9rem; margin-left:4px; }
+  .elegir input[type=color]{ width:42px; height:32px; padding:0; border:1.5px solid var(--linea); border-radius:8px; background:none; cursor:pointer; }
+
+  /* secciones */
+  section.seccion{ padding:96px 0; }
+  .oscura{ background:var(--tinta); color:#fff; }
+  .oscura h2{ color:#fff; }
+  .intro{ margin-bottom:48px; }
+
+  /* cómo funciona */
+  .pasos{ list-style:none; display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:0; counter-reset:paso; border-top:1px solid var(--linea-osc); }
+  .pasos li{ padding:28px 28px 8px 0; position:relative; }
+  .pasos li + li{ padding-left:28px; border-left:1px solid var(--linea-osc); }
+  .pasos .num{ display:grid; place-items:center; width:46px; height:46px; border-radius:50%; font-family:var(--display); font-weight:800; font-size:1.3rem; margin-bottom:18px; }
+  .pasos li:nth-child(1) .num{ background:var(--azul); color:#fff; }
+  .pasos li:nth-child(2) .num{ background:var(--ambar); color:var(--tinta); }
+  .pasos li:nth-child(3) .num{ background:var(--verde); color:#fff; }
+  .pasos li:nth-child(4) .num{ background:var(--rojo); color:#fff; }
+  .pasos h3{ font-size:1.3rem; margin-bottom:8px; letter-spacing:-0.01em; }
+  .pasos p{ color:#c3cbe6; font-size:1rem; }
+
+  /* lo que ve cada persona */
+  .vistas{ display:grid; grid-template-columns:minmax(0,1.9fr) minmax(0,1fr) minmax(0,1fr); gap:44px; align-items:start; }
+  .vista figure{ margin-bottom:22px; min-height:440px; display:flex; align-items:flex-end; }
+  .vista figure .pantalla{ width:100%; }
+  .vista h3{ font-size:1.35rem; margin-bottom:8px; letter-spacing:-0.01em; }
+  .vista p{ color:#38445f; max-width:44ch; }
+  .vista .celular{ --ancho:100%; max-width:230px; }
+
+  /* qué incluye */
+  .lista{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:0 64px; }
+  .lista div{ padding:20px 0; border-top:1px solid var(--linea); }
+  .lista dt{ font-family:var(--display); font-weight:800; font-size:1.2rem; letter-spacing:-0.01em; margin-bottom:4px; }
+  .lista dd{ color:#38445f; }
+
+  /* para quién / acceso */
+  .dos-col{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:72px; align-items:start; }
+  .grande-texto{ font-family:var(--display); font-weight:600; font-size:clamp(1.4rem, 2.4vw, 2rem); line-height:1.25; letter-spacing:-0.01em; max-width:30ch; }
+  .url{ display:inline-block; font-family:ui-monospace, Menlo, Consolas, monospace; font-size:clamp(1rem, 2vw, 1.3rem); background:var(--blanco); border:2px solid var(--tinta); border-radius:99px; padding:.5em 1.1em; margin:6px 0 20px; }
+  .url b{ color:var(--azul); }
+  .hechos{ list-style:none; }
+  .hechos li{ padding:14px 0; border-top:1px solid var(--linea); }
+  .hechos li strong{ display:block; font-family:var(--display); font-weight:800; font-size:1.1rem; }
+  .hechos li span{ color:#38445f; }
+  .parrafo{ color:#38445f; max-width:52ch; margin-top:18px; }
+
+  /* formulario */
+  .formulario{ display:grid; grid-template-columns:minmax(0,5fr) minmax(0,6fr); gap:64px; align-items:start; }
+  .formulario .lado p{ color:#c3cbe6; margin-top:16px; max-width:38ch; }
+  form.pedir{ display:grid; gap:16px; }
+  form.pedir .par{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  form.pedir label{ display:block; font-weight:600; margin-bottom:6px; font-size:.95rem; }
+  form.pedir input, form.pedir textarea{ width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--linea-osc); background:rgba(255,255,255,.07); color:#fff; }
+  form.pedir input::placeholder, form.pedir textarea::placeholder{ color:#8d98bd; }
+  form.pedir textarea{ min-height:110px; resize:vertical; }
+  form.pedir .trampa{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+  .estado{ min-height:1.5em; font-weight:600; }
+  .estado.ok{ color:#7ae0b8; } .estado.mal{ color:#ffb3ad; }
+  .wsp{ display:inline-block; margin-top:20px; color:#fff; font-weight:600; }
+
+  /* preguntas */
+  .preguntas{ max-width:820px; }
+  .preguntas details{ border-top:1px solid var(--linea); padding:18px 0; }
+  .preguntas details:last-child{ border-bottom:1px solid var(--linea); }
+  .preguntas summary{ cursor:pointer; font-family:var(--display); font-weight:800; font-size:1.2rem; letter-spacing:-0.01em; list-style:none; display:flex; justify-content:space-between; gap:20px; }
+  .preguntas summary::-webkit-details-marker{ display:none; }
+  .preguntas summary::after{ content:'+'; font-size:1.5rem; line-height:1; color:var(--azul); }
+  .preguntas details[open] summary::after{ content:'–'; }
+  .preguntas details p{ margin-top:10px; color:#38445f; max-width:62ch; }
+
+  footer.pie{ padding:40px 0; border-top:1px solid var(--linea); color:var(--gris); font-size:.95rem; }
+  footer.pie .contenedor{ display:flex; flex-wrap:wrap; gap:12px 28px; justify-content:space-between; }
+
+  @media (max-width: 980px){
+    .portada .contenedor{ grid-template-columns:1fr; gap:36px; }
+    .pasos{ grid-template-columns:1fr 1fr; }
+    .pasos li:nth-child(3){ border-left:0; padding-left:0; }
+    .pasos li:nth-child(n+3){ border-top:1px solid var(--linea-osc); margin-top:12px; }
+    .vistas{ grid-template-columns:1fr 1fr; }
+    .vistas .vista:first-child{ grid-column:1 / -1; }
+    .dos-col, .formulario{ grid-template-columns:1fr; gap:36px; }
+  }
+  @media (max-width: 640px){
+    body{ font-size:1rem; }
+    .contenedor{ width:calc(100% - 32px); }
+    .cabecera nav a:not(.boton){ display:none; }
+    .portada{ padding-bottom:40px; }
+    section.seccion{ padding:64px 0; }
+    .pasos{ grid-template-columns:1fr; }
+    .pasos li, .pasos li + li{ padding:22px 0 8px; border-left:0; }
+    .pasos li + li{ border-top:1px solid var(--linea-osc); }
+    .vistas{ grid-template-columns:1fr; gap:36px; }
+    .lista{ grid-template-columns:1fr; }
+    form.pedir .par{ grid-template-columns:1fr; }
+    .debajo{ gap:14px; }
+    .debajo .celular.flota{ --ancho:38%; }
+    .elegir{ margin-top:40px; }
+    .vista figure{ min-height:0; }
+    .p-arriba{ grid-template-columns:auto 1fr; }
+    .p-arriba .p-premio, .p-arriba .p-bin{ display:none; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ transition-duration:.01ms !important; }
+  }
+
+  /* ================= ANIMACIONES Y ESCENAS EXPLICATIVAS ================= */
+  .rev{ opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+  .rev.visto{ opacity:1; transform:none; }
+  .pasos .rev:nth-child(2){ transition-delay:.08s; } .pasos .rev:nth-child(3){ transition-delay:.16s; } .pasos .rev:nth-child(4){ transition-delay:.24s; }
+  .sub{ color:#c3cbe6; max-width:50ch; margin-top:14px; font-size:1.12rem; }
+  .sub.oscuro-sub{ color:#38445f; }
+  .intro h2{ max-width:20ch; }
+  .chico{ padding:.55em 1.15em !important; font-size:.92rem !important; }
+  @keyframes parpadeo{ 50%{ opacity:0; } }
+  @keyframes pop{ 0%{ transform:scale(.7); } 60%{ transform:scale(1.12); } 100%{ transform:none; } }
+  .caret{ display:inline-block; width:2px; height:1.05em; background:currentColor; margin-left:1px; vertical-align:text-bottom; animation:parpadeo 1s steps(2) infinite; }
+
+  /* dedo que toca la pantalla */
+  .dedo{ position:absolute; left:0; top:0; width:30px; height:30px; margin:-15px 0 0 -15px; border-radius:50%; background:rgba(14,26,64,.3); border:2px solid rgba(255,255,255,.95); box-shadow:0 2px 8px rgba(0,0,0,.3); transition:transform .55s cubic-bezier(.4,0,.2,1), opacity .3s; pointer-events:none; z-index:30; opacity:0; }
+  .dedo.v{ opacity:1; }
+  .dedo.toque{ animation:toque .42s ease-out; }
+  @keyframes toque{ 0%{ box-shadow:0 0 0 0 rgba(47,91,255,.6); background:rgba(47,91,255,.55); } 100%{ box-shadow:0 0 0 24px rgba(47,91,255,0); background:rgba(14,26,64,.3); } }
+  .chispa{ position:absolute; left:0; top:0; width:12px; height:12px; margin:-6px 0 0 -6px; border-radius:50%; background:var(--ambar); box-shadow:0 0 0 4px rgba(245,180,0,.35), 0 0 14px var(--ambar); z-index:25; pointer-events:none; }
+
+  /* ilustraciones de los pasos */
+  .pasos li{ padding:0 22px 8px 0; }
+  .pasos li + li{ padding-left:22px; }
+  .ilus{ height:196px; border-radius:16px; background:rgba(255,255,255,.06); border:1px solid var(--linea-osc); margin-bottom:22px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; padding:14px; }
+  .s1{ width:100%; display:flex; flex-direction:column; gap:14px; }
+  .nav3{ background:#fff; color:var(--tinta); border-radius:99px; padding:7px 10px; font-family:ui-monospace, Menlo, Consolas, monospace; font-size:.58rem; display:flex; align-items:center; white-space:nowrap; overflow:hidden; }
+  .nav3 .pref{ color:#7b86a3; }
+  .llave{ background:rgba(255,255,255,.1); border:1px solid var(--linea-osc); border-radius:12px; padding:10px 12px; opacity:0; transform:translateY(14px); transition:opacity .45s, transform .45s; }
+  .llave.entra{ opacity:1; transform:none; }
+  .llave .rot{ font-size:.74rem; color:#aeb8da; margin-bottom:4px; }
+  .llave .cod{ font-family:ui-monospace, Menlo, Consolas, monospace; font-size:1.05rem; font-weight:700; letter-spacing:.06em; color:var(--ambar); min-height:1.4em; }
+  .pastilla{ display:inline-block; margin-top:6px; background:rgba(18,160,110,.22); color:#7ae0b8; border-radius:99px; padding:2px 10px; font-size:.74rem; font-weight:600; transform:scale(.6); opacity:0; transition:transform .35s cubic-bezier(.2,.9,.3,1.4), opacity .3s; }
+  .pastilla.pop{ transform:none; opacity:1; }
+
+  .mini{ width:100%; height:100%; border-radius:10px; background:var(--m-fondo); color:var(--m-texto); padding:9px 10px; display:flex; flex-direction:column; gap:7px; transition:background-color .5s; position:relative; }
+  .m-tit{ font-family:var(--display); font-weight:800; font-size:.95rem; color:var(--m-titulo); min-height:1.2em; letter-spacing:-.01em; }
+  .m-tab{ display:grid; grid-template-columns:repeat(12, 1fr); gap:3px; flex:1; }
+  .m-tab i{ background:var(--m-celda); border:1px solid var(--m-borde-celda); border-radius:3px; transition:background-color .4s, border-color .4s; }
+  .m-tab i.on{ background:var(--m-acento); border-color:var(--m-acento); }
+  .m-sw{ display:flex; gap:7px; }
+  .m-sw b{ width:16px; height:16px; border-radius:50%; outline:2px solid transparent; outline-offset:2px; transition:transform .25s, outline-color .25s; }
+  .m-sw b.on{ transform:scale(1.2); outline-color:var(--m-titulo); }
+  .m-ronda{ position:absolute; right:8px; bottom:8px; background:var(--m-panel); border:1px solid var(--m-linea); border-radius:99px; padding:3px 10px; font-size:.66rem; font-weight:600; color:var(--m-texto); transform:translateY(18px); opacity:0; transition:transform .4s, opacity .4s; }
+  .m-ronda.entra{ transform:none; opacity:1; }
+
+  .s3{ width:100%; display:flex; align-items:center; justify-content:space-around; gap:10px; }
+  .proy3{ flex:1; max-width:132px; background:#fff; border-radius:10px; padding:10px; position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .proy3 svg{ width:86px; height:86px; }
+  .proy3 .rot{ color:var(--tinta); font-size:.68rem; font-weight:600; }
+  .beam{ position:absolute; left:0; right:0; top:12px; height:3px; background:linear-gradient(90deg, transparent, var(--azul), transparent); box-shadow:0 0 10px var(--azul); opacity:0; }
+  .s3.activa .beam{ opacity:1; animation:barrido 1.7s ease-in-out infinite; }
+  @keyframes barrido{ 0%{ top:12px; } 50%{ top:92px; } 100%{ top:12px; } }
+  .tels3{ display:flex; flex-direction:column; gap:8px; }
+  .tel3{ width:64px; height:44px; border:2px solid #fff; border-radius:9px; position:relative; display:grid; place-items:center; font-size:.62rem; color:#aeb8da; overflow:hidden; }
+  .tel3 i{ font-style:normal; position:absolute; inset:0; display:grid; place-items:center; background:var(--verde); color:#fff; font-weight:700; opacity:0; transform:scale(.7); transition:opacity .3s, transform .35s cubic-bezier(.2,.9,.3,1.4); }
+  .tel3.ok i{ opacity:1; transform:none; }
+
+  .s4{ width:100%; height:100%; position:relative; display:flex; align-items:center; justify-content:space-around; gap:10px; }
+  .fono4{ width:88px; border:2px solid #fff; border-radius:12px; padding:7px 5px; background:rgba(255,255,255,.06); }
+  .g4{ display:grid; grid-template-columns:repeat(5, 1fr); gap:3px; }
+  .g4 span{ aspect-ratio:1; display:grid; place-items:center; font-size:.52rem; font-weight:700; border-radius:3px; background:rgba(255,255,255,.16); color:#eaeeff; transition:background-color .25s, color .25s; }
+  .g4 span.on{ background:var(--azul); color:#fff; animation:pop .3s; }
+  .pro4{ flex:1; max-width:140px; background:#fff; border-radius:8px; padding:6px; display:flex; flex-direction:column; gap:5px; align-items:center; }
+  .bola4{ width:34px; height:34px; border-radius:50%; background:var(--azul); color:#fff; display:grid; place-items:center; font-family:var(--display); font-weight:800; font-size:.78rem; box-shadow:inset 0 -3px 5px rgba(0,0,0,.25), inset 0 3px 5px rgba(255,255,255,.35); }
+  .pro4 .g4 span{ background:#e7ebf4; color:#1a2235; }
+  .pro4 .g4 span.on{ background:var(--azul); color:#fff; }
+
+  /* un toque, tres pantallas */
+  .vistas{ position:relative; }
+  .conexion{ position:absolute; inset:0; pointer-events:none; z-index:6; }
+  .celular.vibra{ animation:vibra .5s linear 2; }
+  @keyframes vibra{ 0%,100%{ transform:none; } 20%{ transform:translateX(-4px) rotate(-1.4deg); } 40%{ transform:translateX(4px) rotate(1.4deg); } 60%{ transform:translateX(-3px) rotate(-1deg); } 80%{ transform:translateX(3px) rotate(1deg); } }
+
+  /* binguito y bingo */
+  .gana-grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:64px; align-items:center; }
+  .gana-pasos{ list-style:none; margin-top:26px; display:grid; gap:6px; }
+  .gana-pasos li{ padding:14px 18px; border-left:4px solid var(--linea); border-radius:0 12px 12px 0; transition:background-color .35s, border-color .35s; }
+  .gana-pasos li strong{ display:block; font-family:var(--display); font-weight:800; font-size:1.15rem; }
+  .gana-pasos li span{ color:#38445f; }
+  .gana-pasos li.act{ background:var(--papel); border-left-color:var(--azul); }
+  .gana-escena{ position:relative; display:flex; flex-direction:column; gap:16px; align-items:center; padding-bottom:26px; }
+  .narrador{ min-height:3.6em; text-align:center; font-family:var(--display); font-weight:600; font-size:1.2rem; letter-spacing:-.01em; max-width:30ch; transition:opacity .3s; display:flex; align-items:center; }
+  .gana-carton{ container-type:inline-size; width:min(100%, 400px); background:var(--m-fondo); border:3px solid var(--tinta); border-radius:18px; position:relative; transition:background-color .4s; }
+  .gc-in{ padding:5cqw; }
+  .gc-rangos, .gc-cab, .gc-grid{ display:grid; grid-template-columns:repeat(5, 1fr); gap:2.4cqw; }
+  .gc-rangos span{ text-align:center; font-size:3.2cqw; color:var(--m-suave); font-weight:600; opacity:0; transition:opacity .4s; }
+  .gc-rangos span.v{ opacity:1; }
+  .gc-cab span{ text-align:center; font-family:var(--display); font-weight:800; font-size:7cqw; border-radius:2cqw; padding:1cqw 0; margin:.6cqw 0 2cqw; }
+  .gc-grid span{ aspect-ratio:1; display:grid; place-items:center; border-radius:2.6cqw; background:var(--m-celda); border:1px solid var(--m-borde-celda); font-weight:700; font-size:6cqw; color:var(--m-texto); transition:background-color .25s, box-shadow .3s; }
+  .gc-grid span.foco{ box-shadow:0 0 0 .8cqw var(--m-dorado); }
+  .gc-grid span.marcada{ background:var(--m-acento); color:var(--m-sobre-acento); border-color:var(--m-acento); animation:pop .35s; }
+  .gc-grid span.libre{ font-size:3.4cqw; color:var(--m-dorado-texto); background:var(--m-panel); }
+  .gc-grid span.brilla{ box-shadow:0 0 0 .8cqw var(--m-dorado), 0 0 3cqw var(--m-dorado); }
+  .gc-cab span.foco{ box-shadow:0 0 0 .8cqw var(--m-dorado); }
+  .insignia{ position:absolute; left:50%; bottom:0; transform:translate(-50%, 16px) scale(.6); opacity:0; background:linear-gradient(135deg, #cba135, #ecd07a); color:#2a2205; font-family:var(--display); font-weight:800; font-size:1.7rem; padding:.25em 1em; border-radius:99px; box-shadow:0 12px 30px rgba(0,0,0,.25); transition:opacity .35s, transform .45s cubic-bezier(.2,.9,.3,1.4); z-index:5; white-space:nowrap; }
+  .insignia.v{ opacity:1; transform:translate(-50%, 0) scale(1); }
+  .confeti{ position:absolute; inset:0; pointer-events:none; overflow:hidden; border-radius:18px; }
+  .confeti i{ position:absolute; top:46%; left:50%; width:8px; height:13px; border-radius:2px; animation:cae 1.7s ease-out forwards; }
+  @keyframes cae{ 0%{ transform:translate(0,0) rotate(0); opacity:1; } 100%{ transform:translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity:0; } }
+
+  /* recorrido de cartones */
+  .cw{ display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:56px; align-items:start; margin-bottom:56px; }
+  .cw-pasos{ list-style:none; display:grid; gap:10px; }
+  .cw-pasos button, .exp-tabs button{ all:unset; box-sizing:border-box; display:grid; width:100%; cursor:pointer; padding:16px 18px; border-radius:14px; border:2px solid transparent; position:relative; overflow:hidden; transition:background-color .3s, border-color .3s; }
+  .cw-pasos button{ grid-template-columns:40px 1fr; gap:14px; }
+  .cw-pasos button:hover, .exp-tabs button:hover{ background:rgba(47,91,255,.06); }
+  .cw-pasos button:focus-visible, .exp-tabs button:focus-visible{ outline:3px solid var(--azul); outline-offset:2px; }
+  .cw-pasos button[aria-current="step"]{ background:var(--blanco); border-color:var(--azul); }
+  .cw-n{ width:40px; height:40px; border-radius:50%; background:var(--linea); color:var(--tinta); display:grid; place-items:center; font-family:var(--display); font-weight:800; transition:background-color .3s, color .3s; }
+  [aria-current="step"] .cw-n{ background:var(--azul); color:#fff; }
+  .cw-t strong, .exp-tabs button strong{ display:block; font-family:var(--display); font-weight:800; font-size:1.18rem; margin-bottom:2px; letter-spacing:-.01em; }
+  .cw-t span, .exp-tabs button span{ display:block; color:#38445f; font-size:.98rem; }
+  .cw-barra{ position:absolute; left:0; bottom:0; height:4px; width:0; background:var(--azul); }
+  [aria-current="step"] .cw-barra, [aria-selected="true"] .cw-barra{ animation:llenar var(--dur, 6s) linear forwards; }
+  @keyframes llenar{ to{ width:100%; } }
+  .cw-fono{ position:sticky; top:20px; display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .celular.grande{ --ancho:290px; }
+  .cw-fono .celular{ position:relative; }
+  #cwPant{ min-height:162cqw; padding-bottom:6cqw; }
+  .cw-pie{ min-height:2.7em; text-align:center; font-weight:600; max-width:30ch; }
+  .cw-mis{ background:var(--m-panel); border:1px solid var(--m-linea); border-radius:4cqw; overflow:hidden; }
+  .cw-mis-cab{ display:flex; justify-content:space-between; align-items:center; padding:3.6cqw 4cqw; font-family:var(--display); font-weight:800; font-size:4.6cqw; color:var(--m-titulo); }
+  .cw-mis-cab em{ font-style:normal; font-family:var(--texto); font-weight:500; font-size:3.7cqw; color:var(--m-suave); }
+  .cw-mis-cuerpo{ max-height:0; overflow:hidden; transition:max-height .55s ease, padding .55s ease; padding:0 4cqw; }
+  .cw-mis.abierta .cw-mis-cuerpo{ max-height:86cqw; padding-bottom:4cqw; }
+  .cw-vacio{ font-size:3.5cqw; color:var(--m-suave); margin-bottom:3cqw; }
+  .cw-btn{ display:block; text-align:center; border:.6cqw solid var(--m-acento); color:var(--m-acento); border-radius:3cqw; padding:2.8cqw; font-weight:700; font-size:3.9cqw; background:var(--m-celda); }
+  .cw-carton{ background:var(--m-celda); border:1px solid var(--m-linea); border-radius:3cqw; padding:3cqw; }
+  .cw-carton .t{ font-weight:700; font-size:3.8cqw; color:var(--m-titulo); margin-bottom:2cqw; }
+  .cw-carton .g{ display:grid; grid-template-columns:repeat(5,1fr); gap:1.1cqw; }
+  .cw-carton .g span{ aspect-ratio:1; display:grid; place-items:center; border-radius:1.2cqw; background:var(--m-panel); border:1px solid var(--m-borde-celda); font-size:3.2cqw; font-weight:600; color:var(--m-texto); transition:background-color .25s; }
+  .cw-carton .g span.marcada{ background:var(--m-acento); color:var(--m-sobre-acento); border-color:var(--m-acento); animation:pop .3s; }
+  .cw-carton .g span.linea{ box-shadow:inset 0 0 0 .55cqw var(--m-dorado); }
+  .cw-carton .g span.libre, .cw-carton .g span.libre.marcada{ font-size:2.2cqw; color:var(--m-dorado-texto); background:var(--m-panel); border-color:var(--m-borde-celda); }
+  .cw-chips{ display:flex; flex-wrap:wrap; gap:1.6cqw; margin-top:2.6cqw; }
+  .cw-chip{ border-radius:99px; padding:1.2cqw 3cqw; font-size:3.3cqw; font-weight:700; background:var(--m-panel); border:1px solid var(--m-linea); color:var(--m-texto); transition:background-color .3s, color .3s; }
+  .cw-chip.cerca{ background:var(--m-dorado); color:var(--m-sobre-dorado); border-color:var(--m-dorado); }
+  .cw-chip.ok{ background:linear-gradient(135deg, #cba135, #ecd07a); color:#2a2205; border-color:transparent; }
+  .cw-hoja{ position:absolute; left:0; right:0; bottom:0; background:var(--m-panel); border-radius:5cqw 5cqw 0 0; padding:4cqw 4.4cqw 5cqw; box-shadow:0 -3cqw 8cqw rgba(0,0,0,.28); transform:translateY(105%); transition:transform .55s cubic-bezier(.2,.8,.2,1); z-index:5; }
+  .cw-hoja.abierta{ transform:none; }
+  .cw-hoja h4{ font-family:var(--display); font-weight:800; font-size:5cqw; color:var(--m-titulo); margin-bottom:2.4cqw; }
+  .cw-cab, .cw-cuad{ display:grid; grid-template-columns:repeat(5, 1fr); gap:1.6cqw; }
+  .cw-cab span{ text-align:center; border-radius:1.6cqw; font-family:var(--display); font-weight:800; font-size:3.8cqw; padding:.6cqw 0; margin-bottom:1cqw; }
+  .cw-cuad span{ aspect-ratio:1; border-radius:2cqw; display:grid; place-items:center; background:var(--m-celda); border:.5cqw solid var(--m-borde-celda); font-size:4.2cqw; font-weight:700; color:var(--m-texto); transition:background-color .25s, border-color .25s, box-shadow .25s; }
+  .cw-cuad span.act{ border-color:var(--m-acento); box-shadow:0 0 0 .8cqw rgb(47 91 255 / .3); }
+  .cw-cuad span.lleno{ animation:pop .28s; }
+  .cw-cuad span.err{ border-color:#d9534f; background:#fdeceb; color:#b3261e; }
+  .cw-cuad span.avi{ border-color:var(--m-dorado); background:#fff8e1; color:#5c3d00; }
+  .cw-cuad span.libre{ font-size:2.6cqw; color:var(--m-dorado-texto); }
+  .cw-msg{ min-height:9cqw; font-size:3.4cqw; margin-top:2.6cqw; font-weight:600; color:var(--m-suave); line-height:1.3; }
+  .cw-msg.err{ color:#b3261e; } .cw-msg.avi{ color:var(--m-dorado-texto); } .cw-msg.ok{ color:#12806a; }
+  .cw-guardar{ margin-top:2cqw; text-align:center; background:var(--m-acento); color:var(--m-sobre-acento); border-radius:3cqw; padding:2.8cqw; font-weight:700; font-size:4cqw; transition:transform .3s; }
+  .cw-guardar.late{ animation:late .9s ease-in-out infinite; }
+  @keyframes late{ 50%{ transform:scale(1.05); } }
+  .cw-pegar{ position:absolute; right:4.4cqw; top:3.2cqw; background:var(--m-titulo); color:var(--m-fondo); border-radius:99px; padding:1.4cqw 3cqw; font-size:3.1cqw; font-weight:600; opacity:0; transform:translateY(-6px); transition:opacity .35s, transform .35s; }
+  .cw-pegar.v{ opacity:1; transform:none; }
+  .sonido{ position:absolute; top:42%; display:flex; gap:4px; align-items:flex-end; height:46px; opacity:0; transition:opacity .3s; }
+  .sonido.izq{ left:-34px; } .sonido.der{ right:-34px; }
+  .sonido.v{ opacity:1; }
+  .sonido i{ width:5px; border-radius:3px; background:var(--ambar); height:12px; animation:eq .45s ease-in-out infinite alternate; }
+  .sonido i:nth-child(2){ animation-delay:.12s; } .sonido i:nth-child(3){ animation-delay:.24s; }
+  @keyframes eq{ to{ height:44px; } }
+
+  /* pruébalo tú */
+  .prueba{ background:var(--blanco); border:1px solid var(--linea); border-radius:22px; padding:30px; }
+  .prueba-cab h3{ font-size:1.7rem; margin-bottom:8px; }
+  .prueba-cab p{ color:#38445f; max-width:62ch; margin-bottom:24px; }
+  .prueba-cuerpo{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:40px; }
+  .p-rot{ font-weight:600; font-size:.92rem; color:var(--gris); }
+  .p-letras{ display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .p-letras button{ width:38px; height:38px; border-radius:50%; border:2px solid var(--linea); background:#fff; font-family:var(--display); font-weight:800; cursor:pointer; color:var(--tinta); transition:background-color .2s, color .2s, border-color .2s; }
+  .p-letras button[aria-pressed="true"]{ background:var(--azul); border-color:var(--azul); color:#fff; }
+  .p-cab, .p-grid{ display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; max-width:380px; }
+  .p-cab span{ text-align:center; font-family:var(--display); font-weight:800; border-radius:9px; padding:5px 0; margin-bottom:2px; color:#fff; }
+  .lb-B{ background:var(--azul); } .lb-I{ background:var(--ambar); color:var(--tinta) !important; } .lb-N{ background:#aeb8c5; color:var(--tinta) !important; } .lb-G{ background:#1b3384; } .lb-O{ background:var(--gris); }
+  .p-grid .c{ position:relative; aspect-ratio:1; }
+  .p-grid input{ width:100%; height:100%; text-align:center; font:700 1.25rem var(--texto); border:2px solid var(--linea); border-radius:10px; background:#fff; color:var(--tinta); padding:0; transition:background-color .25s, border-color .25s; }
+  .p-grid input:focus{ border-color:var(--azul); outline:none; box-shadow:0 0 0 3px rgba(47,91,255,.22); }
+  .p-grid input.err{ border-color:#d9534f; background:#fdeceb; color:#b3261e; }
+  .p-grid input.avi{ border-color:var(--ambar); background:#fff8e1; }
+  .p-grid input.falta{ animation:vibra .4s linear 1; border-color:#d9534f; }
+  .p-grid .c.marcada input{ background:var(--azul); border-color:var(--azul); color:#fff; animation:pop .3s; }
+  .p-grid .c.linea::after{ content:''; position:absolute; inset:-4px; border:3px solid var(--ambar); border-radius:14px; pointer-events:none; }
+  .p-grid .libre{ display:grid; place-items:center; background:var(--papel); border-radius:10px; font-size:.78rem; font-weight:700; color:#8a5a00; }
+  .p-msg{ min-height:2.8em; margin-top:12px; font-weight:600; font-size:.95rem; color:var(--gris); }
+  .p-msg.err{ color:var(--rojo); } .p-msg.avi{ color:#8a5a00; } .p-msg.ok{ color:#0f7a5a; }
+  .p-botones{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; align-items:center; }
+  .p-rapido{ font-size:.92rem; display:flex; align-items:center; gap:6px; margin-left:4px; cursor:pointer; }
+  .p-estado{ display:grid; gap:8px; margin-bottom:16px; }
+  .est{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 16px; border:1.5px solid var(--linea); border-radius:12px; transition:background-color .35s, border-color .35s; }
+  .est span{ color:#38445f; font-size:.95rem; } .est b{ font-family:var(--display); font-weight:800; font-size:1.15rem; }
+  .est.ok{ background:linear-gradient(135deg, #cba135, #ecd07a); border-color:transparent; } .est.ok span, .est.ok b{ color:#2a2205; }
+  .p-llamadas{ margin-bottom:6px; }
+  .p-ult{ display:flex; flex-wrap:wrap; gap:6px; min-height:40px; margin-top:8px; }
+  .bolita{ width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:.82rem; color:#fff; animation:pop .3s; box-shadow:inset 0 -3px 5px rgba(0,0,0,.2), inset 0 3px 5px rgba(255,255,255,.3); }
+  .p-alerta{ margin-top:16px; min-height:78px; border-radius:14px; display:flex; flex-direction:column; justify-content:center; padding:12px 18px; background:linear-gradient(135deg, #cba135, #ecd07a); color:#2a2205; font-weight:700; font-size:1.25rem; opacity:0; transform:translateY(12px) scale(.97); transition:opacity .35s, transform .45s cubic-bezier(.2,.9,.3,1.3); }
+  .p-alerta small{ font-weight:500; font-size:.92rem; }
+  .p-alerta.v{ opacity:1; transform:none; }
+
+  /* qué incluye */
+  .exp{ display:grid; grid-template-columns:minmax(0,5fr) minmax(0,6fr); gap:40px; align-items:stretch; }
+  .exp-tabs{ display:grid; gap:8px; align-content:start; }
+  .exp-tabs button[aria-selected="true"]{ background:var(--papel); border-color:var(--azul); }
+  .exp-escena{ background:var(--papel); border-radius:20px; min-height:400px; position:relative; overflow:hidden; }
+  .ex{ position:absolute; inset:0; padding:22px; display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap; opacity:0; visibility:hidden; transition:opacity .4s, visibility .4s; }
+  .ex.v{ opacity:1; visibility:visible; }
+  .rd-lista{ display:grid; gap:8px; width:min(100%, 220px); }
+  .rd{ display:flex; align-items:center; gap:10px; background:#fff; border:2px solid var(--linea); border-radius:12px; padding:9px 12px; transition:border-color .3s, background-color .3s, transform .3s; }
+  .rd b{ font-family:var(--display); color:var(--azul); font-size:1rem; min-width:46px; }
+  .rd span{ font-size:.86rem; color:#38445f; line-height:1.25; }
+  .rd.act{ border-color:var(--azul); background:#eef2ff; transform:translateX(6px); }
+  .rd-pant{ container-type:inline-size; width:min(100%, 220px); background:var(--m-fondo); border:3px solid var(--tinta); border-radius:12px; position:relative; }
+  .rd-in{ padding:6cqw; }
+  .rd-premio{ text-align:center; background:var(--m-panel); border-radius:4cqw; padding:6cqw 4cqw; margin-bottom:5cqw; transition:opacity .25s; }
+  .rd-premio b{ display:block; font-family:var(--display); font-weight:800; font-size:13cqw; color:var(--m-dorado-texto); }
+  .rd-premio span{ font-size:6cqw; color:var(--m-suave); }
+  .rd-cab, .rd-pat{ display:grid; grid-template-columns:repeat(5, 1fr); gap:2cqw; }
+  .rd-cab span{ text-align:center; font-family:var(--display); font-weight:800; font-size:6cqw; color:var(--m-suave); }
+  .rd-cab span.on{ color:var(--m-dorado-texto); }
+  .rd-pat i{ aspect-ratio:1; border-radius:1.6cqw; background:var(--m-linea); transition:background-color .35s; }
+  .rd-pat i.on{ background:var(--m-dorado); }
+  .rd-rot{ text-align:center; font-size:5cqw; color:var(--m-suave); margin-top:4cqw; }
+  .ps{ container-type:inline-size; width:min(100%, 380px); background:var(--m-fondo); border:3px solid var(--tinta); border-radius:12px; position:relative; overflow:hidden; aspect-ratio:16/11; }
+  .ps-tab{ display:grid; grid-template-columns:repeat(15, 1fr); gap:1cqw; padding:4cqw 4cqw 12cqw; }
+  .ps-tab i{ aspect-ratio:1.1; border-radius:.9cqw; background:var(--m-celda); border:1px solid var(--m-borde-celda); }
+  .ps-tab i.on{ background:var(--m-acento); border-color:var(--m-acento); }
+  .ps-barra{ position:absolute; left:0; right:0; bottom:0; padding:2cqw 4cqw; display:flex; justify-content:center; background:var(--m-panel); border-top:1px solid var(--m-linea); }
+  .ps-barra span{ border:1.5px solid var(--m-suave); border-radius:99px; padding:.8cqw 3.4cqw; font-size:3cqw; font-weight:600; color:var(--m-texto); transition:background-color .25s, border-color .25s, color .25s; }
+  .ps-barra span.act{ border-color:var(--m-dorado-texto); color:var(--m-dorado-texto); }
+  .ps-pausa{ position:absolute; inset:0; background:var(--m-fondo); display:grid; grid-template-columns:1.3fr 1fr; gap:3cqw; align-items:center; padding:5cqw; opacity:0; transition:opacity .45s; z-index:3; }
+  .ps-pausa.v{ opacity:1; }
+  .ps-centro{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:2.4cqw; }
+  .ps-logo{ width:12cqw; height:12cqw; border-radius:2cqw; background:#fff; border:1px solid var(--m-linea); display:grid; place-items:center; font-family:var(--display); font-weight:800; color:var(--m-acento); font-size:6cqw; }
+  .ps-titulo{ font-family:var(--display); font-weight:800; font-size:7cqw; line-height:1.05; color:var(--m-titulo); min-height:2.1em; }
+  .ps-prox{ font-size:3cqw; font-weight:700; color:var(--m-dorado-texto); border:1.5px solid var(--m-dorado-texto); border-radius:99px; padding:.8cqw 2.6cqw; opacity:0; transform:translateY(6px); transition:opacity .4s, transform .4s; }
+  .ps-prox.v{ opacity:1; transform:none; }
+  .ps-lado{ display:flex; flex-direction:column; align-items:center; gap:2.4cqw; }
+  .ps-aus{ width:100%; height:15cqw; position:relative; border-radius:2cqw; overflow:hidden; }
+  .ps-aus div{ position:absolute; inset:0; display:grid; place-items:center; font-family:var(--display); font-weight:800; font-size:4.4cqw; color:#fff; opacity:0; transform:translateX(20px) scale(.95); transition:opacity .5s, transform .5s; }
+  .ps-aus div.v{ opacity:1; transform:none; }
+  .ps-qr{ width:14cqw; height:14cqw; background:#fff; padding:1cqw; border-radius:1.4cqw; }
+  .ps-qr svg{ width:100%; height:100%; }
+  .m3{ width:min(100%, 380px); display:grid; gap:14px; }
+  .m3 .mini{ min-height:190px; }
+  .m3-fila{ display:flex; align-items:center; gap:10px; }
+  .m3-logo{ width:38px; height:38px; border-radius:50%; background:var(--m-acento); color:var(--m-sobre-acento); display:grid; place-items:center; font-family:var(--display); font-weight:800; transform:scale(0); transition:transform .45s cubic-bezier(.2,.9,.3,1.5), background-color .4s; flex-shrink:0; }
+  .m3-logo.v{ transform:none; }
+  .m3-panel{ background:#fff; border:1px solid var(--linea); border-radius:14px; padding:12px 14px; }
+  .m3-panel .rot{ font-size:.82rem; font-weight:600; color:var(--gris); margin-bottom:8px; }
+  .m3-sw{ display:flex; flex-wrap:wrap; gap:8px; }
+  .m3-sw b{ width:26px; height:26px; border-radius:50%; border:2px solid rgba(14,26,64,.2); outline:3px solid transparent; outline-offset:2px; transition:outline-color .25s, transform .25s; }
+  .m3-sw b.on{ outline-color:var(--tinta); transform:scale(1.12); }
+  .chk{ list-style:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; width:100%; max-width:440px; }
+  .chk li{ display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--linea); border-radius:12px; padding:12px 14px; font-weight:600; font-size:.94rem; line-height:1.25; opacity:.45; transition:opacity .4s, border-color .4s; }
+  .chk li i{ width:24px; height:24px; border-radius:50%; background:var(--linea); flex-shrink:0; display:grid; place-items:center; color:#fff; font-style:normal; font-size:.85rem; transition:background-color .3s, transform .3s; }
+  .chk li.on{ opacity:1; border-color:var(--verde); }
+  .chk li.on i{ background:var(--verde); animation:pop .4s; }
+
+  /* vigencia */
+  .vigencia{ background:var(--papel); border:1px solid var(--linea); border-radius:20px; padding:26px; display:grid; gap:18px; }
+  .vg-estado{ display:flex; align-items:center; gap:14px; }
+  .vg-candado{ width:52px; height:52px; border-radius:50%; background:var(--verde); display:grid; place-items:center; transition:background-color .4s; flex-shrink:0; }
+  .vg-candado svg{ width:26px; height:26px; }
+  .vg-candado .aro{ transform-origin:8px 11px; transition:transform .45s cubic-bezier(.3,1.5,.5,1); }
+  .vg-candado.abierto .aro{ transform:translate(0,-3px) rotate(-22deg); }
+  .vg-candado.cerrado{ background:var(--gris); }
+  .vg-texto strong{ display:block; font-family:var(--display); font-weight:800; font-size:1.3rem; letter-spacing:-.01em; }
+  .vg-texto span{ color:#38445f; font-size:.95rem; }
+  .vg-pista{ position:relative; height:18px; border-radius:99px; background:#cfd6e6; overflow:hidden; }
+  .vg-edit{ position:absolute; left:0; top:0; bottom:0; width:60%; background:var(--verde); transition:width .7s cubic-bezier(.3,1,.4,1); }
+  .vg-marca{ position:absolute; top:-3px; bottom:-3px; width:5px; margin-left:-2px; background:var(--tinta); border-radius:3px; left:0; transition:left linear; }
+  .vg-eje{ position:relative; height:22px; margin-top:-8px; font-size:.78rem; color:var(--gris); }
+  .vg-eje span{ position:absolute; top:0; transform:translateX(-50%); white-space:nowrap; transition:left .7s cubic-bezier(.3,1,.4,1); }
+  .vg-perm{ display:grid; gap:8px; }
+  .vg-perm div{ display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--linea); border-radius:12px; padding:10px 14px; font-size:.95rem; transition:opacity .35s; }
+  .vg-perm i{ width:24px; height:24px; border-radius:50%; display:grid; place-items:center; color:#fff; font-style:normal; font-weight:700; background:var(--verde); transition:background-color .3s; flex-shrink:0; }
+  .vg-perm div.no i{ background:var(--rojo); } .vg-perm div.no{ opacity:.7; }
+  .vg-renovar{ position:relative; justify-self:start; border:2px solid var(--azul); color:var(--azul); border-radius:99px; padding:.5em 1.3em; font-weight:700; background:#fff; font-size:.95rem; transition:background-color .25s, color .25s; }
+  .vg-renovar.act{ background:var(--azul); color:#fff; }
+  .vigencia .dedo{ z-index:20; }
+
+  /* preguntas con animación */
+  .preguntas .resp{ overflow:hidden; }
+  .preguntas details[open] summary::after{ transform:none; }
+
+  @media (max-width: 980px){
+    .gana-grid, .cw, .exp, .prueba-cuerpo{ grid-template-columns:1fr; gap:34px; }
+    .cw-fono{ position:static; }
+    .pasos li{ padding-right:0; }
+  }
+  @media (max-width: 640px){
+    .ilus{ height:180px; }
+    .prueba{ padding:20px 16px; }
+    .chk{ grid-template-columns:1fr; }
+    .ps-pausa{ gap:2cqw; padding:3cqw; }
+    .sonido.izq{ left:-8px; } .sonido.der{ right:-8px; }
+    .cw-fono .celular{ --ancho:min(290px, 84vw); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .rev{ opacity:1; transform:none; transition:none; }
+    .caret, .s3.activa .beam, .cw-guardar.late, .sonido i{ animation:none !important; }
+    .dedo{ display:none; }
+  }
+
+  .c-carton .cuad span.libre, .c-carton .cuad span.libre.marcada{ background:var(--m-panel); color:var(--m-dorado-texto); border-color:var(--m-borde-celda); }
+
+  .pausa-anim{ position:fixed; right:16px; bottom:16px; z-index:60; background:var(--tinta); color:#fff; border:2px solid rgba(255,255,255,.85); border-radius:99px; padding:.55em 1.1em; font:600 .85rem var(--texto); cursor:pointer; box-shadow:0 8px 24px rgba(14,26,64,.35); }
+  .pausa-anim:hover{ background:var(--tinta-2); }
+  .pausa-anim[hidden]{ display:none !important; }
+  body.quieto *, body.quieto *::before, body.quieto *::after{ animation:none !important; transition-duration:.01ms !important; }
+  body.quieto .dedo{ display:none; }
+  @media (max-width: 640px){
+    .pasos li, .pasos li + li{ padding:22px 0 8px; }
+    .rd-lista{ grid-template-columns:1fr 1fr; width:100%; }
+    .rd{ flex-direction:column; align-items:flex-start; padding:8px 10px; gap:1px; } .rd b{ min-width:0; font-size:.95rem; } .rd span{ font-size:.78rem; } .rd.act{ transform:none; }
+    .exp-escena{ min-height:590px; }
+    .pausa-anim{ right:10px; bottom:10px; font-size:.8rem; }
+  }
+
+  [aria-current="step"] .cw-barra, [aria-selected="true"] .cw-barra{ }
+  @media (prefers-reduced-motion: reduce){ .cw-barra{ animation:none !important; width:100% !important; } .exp-tabs.manual .cw-barra{ display:none; } }
+  .exp-tabs.manual .cw-barra{ display:none; }
+</style>
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="contenedor">
+    <a class="marca" href="#"><i aria-hidden="true">B</i>Bingo en vivo</a>
+    <nav aria-label="Principal">
+      <a href="#como">Cómo funciona</a>
+      <a href="#cartones">Cartones</a>
+      <a href="#incluye">Qué incluye</a>
+      <a href="#contratar">Contratar</a>
+      <a class="boton primario" href="#pedir">Pedir cotización</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ================= PORTADA ================= -->
+  <section class="portada">
+    <div class="contenedor">
+      <div>
+        <h1>El tablero de tu bingo, en el proyector y en cada celular</h1>
+        <p class="bajada">Cantas los números desde tu teléfono y todos los ven al instante: en la pantalla grande y en el celular de cada asistente. Con tus colores, tus premios y tu propio enlace.</p>
+        <div class="botones">
+          <a class="boton primario" href="#pedir">Pedir cotización</a>
+          <a class="boton contorno" href="#como">Cómo funciona</a>
+        </div>
+        <p class="nota">No hay nada que instalar: funciona en el navegador.</p>
+      </div>
+      <div>
+        <div class="escena">
+          <div class="pantalla" id="heroPantalla" role="img" aria-label="Maqueta del tablero de bingo en el proyector, llamando números en vivo, y un celular que avisa cuando se completa el binguito.">
+            <div class="p-arriba" aria-hidden="true">
+              <div class="p-panel"><div class="bola grande L-B" id="heroBola">B-4</div><div class="p-rotulo">Llamada<br>actual</div></div>
+              <div class="p-panel"><div><div class="p-rotulo">Últimas llamadas</div><div class="p-ultimas" id="heroUltimas"></div></div></div>
+              <div class="p-panel p-premio"><b>$300.000</b><span>Bingo</span></div>
+              <div class="p-panel p-bin"><div class="patron" id="heroPatron"></div></div>
+            </div>
+            <div class="tablero" id="heroTablero" aria-hidden="true"></div>
+          </div>
+          <div class="debajo">
+            <div class="celular flota" aria-hidden="true">
+              <div class="pant" id="heroMovil">
+                <div class="c-hero"><div class="bola grande L-B" id="movilBola">4</div><div class="texto">Llamada<b id="movilEtiq">B-4</b></div></div>
+                <div class="c-carton"><div class="cab" id="movilCab"></div><div class="cuad" id="movilCuad"></div></div>
+                <div class="aviso" id="movilAviso">¡Binguito!<small>Completaste la línea de la B</small></div>
+              </div>
+            </div>
+            <div class="elegir" role="group" aria-label="Probar colores en las maquetas">
+              <p>Pruébalo con tus colores</p>
+              <span id="temas" style="display:contents"></span>
+              <label class="color">Tu color <input type="color" id="colorPropio" value="#2f5bff" aria-label="Elegir un color principal propio"></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+    <!-- ================= CÓMO FUNCIONA ================= -->
+  <section class="seccion oscura en-oscuro" id="como">
+    <div class="contenedor">
+      <div class="intro rev"><h2>Así se arma tu bingo</h2><p class="sub">Nosotros lo dejamos creado; tú lo personalizas y lo usas en minutos.</p></div>
+      <ol class="pasos">
+        <li class="rev"><div class="ilus" id="ilus1" aria-hidden="true"></div><span class="num" aria-hidden="true">1</span><h3>Te creamos tu bingo</h3><p>Recibes un enlace propio, como tu-bingo.bingoenvivo.cl, y un código de acceso por las fechas que necesites.</p></li>
+        <li class="rev"><div class="ilus" id="ilus2" aria-hidden="true"></div><span class="num" aria-hidden="true">2</span><h3>Lo dejas a tu medida</h3><p>Pones el nombre, los colores, el logo y los auspiciadores. Defines las rondas con su hora, su premio y la letra del binguito.</p></li>
+        <li class="rev"><div class="ilus" id="ilus3" aria-hidden="true"></div><span class="num" aria-hidden="true">3</span><h3>Proyectas el tablero</h3><p>Abres tu enlace en el computador conectado al proyector. Los asistentes entran escaneando un código QR.</p></li>
+        <li class="rev"><div class="ilus" id="ilus4" aria-hidden="true"></div><span class="num" aria-hidden="true">4</span><h3>Cantas desde el celular</h3><p>Marcas cada número en tu teléfono y aparece al instante en el proyector y en todos los celulares.</p></li>
+      </ol>
+    </div>
+  </section>
+
+    <!-- ================= UN TOQUE, TRES PANTALLAS ================= -->
+  <section class="seccion" id="vistas">
+    <div class="contenedor">
+      <div class="intro rev"><h2>Un toque, tres pantallas</h2><p class="sub oscuro-sub">Cuando marcas un número en tu teléfono, aparece al mismo tiempo en el proyector y en el celular de cada asistente.</p></div>
+      <div class="vistas" id="vistas3">
+        <div class="vista rev">
+          <figure><div class="pantalla" id="vistaProyector" role="img" aria-label="Maqueta del proyector con el tablero y el premio de la ronda."></div></figure>
+          <h3>En el proyector</h3>
+          <p>El tablero del 1 al 75, el último número llamado, el premio de la ronda y tus auspiciadores.</p>
+        </div>
+        <div class="vista rev">
+          <figure><div class="celular"><div class="pant" id="vistaOrganizador" role="img" aria-label="Maqueta del panel del organizador en el celular."></div></div></figure>
+          <h3>En tu celular</h3>
+          <p>Un panel para una mano: marcas números, cambias de ronda y pones la pausa.</p>
+        </div>
+        <div class="vista rev">
+          <figure><div class="celular"><div class="pant" id="vistaPublico" role="img" aria-label="Maqueta del celular de un asistente con su cartón y el aviso de binguito."></div></div></figure>
+          <h3>En el celular del público</h3>
+          <p>Siguen los números en vivo y reciben un aviso cuando su cartón gana.</p>
+        </div>
+        <div class="conexion" id="conexion" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BINGUITO Y BINGO ================= -->
+  <section class="seccion" id="gana" style="background:var(--blanco)">
+    <div class="contenedor gana-grid">
+      <div class="rev">
+        <h2>Binguito y bingo, explicados</h2>
+        <p class="sub oscuro-sub">Dos premios por ronda: uno por una línea y otro por el cartón entero.</p>
+        <ol class="gana-pasos" id="ganaPasos">
+          <li><strong>Cada letra es una columna</strong><span>La B tiene los números del 1 al 15, la I del 16 al 30, la N del 31 al 45, la G del 46 al 60 y la O del 61 al 75.</span></li>
+          <li><strong>Binguito: una línea</strong><span>Gana quien completa primero la columna de la letra de esa ronda. La letra la eliges tú para cada ronda.</span></li>
+          <li><strong>Bingo: el cartón lleno</strong><span>Gana quien completa los 24 números del cartón. El centro es una casilla libre.</span></li>
+        </ol>
+      </div>
+      <div class="gana-escena rev">
+        <div class="narrador" id="ganaNarr" aria-live="off"></div>
+        <div class="gana-carton" id="ganaCarton" role="img" aria-label="Animación de un cartón de bingo: primero se señalan las cinco columnas, luego se completa la línea de la B (binguito) y por último todo el cartón (bingo)."></div>
+        <div class="insignia" id="ganaBadge"></div>
+      </div>
+    </div>
+  </section>
+
+    <!-- ================= CARTONES ================= -->
+  <section class="seccion" id="cartones">
+    <div class="contenedor">
+      <div class="intro rev"><h2>Cada asistente puede anotar su cartón</h2><p class="sub oscuro-sub">Escribe los números del cartón impreso y su teléfono le avisa cuando completa el binguito o el bingo. Los cartones se guardan solo en ese teléfono.</p></div>
+      <div class="cw">
+        <ol class="cw-pasos" id="cwPasos">
+          <li><button type="button" data-i="0"><span class="cw-n">1</span><span class="cw-t"><strong>Toca «Agregar cartón»</strong><span>Está en «Mis cartones», abajo en la pantalla del bingo.</span></span><i class="cw-barra"></i></button></li>
+          <li><button type="button" data-i="1"><span class="cw-n">2</span><span class="cw-t"><strong>Escribe los números</strong><span>De izquierda a derecha y de arriba hacia abajo. El teléfono salta solo a la casilla siguiente. También puedes pegar los 24 números de una vez.</span></span><i class="cw-barra"></i></button></li>
+          <li><button type="button" data-i="2"><span class="cw-n">3</span><span class="cw-t"><strong>La app revisa por ti</strong><span>Avisa si repetiste un número o si uno no corresponde a su columna, antes de guardar.</span></span><i class="cw-barra"></i></button></li>
+          <li><button type="button" data-i="3"><span class="cw-n">4</span><span class="cw-t"><strong>Se marca solo</strong><span>A medida que se cantan los números, tu cartón los marca y te dice cuántos te faltan.</span></span><i class="cw-barra"></i></button></li>
+          <li><button type="button" data-i="4"><span class="cw-n">5</span><span class="cw-t"><strong>Te avisa cuando ganas</strong><span>Suena y vibra al completar el binguito o el bingo. Tú avisas a la organización, que valida el premio con el cartón físico.</span></span><i class="cw-barra"></i></button></li>
+        </ol>
+        <div class="cw-fono">
+          <div class="celular grande" aria-hidden="true">
+            <div class="pant" id="cwPant"></div>
+          </div>
+          <div class="cw-pie" id="cwPie" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="prueba rev" id="prueba">
+        <div class="prueba-cab">
+          <h3>Ahora pruébalo tú</h3>
+          <p>Escribe los números de tu cartón, o toca «Llenar con un ejemplo». Después presiona «Cantar números» y mira cómo te avisa. Para pasar a la casilla siguiente con un número de una cifra, usa la barra espaciadora.</p>
+        </div>
+        <div class="prueba-cuerpo">
+          <div class="p-izq">
+            <div class="p-letras" role="group" aria-label="Letra del binguito de esta ronda">
+              <span class="p-rot">Binguito de esta ronda:</span>
+              <span id="pLetras" style="display:contents"></span>
+            </div>
+            <div class="p-cab" id="pCab"></div>
+            <div class="p-grid" id="pGrid"></div>
+            <p class="p-msg" id="pMsg" role="status" aria-live="polite"></p>
+            <div class="p-botones">
+              <button type="button" class="boton contorno chico" id="pEjemplo">Llenar con un ejemplo</button>
+              <button type="button" class="boton contorno chico" id="pBorrar">Borrar</button>
+            </div>
+          </div>
+          <div class="p-der">
+            <div class="p-estado" id="pEstado"></div>
+            <div class="p-llamadas"><span class="p-rot">Números cantados</span><div class="p-ult" id="pUlt"></div></div>
+            <div class="p-botones">
+              <button type="button" class="boton primario chico" id="pCantar">Cantar números</button>
+              <button type="button" class="boton contorno chico" id="pDiez">+10 números</button>
+              <button type="button" class="boton contorno chico" id="pReiniciar">Reiniciar</button>
+              <label class="p-rapido"><input type="checkbox" id="pRapido"> Rápido</label>
+            </div>
+            <div class="p-alerta" id="pAlerta" role="alert"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================= QUÉ INCLUYE ================= -->
+  <section class="seccion" id="incluye" style="background:var(--blanco)">
+    <div class="contenedor">
+      <div class="intro rev"><h2>Qué incluye</h2><p class="sub oscuro-sub">Toca cada opción para verla en acción.</p></div>
+      <div class="exp rev">
+        <div class="exp-tabs" role="tablist" aria-label="Funciones" id="expTabs">
+          <button role="tab" type="button" aria-selected="true" data-i="0"><strong>Rondas y premios</strong><span>Defines cuántas rondas hay, a qué hora son y cuánto se juega en cada una. Cambias de ronda con un toque.</span><i class="cw-barra"></i></button>
+          <button role="tab" type="button" aria-selected="false" data-i="1"><strong>Pausas con auspiciadores</strong><span>En un descanso, el proyector muestra tu logo, el motivo, el próximo bingo, los auspiciadores en rotación y un QR.</span><i class="cw-barra"></i></button>
+          <button role="tab" type="button" aria-selected="false" data-i="2"><strong>Tu marca</strong><span>Nombre, logo y colores a tu gusto. Fondo claro para proyectores flojos, u oscuro para salas con poca luz.</span><i class="cw-barra"></i></button>
+          <button role="tab" type="button" aria-selected="false" data-i="3"><strong>Y además</strong><span>Todo lo demás que viene incluido en cada bingo.</span><i class="cw-barra"></i></button>
+        </div>
+        <div class="exp-escena" id="expEscena" role="img" aria-label="Demostración animada de la función elegida."></div>
+      </div>
+    </div>
+  </section>
+
+    <!-- ================= PARA QUIÉN / CONTRATAR ================= -->
+  <section class="seccion" id="contratar">
+    <div class="contenedor">
+      <div class="intro rev">
+        <h2>Contratas por el tiempo que necesitas</h2>
+        <p class="sub oscuro-sub">Para colegios, clubes, juntas de vecinos, empresas y campañas solidarias. Lo usamos por primera vez en el Bingo Oxford School 2026 y ahora lo ofrecemos para cualquier organización.</p>
+      </div>
+      <div class="dos-col">
+        <div class="rev">
+          <p class="url" aria-label="Ejemplo de dirección">tu-bingo.<b id="dominioEjemplo">bingoenvivo.cl</b></p>
+          <ul class="hechos">
+            <li><strong>Un enlace propio</strong><span>Cada bingo tiene su dirección. El público entra sin código, escaneando el QR.</span></li>
+            <li><strong>Un código para el organizador</strong><span>Solo quien lo tiene puede editar el bingo, marcar números y cambiar la configuración.</span></li>
+            <li><strong>Las fechas que elijas</strong><span>Un día, un fin de semana o un mes. Si necesitas más días, se renueva sin perder tu configuración.</span></li>
+          </ul>
+        </div>
+        <div class="rev"><div class="vigencia" id="vigencia" role="img" aria-label="Animación del acceso por fechas: el acceso está vigente, llega la fecha de término, el bingo queda solo para ver, y al renovar vuelve a poder editarse."></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FORMULARIO ================= -->
+  <section class="seccion oscura en-oscuro" id="pedir">
+    <div class="contenedor formulario">
+      <div class="lado rev">
+        <h2>Pide tu cotización</h2>
+        <p>Cuéntanos qué evento tienes, para cuándo y cuántas personas esperas. Te escribimos con una propuesta y los pasos para dejarlo listo.</p>
+        <a class="wsp" id="wsp" href="#" hidden>Escríbenos por WhatsApp</a>
+      </div>
+      <form class="pedir rev" id="formulario" novalidate>
+        <div class="par">
+          <div><label for="fNombre">Tu nombre</label><input id="fNombre" name="nombre" type="text" maxlength="80" autocomplete="name" required></div>
+          <div><label for="fContacto">Correo o WhatsApp</label><input id="fContacto" name="contacto" type="text" maxlength="120" autocomplete="email" required></div>
+        </div>
+        <div class="par">
+          <div><label for="fEvento">Nombre del evento</label><input id="fEvento" name="evento" type="text" maxlength="120" placeholder="Ej. Bingo anual del club"></div>
+          <div><label for="fFecha">Fecha aproximada</label><input id="fFecha" name="fecha" type="text" maxlength="60" placeholder="Ej. sábado 15 de noviembre"></div>
+        </div>
+        <div><label for="fMensaje">Cuéntanos un poco más</label><textarea id="fMensaje" name="mensaje" maxlength="480" placeholder="Cuántas personas esperas, cuántas rondas, si tienes auspiciadores…"></textarea></div>
+        <div class="trampa" aria-hidden="true"><label>No completar <input id="fTrampa" type="text" tabindex="-1" autocomplete="off"></label></div>
+        <div><button class="boton primario" type="submit" id="fEnviar">Enviar solicitud</button></div>
+        <p class="estado" id="fEstado" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= PREGUNTAS ================= -->
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="intro rev"><h2>Preguntas frecuentes</h2></div>
+      <div class="preguntas rev">
+        <details><summary>¿Necesito instalar algo?</summary><p>No. Abres el enlace en el navegador del computador y del teléfono.</p></details>
+        <details><summary>¿Qué necesito el día del evento?</summary><p>Un computador con internet conectado al proyector (por cable o con un wifi estable) y tu teléfono para cantar los números. Los asistentes usan sus propios datos o el wifi del lugar.</p></details>
+        <details><summary>¿Puedo usar mis cartones impresos?</summary><p>Sí. Los cartones físicos siguen siendo los que valen. Quien quiera, anota los números de su cartón en la app para recibir avisos.</p></details>
+        <details><summary>¿Quién valida el premio?</summary><p>La organización, con el cartón en la mano. Los avisos de la app son una ayuda para el público.</p></details>
+        <details><summary>¿Se puede cambiar algo durante el evento?</summary><p>Sí. El nombre, los colores, las rondas y los premios se editan desde el ícono ⚙ y se actualizan al instante en todas las pantallas.</p></details>
+        <details><summary>¿Qué pasa con los datos de los asistentes?</summary><p>La app no pide datos personales. Los cartones se guardan solo en el teléfono de cada persona.</p></details>
+        <details><summary>¿Para cuántas personas sirve?</summary><p>Está pensado para eventos con cientos de personas conectadas a la vez. Si el tuyo es más grande, cuéntanos y lo revisamos juntos.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pie">
+  <div class="contenedor">
+    <span>© 2026 Bingo en vivo · Hecho en Chile</span>
+    <a href="#pedir">Pedir cotización</a>
+  </div>
+</footer>
+
+<button class="pausa-anim" id="pausaAnim" type="button" aria-pressed="false" hidden>Pausar animaciones</button>
+<script>
+(function(){
+  // ---------------- configuración de la página ----------------
+  const DB_URL = 'https://bingo-oxford-school-default-rtdb.firebaseio.com';   // misma base de datos que usa la app
+  const WHATSAPP = '';                                                       // ej. '56912345678' para mostrar el botón de WhatsApp
+  const $ = (id) => document.getElementById(id);
+  const reducir = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  $('dominioEjemplo').textContent = (/^(localhost|[\d.]+)$/.test(location.hostname) || !location.hostname) ? 'bingoenvivo.cl' : location.hostname.replace(/^www\./, '');
+  if(WHATSAPP){ const w = $('wsp'); w.href = 'https://wa.me/' + WHATSAPP; w.hidden = false; }
+
+  // ---------------- motor de temas (el mismo de la app) ----------------
+  function hexARgb(h){ h = String(h || '').replace('#', '').trim(); if(h.length === 3) h = h.split('').map(c => c + c).join(''); if(!/^[0-9a-fA-F]{6}$/.test(h)) return null; const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function rgbAHex(v){ return '#' + v.map(x => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, '0')).join(''); }
+  function mezclar(a, b, t){ const A = hexARgb(a), B = hexARgb(b); return rgbAHex(A.map((v, i) => v + (B[i] - v) * t)); }
+  function luminancia(h){ const c = hexARgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; }
+  function contraste(a, b){ const x = luminancia(a), y = luminancia(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+  function textoSobre(f){ return contraste(f, '#10141c') >= contraste(f, '#ffffff') ? '#10141c' : '#ffffff'; }
+  function asegurar(color, ref, min, extremo){ let c = color; for(let i = 0; i < 30 && contraste(c, ref) < min; i++) c = mezclar(c, extremo, 0.12); return c; }
+  function paleta(fondoElegido, acento){
+    let fondo = hexARgb(fondoElegido) ? fondoElegido : '#f4f6fa'; acento = hexARgb(acento) ? acento : '#2f5bff';
+    const negro = '#0b1220', blanco = '#ffffff', ambar = '#f5b400';
+    const claro = luminancia(fondo) > 0.179, tp = claro ? negro : '#f7f9fc', ext = claro ? blanco : negro;
+    const panelDe = f => claro ? mezclar(f, negro, 0.06) : mezclar(f, blanco, 0.09);
+    const celdaDe = pn => claro ? '#ffffff' : mezclar(pn, blanco, 0.14);
+    let panel = panelDe(fondo);
+    for(let i = 0; i < 60 && (contraste(tp, fondo) < 5 || contraste(tp, panel) < 4.8 || contraste(tp, celdaDe(panel)) < 4.7); i++){ fondo = mezclar(fondo, ext, 0.06); panel = panelDe(fondo); }
+    for(let i = 0; i < 30 && Math.max(contraste(acento, '#10141c'), contraste(acento, '#ffffff')) < 4.7; i++) acento = mezclar(acento, luminancia(acento) > 0.179 ? blanco : negro, 0.05);
+    const celda = celdaDe(panel), gris = claro ? '#aeb8c5' : '#b9c0cb';
+    return { fondo, panel, acento, celda, claro, tp,
+      header: asegurar(mezclar(acento, negro, claro ? 0.55 : 0.45), '#ffffff', 4.6, negro), gris, grisOsc: claro ? '#5b6676' : '#5f6a7a',
+      texto: asegurar(claro ? mezclar(negro, fondo, 0.12) : mezclar(blanco, fondo, 0.15), celda, 5, claro ? negro : blanco),
+      suave: asegurar(mezclar(tp, panel, 0.38), panel, 4.6, tp), doradoTexto: asegurar(claro ? '#8a5a00' : '#e8bb55', panel, 3.4, claro ? negro : blanco),
+      sobreAcento: textoSobre(acento), sobreDorado: textoSobre(ambar), sobreGris: textoSobre(gris),
+      linea: claro ? 'rgb(11 18 32 / .16)' : 'rgb(255 255 255 / .08)', borde: claro ? 'rgb(11 18 32 / .22)' : 'transparent' };
+  }
+  function aplicarMaquetas(fondo, acento){
+    const p = paleta(fondo, acento), s = document.documentElement.style;
+    s.setProperty('--m-fondo', p.fondo); s.setProperty('--m-panel', p.panel); s.setProperty('--m-acento', p.acento); s.setProperty('--m-header', p.header);
+    s.setProperty('--m-celda', p.celda); s.setProperty('--m-texto', p.texto); s.setProperty('--m-suave', p.suave); s.setProperty('--m-titulo', p.tp);
+    s.setProperty('--m-sobre-acento', p.sobreAcento); s.setProperty('--m-gris', p.gris); s.setProperty('--m-gris-osc', p.grisOsc);
+    s.setProperty('--m-sobre-dorado', p.sobreDorado); s.setProperty('--m-sobre-gris', p.sobreGris); s.setProperty('--m-linea', p.linea);
+    s.setProperty('--m-borde-celda', p.borde); s.setProperty('--m-dorado-texto', p.doradoTexto);
+  }
+  const TEMAS = [['Claro', '#f4f6fa', '#2f5bff'], ['Oscuro', '#10151f', '#5b8cff'], ['Bosque', '#0c231b', '#3fae72'], ['Océano', '#0b2540', '#22b8cf'], ['Atardecer', '#2a1814', '#ff7a45'], ['Rosa', '#fff4f8', '#d6336c']];
+  let temaActual = TEMAS[0];
+  const contTemas = $('temas');
+  TEMAS.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tema'; b.setAttribute('aria-pressed', String(i === 0));
+    const sw = document.createElement('i'); sw.style.background = 'linear-gradient(135deg,' + t[1] + ' 50%,' + t[2] + ' 50%)';
+    b.appendChild(sw); b.appendChild(document.createTextNode(t[0]));
+    b.addEventListener('click', () => {
+      temaActual = t; aplicarMaquetas(t[1], t[2]); $('colorPropio').value = t[2];
+      Array.from(contTemas.children).forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    });
+    contTemas.appendChild(b);
+  });
+  $('colorPropio').addEventListener('input', (e) => {
+    aplicarMaquetas(temaActual[1], e.target.value);
+    Array.from(contTemas.children).forEach(x => x.setAttribute('aria-pressed', 'false'));
+  });
+
+  // ---------------- piezas de las maquetas ----------------
+  const LETRAS = ['B', 'I', 'N', 'G', 'O'];
+  const letraDe = n => LETRAS[Math.min(4, Math.floor((n - 1) / 15))];
+  function el(tag, clase, texto){ const e = document.createElement(tag); if(clase) e.className = clase; if(texto !== undefined) e.textContent = texto; return e; }
+  function bola(n, tam){ return el('div', 'bola ' + tam + ' L-' + letraDe(n), String(n)); }
+  function construirTablero(cont, celdas){
+    cont.innerHTML = '';
+    LETRAS.forEach((L, f) => {
+      cont.appendChild(el('div', 'letra L-' + L, L));
+      for(let c = 1; c <= 15; c++){ const n = f * 15 + c; const d = el('div', 'n', String(n)); celdas[n] = d; cont.appendChild(d); }
+    });
+  }
+  function construirPatron(cont, col){
+    cont.innerHTML = '';
+    for(let f = 0; f < 5; f++) for(let c = 0; c < 5; c++) cont.appendChild(el('i', c === col ? 'on' : ''));
+  }
+  // cartón de ejemplo: columna B completa en cuanto salgan estos 5 números
+  const CARTON = [[4, 9, 12, 7, 14], [18, 22, 27, 30, 16], [33, 41, 0, 38, 44], [47, 52, 55, 58, 49], [63, 68, 72, 75, 66]];   // por columna
+  function construirCarton(cab, cuad, celdas, resaltarLinea){
+    cab.innerHTML = ''; cuad.innerHTML = '';
+    const colL = resaltarLinea === true ? 0 : (typeof resaltarLinea === 'number' ? resaltarLinea : -1);
+    LETRAS.forEach((L, i) => cab.appendChild(el('span', i === colL ? 'on' : '', L)));
+    for(let f = 0; f < 5; f++) for(let c = 0; c < 5; c++){
+      const n = CARTON[c][f]; const d = el('span', (n === 0 ? 'libre marcada' : '') + (c === colL ? ' linea' : ''), n === 0 ? 'LIBRE' : String(n));
+      if(n) celdas[n] = d; cuad.appendChild(d);
+    }
+  }
+
+  // ---------------- portada: tablero que canta solo ----------------
+  const celdasHero = {}, celdasMovil = {};
+  construirTablero($('heroTablero'), celdasHero);
+  construirPatron($('heroPatron'), 0);
+  construirCarton($('movilCab'), $('movilCuad'), celdasMovil, true);
+  const llamados = [];
+  function pintarLlamada(n){
+    const L = letraDe(n);
+    const b = $('heroBola'); b.className = 'bola grande L-' + L; b.textContent = L + '-' + n;
+    const mb = $('movilBola'); mb.className = 'bola grande L-' + L; mb.textContent = String(n); $('movilEtiq').textContent = L + '-' + n;
+    const u = $('heroUltimas'); u.innerHTML = '';
+    llamados.slice(-6, -1).reverse().forEach(x => u.appendChild(bola(x, 'chica')));
+  }
+  function marcar(n){
+    llamados.push(n);
+    Object.keys(celdasHero).forEach(k => celdasHero[k].classList.remove('reciente'));
+    if(celdasHero[n]){ celdasHero[n].classList.add('marcada', 'reciente'); }
+    if(celdasMovil[n]) celdasMovil[n].classList.add('marcada');
+    pintarLlamada(n);
+  }
+  function reiniciar(){
+    llamados.length = 0;
+    Object.keys(celdasHero).forEach(k => celdasHero[k].classList.remove('marcada', 'reciente'));
+    Object.keys(celdasMovil).forEach(k => celdasMovil[k].classList.remove('marcada'));
+    $('heroUltimas').innerHTML = ''; $('movilAviso').classList.remove('visible');
+  }
+  function orden(){
+    const bDelCarton = CARTON[0].slice(), resto = [];
+    for(let n = 1; n <= 75; n++) if(bDelCarton.indexOf(n) < 0) resto.push(n);
+    for(let i = resto.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [resto[i], resto[j]] = [resto[j], resto[i]]; }
+    [2, 6, 9, 13, 17].forEach((pos, k) => resto.splice(pos, 0, bDelCarton[k]));    // la línea B queda completa hacia la llamada 18
+    return resto.slice(0, 46);
+  }
+  let secuencia = [], paso = 0, temporizador = null;
+  function avanzar(){
+    if(paso >= secuencia.length){ reiniciar(); secuencia = orden(); paso = 0; temporizador = setTimeout(avanzar, 1500); return; }
+    const n = secuencia[paso++]; marcar(n);
+    const completo = CARTON[0].every(x => llamados.indexOf(x) >= 0);
+    let espera = 1250;
+    if(completo && !$('movilAviso').classList.contains('visible') && !avanzar.avisado){ $('movilAviso').classList.add('visible'); avanzar.avisado = true; espera = 3800; setTimeout(() => $('movilAviso').classList.remove('visible'), 3500); }
+    if(paso === 1) avanzar.avisado = false;
+    temporizador = setTimeout(avanzar, espera);
+  }
+  if(reducir){
+    secuencia = orden(); for(let i = 0; i < 22; i++) marcar(secuencia[i]);
+    $('movilAviso').classList.add('visible');
+  } else {
+    secuencia = orden(); paso = 0;
+    // arranca ya con algunos números para que nunca se vea vacío
+    for(let i = 0; i < 9; i++) marcar(secuencia[paso++]);
+    temporizador = setTimeout(avanzar, 900);
+    document.addEventListener('visibilitychange', () => { if(document.hidden) clearTimeout(temporizador); else { clearTimeout(temporizador); temporizador = setTimeout(avanzar, 600); } });
+  }
+
+  // ======================================================================
+  // ESCENAS ANIMADAS (todas se reproducen solo mientras están a la vista)
+  // ======================================================================
+  const dormir = (ms) => new Promise(r => setTimeout(r, ms));
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const sinAnimar = () => reducir;
+
+  // reproduce una escena en bucle mientras esté a la vista; todas se pueden pausar con el botón de la página
+  const registro = [], ganchos = []; let pausadas = false;
+  ganchos.push({ pausar: () => clearTimeout(temporizador), reanudar: () => { if(!reducir && !document.hidden){ clearTimeout(temporizador); temporizador = setTimeout(avanzar, 600); } } });
+  function bucle(cont, loop, estatico, manual){
+    let vivo = false, id = 0, visible = false;
+    function iniciar(){
+      if(pausadas || vivo) return; vivo = true; const t = ++id;
+      (async () => { while(vivo && t === id){ try{ await loop(() => !(vivo && t === id)); } catch(e){ break; } await dormir(30); } })();
+    }
+    function parar(){ vivo = false; id++; }
+    registro.push({ parar: parar, iniciar: iniciar, estatico: estatico, manual: !!manual, visible: () => visible });
+    if(reducir){ if(estatico) estatico(); return { iniciar: function(){}, parar: function(){} }; }
+    if(!manual && 'IntersectionObserver' in window){
+      new IntersectionObserver(es => es.forEach(x => { visible = x.isIntersecting; if(visible) iniciar(); else parar(); }), { threshold: 0.3 }).observe(cont);
+    } else if(!manual){ visible = true; iniciar(); }
+    return { iniciar: iniciar, parar: parar };
+  }
+  // dedo que se mueve y toca
+  function crearDedo(marco){ const d = el('div', 'dedo'); marco.appendChild(d); return d; }
+  function moverA(dedo, objetivo, marco, ms){
+    const m = marco.getBoundingClientRect(), r = objetivo.getBoundingClientRect();
+    dedo.style.transitionDuration = (ms || 550) + 'ms'; dedo.classList.add('v');
+    dedo.style.transform = 'translate(' + (r.left - m.left + r.width / 2) + 'px,' + (r.top - m.top + r.height / 2) + 'px)';
+  }
+  async function tocar(dedo){ dedo.classList.remove('toque'); void dedo.offsetWidth; dedo.classList.add('toque'); await dormir(300); }
+  // chispa que viaja de una pantalla a otra
+  function volar(desde, hasta, marco, ms){
+    const m = marco.getBoundingClientRect(), a = desde.getBoundingClientRect(), b = hasta.getBoundingClientRect();
+    const p = (r) => 'translate(' + (r.left - m.left + r.width / 2) + 'px,' + (r.top - m.top + r.height / 2) + 'px)';
+    const c = el('div', 'chispa'); marco.appendChild(c);
+    const an = c.animate([{ transform: p(a) }, { transform: p(b) }], { duration: ms || 500, easing: 'ease-in-out', fill: 'forwards' });
+    return an.finished.then(() => c.remove(), () => c.remove());
+  }
+  function aplicarPaletaEn(e, fondo, acento){
+    const p = paleta(fondo, acento), s = e.style;
+    [['--m-fondo', p.fondo], ['--m-panel', p.panel], ['--m-acento', p.acento], ['--m-header', p.header], ['--m-celda', p.celda], ['--m-texto', p.texto],
+     ['--m-suave', p.suave], ['--m-titulo', p.tp], ['--m-sobre-acento', p.sobreAcento], ['--m-gris', p.gris], ['--m-gris-osc', p.grisOsc],
+     ['--m-sobre-dorado', p.sobreDorado], ['--m-sobre-gris', p.sobreGris], ['--m-linea', p.linea], ['--m-borde-celda', p.borde], ['--m-dorado-texto', p.doradoTexto]
+    ].forEach(par => s.setProperty(par[0], par[1]));
+  }
+  function qrSvg(){
+    const N = 11, s = document.createElementNS(SVG_NS, 'svg'); s.setAttribute('viewBox', '0 0 ' + N + ' ' + N);
+    let sem = 7; const rnd = () => { sem = (sem * 16807) % 2147483647; return sem / 2147483647; };
+    const rect = (x, y, w, h, c) => { const r = document.createElementNS(SVG_NS, 'rect'); r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', w); r.setAttribute('height', h); r.setAttribute('fill', c || '#0e1a40'); s.appendChild(r); };
+    const esquina = (x, y) => (x < 4 && y < 4) || (x > N - 5 && y < 4) || (x < 4 && y > N - 5);
+    for(let y = 0; y < N; y++) for(let x = 0; x < N; x++) if(!esquina(x, y) && rnd() > 0.5) rect(x, y, 1, 1);
+    [[0, 0], [N - 3, 0], [0, N - 3]].forEach(c => { rect(c[0], c[1], 3, 3); rect(c[0] + 1, c[1] + 1, 1, 1, '#fff'); });
+    return s;
+  }
+  function letraBingo(n){ return letraDe(n); }
+
+  // ---------------- pasos: una escena por cada paso ----------------
+  (function pasos(){
+    // 1. te creamos tu bingo
+    (function(){
+      const cont = $('ilus1');
+      cont.innerHTML = '<div class="s1"><div class="nav3"><span class="pref">https://</span><span data-r="url"></span><span class="caret"></span></div><div class="llave"><div class="rot">Tu código de acceso</div><div class="cod" data-r="cod"></div><span class="pastilla" data-r="vig">Vigente hasta el 30-11</span></div></div>';
+      const url = cont.querySelector('[data-r=url]'), cod = cont.querySelector('[data-r=cod]'), llave = cont.querySelector('.llave'), vig = cont.querySelector('[data-r=vig]');
+      const URL_T = 'colegio-aromos.bingoenvivo.cl', COD_T = 'K7QM-4TXD-9RHB';
+      bucle(cont, async (c) => {
+        llave.classList.remove('entra'); vig.classList.remove('pop'); cod.textContent = ''; url.textContent = '';
+        await dormir(500); if(c()) return;
+        for(const ch of URL_T){ url.textContent += ch; await dormir(48); if(c()) return; }
+        await dormir(450); if(c()) return;
+        llave.classList.add('entra'); await dormir(550); if(c()) return;
+        for(const ch of COD_T){ cod.textContent += ch; await dormir(55); if(c()) return; }
+        await dormir(250); vig.classList.add('pop'); await dormir(2600);
+      }, () => { url.textContent = URL_T; cod.textContent = COD_T; llave.classList.add('entra'); vig.classList.add('pop'); });
+    })();
+    // 2. lo dejas a tu medida
+    (function(){
+      const cont = $('ilus2');
+      cont.innerHTML = '<div class="mini"><div class="m-tit"><span data-r="tit"></span><span class="caret"></span></div><div class="m-tab" data-r="tab"></div><div class="m-sw" data-r="sw"></div><div class="m-ronda" data-r="ronda">13:30 · $100.000 · Binguito B</div></div>';
+      const mini = cont.querySelector('.mini'), tit = cont.querySelector('[data-r=tit]'), tab = cont.querySelector('[data-r=tab]'), sw = cont.querySelector('[data-r=sw]'), ronda = cont.querySelector('[data-r=ronda]');
+      const celdas = []; for(let i = 0; i < 48; i++){ const c = el('i'); celdas.push(c); tab.appendChild(c); }
+      const temas = [TEMAS[0], TEMAS[2], TEMAS[4], TEMAS[5]]; const puntos = [];
+      temas.forEach(t => { const b = el('b'); b.style.background = 'linear-gradient(135deg,' + t[1] + ' 50%,' + t[2] + ' 50%)'; b.style.border = '2px solid rgba(128,128,128,.45)'; puntos.push(b); sw.appendChild(b); });
+      aplicarPaletaEn(mini, temas[0][1], temas[0][2]);
+      bucle(cont, async (c) => {
+        ronda.classList.remove('entra'); tit.textContent = ''; celdas.forEach(x => x.classList.remove('on')); puntos.forEach(p => p.classList.remove('on'));
+        aplicarPaletaEn(mini, temas[0][1], temas[0][2]);
+        await dormir(400); if(c()) return;
+        for(const ch of 'Bingo del club'){ tit.textContent += ch; await dormir(60); if(c()) return; }
+        for(let k = 0; k < temas.length; k++){
+          puntos.forEach((p, i) => p.classList.toggle('on', i === k)); aplicarPaletaEn(mini, temas[k][1], temas[k][2]);
+          for(let j = 0; j < 7; j++){ celdas[Math.floor(Math.random() * 48)].classList.add('on'); await dormir(110); if(c()) return; }
+          await dormir(500); if(c()) return;
+        }
+        ronda.classList.add('entra'); await dormir(2200);
+      }, () => { tit.textContent = 'Bingo del club'; [3, 8, 14, 21, 27, 33, 40].forEach(i => celdas[i].classList.add('on')); ronda.classList.add('entra'); puntos[0].classList.add('on'); });
+    })();
+    // 3. proyectas el tablero
+    (function(){
+      const cont = $('ilus3');
+      cont.innerHTML = '<div class="s3"><div class="proy3"><div data-r="qr"></div><span class="rot">Escanea el QR</span><div class="beam"></div></div><div class="tels3"><div class="tel3">celular<i>Entró</i></div><div class="tel3">celular<i>Entró</i></div><div class="tel3">celular<i>Entró</i></div></div></div>';
+      cont.querySelector('[data-r=qr]').appendChild(qrSvg());
+      const s3 = cont.querySelector('.s3'), tels = cont.querySelectorAll('.tel3');
+      bucle(cont, async (c) => {
+        tels.forEach(t => t.classList.remove('ok')); s3.classList.add('activa');
+        await dormir(1300); if(c()) return;
+        for(const t of tels){ t.classList.add('ok'); await dormir(700); if(c()) return; }
+        await dormir(2200);
+      }, () => { tels.forEach(t => t.classList.add('ok')); });
+    })();
+    // 4. cantas desde el celular
+    (function(){
+      const cont = $('ilus4'), NUM = []; for(let n = 31; n <= 45; n++) NUM.push(n);
+      cont.innerHTML = '<div class="s4"><div class="fono4"><div class="g4"></div></div><div class="pro4"><div class="bola4">N-34</div><div class="g4"></div></div></div>';
+      const s4 = cont.querySelector('.s4'), g = cont.querySelectorAll('.g4'), b4 = cont.querySelector('.bola4'), cF = {}, cP = {};
+      NUM.forEach(n => { const a = el('span', '', String(n)), b = el('span', '', String(n)); cF[n] = a; cP[n] = b; g[0].appendChild(a); g[1].appendChild(b); });
+      const dedo = crearDedo(s4);
+      bucle(cont, async (c) => {
+        NUM.forEach(n => { cF[n].classList.remove('on'); cP[n].classList.remove('on'); }); dedo.classList.remove('v'); b4.textContent = 'N-?';
+        await dormir(700); if(c()) return;
+        for(const n of [34, 41, 38, 43]){
+          moverA(dedo, cF[n], s4, 600); await dormir(640); if(c()) return;
+          await tocar(dedo); cF[n].classList.add('on');
+          await volar(cF[n], cP[n], s4, 450); if(c()) return;
+          cP[n].classList.add('on'); b4.textContent = 'N-' + n; await dormir(280);
+        }
+        dedo.classList.remove('v'); await dormir(2000);
+      }, () => { [34, 41, 38, 43].forEach(n => { cF[n].classList.add('on'); cP[n].classList.add('on'); }); b4.textContent = 'N-43'; });
+    })();
+  })();
+
+  // ---------------- un toque, tres pantallas ----------------
+  (function pantallas(){
+    const marco = $('vistas3'), con = $('conexion');
+    const prCel = {}, ogCel = {}, puCel = {};
+    // proyector
+    const pr = $('vistaProyector'); pr.innerHTML = '';
+    const arriba = el('div', 'p-arriba');
+    const a = el('div', 'p-panel'); const prBolaCont = el('div'); a.appendChild(prBolaCont); const rot = el('div', 'p-rotulo'); rot.innerHTML = 'Llamada<br>actual'; a.appendChild(rot); arriba.appendChild(a);
+    const b = el('div', 'p-panel'); const bw = el('div'); bw.appendChild(el('div', 'p-rotulo', 'Últimas llamadas')); const prUlt = el('div', 'p-ultimas'); bw.appendChild(prUlt); b.appendChild(bw); arriba.appendChild(b);
+    const c = el('div', 'p-panel p-premio'); c.appendChild(el('b', '', '$500.000')); c.appendChild(el('span', '', 'Bingo')); arriba.appendChild(c);
+    const d = el('div', 'p-panel p-bin'); const pt = el('div', 'patron'); construirPatron(pt, 3); d.appendChild(pt); arriba.appendChild(d);
+    pr.appendChild(arriba);
+    const tb = el('div', 'tablero'); construirTablero(tb, prCel); pr.appendChild(tb);
+    // organizador
+    const org = $('vistaOrganizador'); org.innerHTML = '';
+    org.appendChild(el('div', 'c-titulo', 'Bingo del club'));
+    const h = el('div', 'c-hero'); const orBolaCont = el('div'); h.appendChild(orBolaCont); const tx = el('div', 'texto'); tx.appendChild(document.createTextNode('Llamada')); const orEt = el('b', '', 'G-45'); tx.appendChild(orEt); h.appendChild(tx); org.appendChild(h);
+    const tabs = el('div', 'c-tabs'); LETRAS.forEach((L, i) => tabs.appendChild(el('span', i === 3 ? 'on' : '', L))); org.appendChild(tabs);
+    const g = el('div', 'c-cuad15'); for(let n = 46; n <= 60; n++){ const s = el('span', '', String(n)); ogCel[n] = s; g.appendChild(s); } org.appendChild(g);
+    const bar = el('div', 'c-barra'); bar.appendChild(el('span', '', 'Deshacer')); bar.appendChild(el('span', 'dor', 'Pausa')); org.appendChild(bar);
+    // público
+    const pub = $('vistaPublico'); pub.innerHTML = '';
+    pub.appendChild(el('div', 'c-titulo', 'Bingo del club'));
+    const h2 = el('div', 'c-hero'); const puBolaCont = el('div'); h2.appendChild(puBolaCont); const tx2 = el('div', 'texto'); tx2.appendChild(document.createTextNode('Llamada')); const puEt = el('b', '', 'G-45'); tx2.appendChild(puEt); h2.appendChild(tx2); pub.appendChild(h2);
+    const ct = el('div', 'c-carton'); const cab = el('div', 'cab'), cu = el('div', 'cuad'); construirCarton(cab, cu, puCel, 3); ct.appendChild(cab); ct.appendChild(cu); pub.appendChild(ct);
+    const aviso = el('div', 'aviso'); aviso.appendChild(document.createTextNode('¡Binguito!')); aviso.appendChild(el('small', '', 'Completaste la línea de la G')); pub.appendChild(aviso);
+    pub.style.minHeight = '440px'; org.style.minHeight = '440px';
+    const fonoPub = pub.parentElement;
+    const dedo = crearDedo(org);
+    let prBola = null, orBola = null, puBola = null; const ultimas = [];
+    function ponerBola(cont, n, tam, ref){ cont.innerHTML = ''; const x = bola(n, tam); cont.appendChild(x); return x; }
+    const PRE_PR = [2, 7, 9, 15, 17, 22, 27, 31, 38, 40, 44, 61, 63, 68, 72, 4, 12, 19, 25, 33, 14, 18, 1, 6];
+    const PRE_PU = [4, 9, 12, 7, 14, 18, 27, 33, 63, 68];
+    const TAP = [53, 47, 60, 52, 46, 55, 58, 51, 49];
+    function pintarUltimas(){ prUlt.innerHTML = ''; ultimas.slice(-5).reverse().forEach(n => prUlt.appendChild(bola(n, 'chica'))); }
+    function ponerLlamada(n){
+      ultimas.push(n); const L = letraDe(n);
+      ponerBola(prBolaCont, n, 'grande'); ponerBola(orBolaCont, n, 'grande'); ponerBola(puBolaCont, n, 'grande');
+      orEt.textContent = L + '-' + n; puEt.textContent = L + '-' + n; pintarUltimas();
+    }
+    function reiniciar(){
+      Object.keys(prCel).forEach(k => prCel[k].classList.remove('marcada', 'reciente')); PRE_PR.forEach(n => prCel[n] && prCel[n].classList.add('marcada'));
+      Object.keys(ogCel).forEach(k => ogCel[k].classList.remove('marcada'));
+      Object.keys(puCel).forEach(k => puCel[k].classList.remove('marcada')); PRE_PU.forEach(n => puCel[n] && puCel[n].classList.add('marcada'));
+      aviso.classList.remove('visible'); fonoPub.classList.remove('vibra'); dedo.classList.remove('v');
+      ultimas.length = 0; [25, 61, 9, 40].forEach(n => ultimas.push(n)); ponerLlamada(45);
+    }
+    reiniciar();
+    bucle(marco, async (cancelado) => {
+      reiniciar(); await dormir(900); if(cancelado()) return;
+      for(const n of TAP){
+        moverA(dedo, ogCel[n], org, 600); await dormir(640); if(cancelado()) return;
+        await tocar(dedo); ogCel[n].classList.add('marcada');
+        await Promise.all([volar(ogCel[n], prCel[n], con, 560), volar(ogCel[n], puBolaCont, con, 560)]); if(cancelado()) return;
+        Object.keys(prCel).forEach(k => prCel[k].classList.remove('reciente')); prCel[n].classList.add('marcada', 'reciente');
+        ponerLlamada(n); if(puCel[n]) puCel[n].classList.add('marcada');
+        await dormir(300);
+      }
+      dedo.classList.remove('v'); await dormir(200); if(cancelado()) return;
+      aviso.classList.add('visible'); fonoPub.classList.add('vibra');
+      await dormir(3000);
+    }, () => { TAP.forEach(n => { ogCel[n].classList.add('marcada'); prCel[n].classList.add('marcada'); if(puCel[n]) puCel[n].classList.add('marcada'); }); ponerLlamada(49); aviso.classList.add('visible'); });
+  })();
+
+  // ---------------- binguito y bingo explicados ----------------
+  (function gana(){
+    const cont = $('ganaCarton'), narr = $('ganaNarr'), badge = $('ganaBadge'), pasosLi = $('ganaPasos').querySelectorAll('li');
+    cont.innerHTML = ''; const inn = el('div', 'gc-in'); cont.appendChild(inn);
+    const rangos = el('div', 'gc-rangos'); ['1–15', '16–30', '31–45', '46–60', '61–75'].forEach(t => rangos.appendChild(el('span', '', t)));
+    const cab = el('div', 'gc-cab'); LETRAS.forEach(L => cab.appendChild(el('span', 'L-' + L, L)));
+    const grid = el('div', 'gc-grid'); const celdas = [];
+    for(let f = 0; f < 5; f++) for(let c = 0; c < 5; c++){ const n = CARTON[c][f]; const s = el('span', n === 0 ? 'libre' : '', n === 0 ? 'LIBRE' : String(n)); celdas.push({ el: s, n: n, c: c, f: f }); grid.appendChild(s); }
+    const confeti = el('div', 'confeti');
+    inn.appendChild(rangos); inn.appendChild(cab); inn.appendChild(grid); cont.appendChild(confeti);
+    const rangosSp = rangos.children, cabSp = cab.children;
+    const colores = ['#2f5bff', '#f5b400', '#12a06e', '#e8453c', '#ffffff'];
+    function lanzarConfeti(){
+      confeti.innerHTML = '';
+      for(let i = 0; i < 34; i++){
+        const p = el('i'); p.style.background = colores[i % colores.length]; p.style.setProperty('--dx', (Math.random() * 340 - 170) + 'px'); p.style.setProperty('--dy', (Math.random() * 260 - 90) + 'px'); p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+        p.style.animationDelay = (Math.random() * 0.15) + 's'; confeti.appendChild(p);
+      }
+    }
+    function paso(i, texto){ pasosLi.forEach((li, k) => li.classList.toggle('act', k === i)); narr.textContent = texto; }
+    function limpiar(){ celdas.forEach(x => { x.el.classList.remove('marcada', 'foco', 'brilla'); }); [].forEach.call(rangosSp, x => x.classList.remove('v')); [].forEach.call(cabSp, x => x.classList.remove('foco')); badge.classList.remove('v'); confeti.innerHTML = ''; }
+    bucle(cont, async (c) => {
+      limpiar();
+      paso(0, 'Cada letra es una columna del cartón'); await dormir(900); if(c()) return;
+      for(let k = 0; k < 5; k++){
+        celdas.filter(x => x.c === k).forEach(x => x.el.classList.add('foco')); cabSp[k].classList.add('foco'); rangosSp[k].classList.add('v');
+        await dormir(850); if(c()) return;
+        celdas.filter(x => x.c === k).forEach(x => x.el.classList.remove('foco')); cabSp[k].classList.remove('foco');
+      }
+      await dormir(600); if(c()) return;
+      paso(1, 'Binguito: gana quien completa primero la línea de la letra de la ronda. Esta ronda, la B.');
+      await dormir(1500); if(c()) return;
+      const colB = celdas.filter(x => x.c === 0); const orden = [1, 0, 4, 2, 3];
+      for(const k of orden){ colB[k].el.classList.add('marcada'); await dormir(620); if(c()) return; }
+      colB.forEach(x => x.el.classList.add('brilla')); badge.textContent = '¡Binguito!'; badge.classList.add('v'); await dormir(2600); if(c()) return;
+      badge.classList.remove('v'); colB.forEach(x => x.el.classList.remove('brilla'));
+      paso(2, 'Bingo: gana quien completa los 24 números del cartón. El centro es casilla libre.'); await dormir(1600); if(c()) return;
+      const resto = celdas.filter(x => x.n !== 0 && x.c !== 0);
+      for(const x of resto){ x.el.classList.add('marcada'); await dormir(95); if(c()) return; }
+      celdas.forEach(x => x.el.classList.add('brilla')); badge.textContent = '¡Bingo!'; badge.classList.add('v'); lanzarConfeti();
+      await dormir(3200);
+    }, () => { celdas.forEach(x => x.el.classList.add('marcada')); badge.textContent = '¡Bingo!'; badge.classList.add('v'); paso(2, 'Bingo: gana quien completa los 24 números del cartón. El centro es casilla libre.'); [].forEach.call(rangosSp, x => x.classList.add('v')); });
+  })();
+
+  // ---------------- recorrido: agregar un cartón ----------------
+  (function cartones(){
+    const pant = $('cwPant'), fono = pant.parentElement, caja = $('cwPasos').closest('.cw');
+    pant.innerHTML = '';
+    pant.appendChild(el('div', 'c-titulo', 'Bingo del club'));
+    const hero = el('div', 'c-hero'); const bolaCont = el('div'); hero.appendChild(bolaCont); const tx = el('div', 'texto'); tx.appendChild(document.createTextNode('Llamada')); const etiq = el('b', '', 'I-26'); tx.appendChild(etiq); hero.appendChild(tx); pant.appendChild(hero);
+    // mis cartones
+    const mis = el('div', 'cw-mis'), misCab = el('div', 'cw-mis-cab'); misCab.appendChild(el('span', '', 'Mis cartones')); const misEm = el('em', '', 'Agregar'); misCab.appendChild(misEm); mis.appendChild(misCab);
+    const cuerpo = el('div', 'cw-mis-cuerpo'), vacio = el('div'); vacio.appendChild(el('p', 'cw-vacio', 'Aún no tienes cartones.')); const btnAgr = el('div', 'cw-btn', '+ Agregar cartón'); vacio.appendChild(btnAgr);
+    const lista = el('div'), cm = el('div', 'cw-carton'); cm.appendChild(el('div', 't', 'Cartón 1')); const gcm = el('div', 'g'); lista.appendChild(cm);
+    const mcCel = {};
+    for(let f = 0; f < 5; f++) for(let c = 0; c < 5; c++){ const n = CARTON[c][f]; const s = el('span', (n === 0 ? 'libre marcada' : '') + (c === 0 ? ' linea' : ''), n === 0 ? 'LIBRE' : String(n)); if(n) mcCel[n] = s; gcm.appendChild(s); }
+    cm.appendChild(gcm); const chips = el('div', 'cw-chips'), chipB = el('span', 'cw-chip', 'Binguito B: faltan 5'), chipT = el('span', 'cw-chip', 'Bingo: faltan 24'); chips.appendChild(chipB); chips.appendChild(chipT); cm.appendChild(chips);
+    cuerpo.appendChild(vacio); cuerpo.appendChild(lista); mis.appendChild(cuerpo); pant.appendChild(mis);
+    // hoja del editor
+    const hoja = el('div', 'cw-hoja'); hoja.appendChild(el('h4', '', 'Nuevo cartón'));
+    const pegar = el('div', 'cw-pegar', 'Pegar 24 números'); hoja.appendChild(pegar);
+    const hc = el('div', 'cw-cab'); LETRAS.forEach(L => hc.appendChild(el('span', 'L-' + L, L))); hoja.appendChild(hc);
+    const cuad = el('div', 'cw-cuad'), cC = []; for(let i = 0; i < 25; i++){ const s = el('span', i === 12 ? 'libre' : '', i === 12 ? 'LIBRE' : ''); cC.push(s); cuad.appendChild(s); } hoja.appendChild(cuad);
+    const msg = el('div', 'cw-msg'); hoja.appendChild(msg); const guardar = el('div', 'cw-guardar', 'Guardar cartón'); hoja.appendChild(guardar); pant.appendChild(hoja);
+    const aviso = el('div', 'aviso'); aviso.innerHTML = '¡Binguito!<small>Cartón 1 completó la línea de la B</small>'; pant.appendChild(aviso);
+    const sIzq = el('div', 'sonido izq'), sDer = el('div', 'sonido der'); [sIzq, sDer].forEach(s => { for(let i = 0; i < 3; i++) s.appendChild(el('i')); fono.appendChild(s); });
+    const dedo = crearDedo(pant);
+    const LLAMADOS3 = [27, 4, 63, 9, 33, 12, 41, 14];
+    const valorDe = (i) => CARTON[i % 5][Math.floor(i / 5)];
+    function setBola(n){ bolaCont.innerHTML = ''; bolaCont.appendChild(bola(n, 'grande')); etiq.textContent = letraDe(n) + '-' + n; }
+    function setCelda(i, v, cls){ cC[i].textContent = v; cC[i].className = cls || ''; }
+    function limpiarHoja(){ for(let i = 0; i < 25; i++) if(i !== 12) setCelda(i, '', ''); msg.textContent = ''; msg.className = 'cw-msg'; guardar.classList.remove('late'); pegar.classList.remove('v'); }
+    function llenarHoja(){ for(let i = 0; i < 25; i++) if(i !== 12) setCelda(i, String(valorDe(i)), ''); }
+    function pintarChips(lm){
+      const b = CARTON[0].filter(n => lm.indexOf(n) < 0).length, t = 24 - lm.filter(n => mcCel[n]).length;
+      chipB.textContent = b === 0 ? '¡Binguito!' : 'Binguito B: faltan ' + b; chipB.className = 'cw-chip' + (b === 0 ? ' ok' : (b <= 2 ? ' cerca' : ''));
+      chipT.textContent = 'Bingo: faltan ' + t; chipT.className = 'cw-chip' + (t <= 2 ? ' cerca' : '');
+    }
+    function marcarCarton(lm){ Object.keys(mcCel).forEach(k => mcCel[k].classList.remove('marcada')); lm.forEach(n => mcCel[n] && mcCel[n].classList.add('marcada')); pintarChips(lm); }
+    function base(){ hoja.classList.remove('abierta'); aviso.classList.remove('visible'); fono.classList.remove('vibra'); sIzq.classList.remove('v'); sDer.classList.remove('v'); dedo.classList.remove('v'); mis.classList.remove('abierta'); vacio.style.display = ''; lista.style.display = 'none'; misEm.textContent = 'Agregar'; limpiarHoja(); marcarCarton([]); setBola(26); }
+    function conCarton(){ mis.classList.add('abierta'); vacio.style.display = 'none'; lista.style.display = ''; misEm.textContent = '1 cartón'; }
+    const prep = [
+      () => { base(); },
+      () => { base(); mis.classList.add('abierta'); hoja.classList.add('abierta'); },
+      () => { base(); mis.classList.add('abierta'); hoja.classList.add('abierta'); llenarHoja(); },
+      () => { base(); conCarton(); },
+      () => { base(); conCarton(); marcarCarton(LLAMADOS3); setBola(14); }
+    ];
+    const play = [
+      async (c) => {
+        await dormir(500); if(c()) return;
+        moverA(dedo, misCab, pant, 700); await dormir(760); if(c()) return; await tocar(dedo);
+        mis.classList.add('abierta'); await dormir(800); if(c()) return;
+        moverA(dedo, btnAgr, pant, 600); await dormir(660); if(c()) return; await tocar(dedo);
+        hoja.classList.add('abierta'); await dormir(900); dedo.classList.remove('v');
+      },
+      async (c) => {
+        await dormir(650); if(c()) return;
+        pegar.classList.add('v'); await dormir(1500); pegar.classList.remove('v'); await dormir(300);
+        for(let i = 0; i < 25; i++){
+          if(i === 12) continue; if(c()) return;
+          cC.forEach(s => s.classList.remove('act')); cC[i].classList.add('act'); await dormir(70);
+          setCelda(i, String(valorDe(i)), 'lleno act'); await dormir(55);
+        }
+        cC.forEach(s => s.classList.remove('act')); msg.textContent = '24 números anotados.'; await dormir(900);
+      },
+      async (c) => {
+        await dormir(700); if(c()) return;
+        setCelda(16, '22', 'err'); cC[6].classList.add('err'); msg.textContent = 'El 22 está repetido.'; msg.className = 'cw-msg err'; await dormir(2100); if(c()) return;
+        setCelda(16, '30', 'lleno'); cC[6].classList.remove('err'); msg.textContent = ''; msg.className = 'cw-msg'; await dormir(700); if(c()) return;
+        setCelda(4, '40', 'avi'); msg.textContent = 'El 40 no es de la columna O (61 a 75). Puedes guardarlo igual.'; msg.className = 'cw-msg avi'; await dormir(2400); if(c()) return;
+        setCelda(4, String(valorDe(4)), 'lleno'); msg.textContent = '¡Cartón listo para guardar!'; msg.className = 'cw-msg ok'; guardar.classList.add('late'); await dormir(1200); if(c()) return;
+        moverA(dedo, guardar, pant, 600); await dormir(660); if(c()) return; await tocar(dedo);
+        guardar.classList.remove('late'); hoja.classList.remove('abierta'); dedo.classList.remove('v'); await dormir(700); if(c()) return;
+        vacio.style.display = 'none'; lista.style.display = ''; misEm.textContent = '1 cartón'; await dormir(1200);
+      },
+      async (c) => {
+        await dormir(700); if(c()) return;
+        const hechos = [];
+        for(const n of LLAMADOS3){ setBola(n); hechos.push(n); marcarCarton(hechos); await dormir(780); if(c()) return; }
+        await dormir(700);
+      },
+      async (c) => {
+        await dormir(700); if(c()) return;
+        setBola(7); marcarCarton(LLAMADOS3.concat([7])); await dormir(550); if(c()) return;
+        aviso.classList.add('visible'); fono.classList.add('vibra'); sIzq.classList.add('v'); sDer.classList.add('v'); await dormir(3700);
+      }
+    ];
+    const DUR = [4400, 6600, 10100, 7800, 5000];
+    const PIES = ['Abre «Mis cartones» y toca «Agregar cartón».', 'Escribes los números del cartón impreso, uno por casilla.', 'Antes de guardar, la app te avisa si algo no cuadra.', 'Los números cantados se marcan solos y ves cuántos te faltan.', '¡Binguito! Suena, vibra y muestra un aviso en pantalla.'];
+    const botones = Array.prototype.slice.call($('cwPasos').querySelectorAll('button')), pie = $('cwPie');
+    function marcarPaso(i){
+      botones.forEach((b, k) => { if(k === i){ b.removeAttribute('aria-current'); void b.offsetWidth; b.style.setProperty('--dur', DUR[i] + 'ms'); b.setAttribute('aria-current', 'step'); } else b.removeAttribute('aria-current'); });
+      pie.textContent = PIES[i];
+    }
+    function estaticoPaso(i){
+      prep[i](); if(i === 1 || i === 2) llenarHoja(); if(i === 2){ msg.textContent = '¡Cartón listo para guardar!'; msg.className = 'cw-msg ok'; }
+      if(i === 4){ aviso.classList.add('visible'); sIzq.classList.add('v'); sDer.classList.add('v'); marcarCarton(LLAMADOS3.concat([7])); }
+      botones.forEach((b, k) => { if(k === i) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); }); pie.textContent = PIES[i];
+    }
+    prep[0]();
+    let actual = 0;
+    const ctl = bucle(caja, async (c) => {
+      for(let i = actual; i < 5; i++){ if(c()) return; actual = i; marcarPaso(i); prep[i](); await dormir(120); await play[i](c); if(c()) return; }
+      actual = 0; await dormir(900);
+    }, () => estaticoPaso(4));
+    botones.forEach((b, i) => b.addEventListener('click', () => {
+      if(reducir){ estaticoPaso(i); return; }
+      actual = i; ctl.parar(); setTimeout(ctl.iniciar, 40);
+    }));
+  })();
+
+  // ---------------- pruébalo tú: editor interactivo ----------------
+  (function prueba(){
+    const grid = $('pGrid'), cabEl = $('pCab'), msg = $('pMsg'), estado = $('pEstado'), ult = $('pUlt'), alerta = $('pAlerta'), letrasEl = $('pLetras');
+    const btnCantar = $('pCantar'), btnDiez = $('pDiez'), btnRein = $('pReiniciar'), btnEj = $('pEjemplo'), btnBor = $('pBorrar'), chkRap = $('pRapido');
+    LETRAS.forEach(L => cabEl.appendChild(el('span', 'lb-' + L, L)));
+    const inputs = [], cajas = [];
+    for(let f = 0; f < 5; f++) for(let c = 0; c < 5; c++){
+      const i = f * 5 + c;
+      if(i === 12){ const l = el('div', 'libre c', 'LIBRE'); cajas.push(l); inputs.push(null); grid.appendChild(l); continue; }
+      const cj = el('div', 'c'), inp = document.createElement('input');
+      inp.type = 'text'; inp.inputMode = 'numeric'; inp.maxLength = 2; inp.autocomplete = 'off'; inp.setAttribute('aria-label', 'Fila ' + (f + 1) + ', columna ' + LETRAS[c]);
+      cj.appendChild(inp); grid.appendChild(cj); cajas.push(cj); inputs.push(inp);
+    }
+    let letraL = 0, llamados = [], pendientes = [], timer = null, jugando = false, avisoLinea = false, avisoBingo = false;
+    const botonesLetra = LETRAS.map((L, k) => { const b = el('button', '', L); b.type = 'button'; b.setAttribute('aria-pressed', String(k === 0)); b.addEventListener('click', () => { if(llamados.length) return; letraL = k; botonesLetra.forEach((x, j) => x.setAttribute('aria-pressed', String(j === k))); pintarJuego(); }); letrasEl.appendChild(b); return b; });
+
+    function evaluar(){
+      const vals = inputs.map(x => x ? (x.value.trim() === '' ? null : Number(x.value)) : 0);
+      const e = { vals: vals, errores: new Set(), avisos: new Set(), faltan: 0, fuera: null, repetido: null, aviso: null }, vistos = {};
+      vals.forEach((v, i) => {
+        if(i === 12) return;
+        if(v === null){ e.faltan++; return; }
+        if(!(v >= 1 && v <= 75)){ e.errores.add(i); if(e.fuera === null) e.fuera = i; return; }
+        if(vistos[v] !== undefined){ e.errores.add(i); e.errores.add(vistos[v]); if(e.repetido === null) e.repetido = v; } else vistos[v] = i;
+        const col = i % 5; if(v < 15 * col + 1 || v > 15 * col + 15){ e.avisos.add(i); if(e.aviso === null) e.aviso = i; }
+      });
+      e.completo = e.faltan === 0 && e.errores.size === 0;
+      return e;
+    }
+    function pintar(){
+      const e = evaluar();
+      inputs.forEach((x, i) => { if(!x) return; x.classList.toggle('err', e.errores.has(i)); x.classList.toggle('avi', !e.errores.has(i) && e.avisos.has(i)); });
+      let t = '', cls = '';
+      if(e.fuera !== null){ t = 'Los números van del 1 al 75.'; cls = 'err'; }
+      else if(e.repetido !== null){ t = 'El ' + e.repetido + ' está repetido.'; cls = 'err'; }
+      else if(e.aviso !== null){ const col = e.aviso % 5; t = 'El ' + e.vals[e.aviso] + ' no es de la columna ' + LETRAS[col] + ' (' + (15 * col + 1) + ' a ' + (15 * col + 15) + '). Puedes dejarlo si tu cartón es así.'; cls = 'avi'; }
+      else if(e.faltan === 24){ t = 'Escribe los números de tu cartón o toca «Llenar con un ejemplo».'; }
+      else if(e.faltan > 0){ t = 'Te faltan ' + e.faltan + (e.faltan === 1 ? ' número.' : ' números.'); }
+      if(e.completo && e.aviso === null){ t = '¡Cartón listo! Presiona «Cantar números» para ver cómo te avisa.'; cls = 'ok'; }
+      if(!llamados.length){ msg.textContent = t; msg.className = 'p-msg ' + cls; }
+      return e;
+    }
+    function fila(rot, valor, ok){ const d = el('div', 'est' + (ok ? ' ok' : '')); d.appendChild(el('span', '', rot)); d.appendChild(el('b', '', valor)); estado.appendChild(d); }
+    function pintarJuego(){
+      const e = evaluar(), set = new Set(llamados);
+      let fL = 0, fT = 0;
+      cajas.forEach((cj, i) => {
+        cj.classList.toggle('linea', i % 5 === letraL);
+        if(i === 12) return;
+        const v = e.vals[i], marcada = v !== null && set.has(v);
+        cj.classList.toggle('marcada', marcada);
+        if(!marcada){ fT++; if(i % 5 === letraL) fL++; }
+      });
+      estado.innerHTML = '';
+      fila('Binguito (línea de la ' + LETRAS[letraL] + ')', fL === 0 ? '¡Completo!' : 'faltan ' + fL, fL === 0);
+      fila('Bingo (cartón lleno)', fT === 0 ? '¡Completo!' : 'faltan ' + fT, fT === 0);
+      return { fL: fL, fT: fT };
+    }
+    function mostrarAlerta(t, s){
+      alerta.innerHTML = ''; alerta.appendChild(document.createTextNode(t)); alerta.appendChild(el('small', '', s)); alerta.classList.add('v');
+      clearTimeout(mostrarAlerta.h); mostrarAlerta.h = setTimeout(() => alerta.classList.remove('v'), 4300);
+    }
+    function barajar(){ const a = []; for(let n = 1; n <= 75; n++) a.push(n); for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    function bloquear(si){ inputs.forEach(x => { if(x) x.readOnly = si; }); btnEj.disabled = si; btnBor.disabled = si; botonesLetra.forEach(b => { b.disabled = si; }); }
+    function detener(){ jugando = false; clearInterval(timer); timer = null; btnCantar.textContent = llamados.length ? 'Seguir cantando' : 'Cantar números'; }
+    function llamar(){
+      if(!pendientes.length){ detener(); return; }
+      const n = pendientes.shift(); llamados.push(n);
+      const b = el('div', 'bolita lb-' + letraDe(n), String(n)); ult.insertBefore(b, ult.firstChild); while(ult.children.length > 14) ult.removeChild(ult.lastChild);
+      const r = pintarJuego();
+      if(r.fT === 0 && !avisoBingo){
+        // si el último número completa a la vez la línea y el cartón, se avisa de ambas cosas en un solo mensaje
+        const junto = r.fL === 0 && !avisoLinea; avisoBingo = true; avisoLinea = true;
+        mostrarAlerta('¡Bingo!', junto ? 'Completaste todo el cartón, y con él la línea de la ' + LETRAS[letraL] + '. Avisa a la organización.' : 'Completaste todo el cartón. Avisa a la organización.');
+        detener(); btnCantar.disabled = true; btnDiez.disabled = true; btnCantar.textContent = 'Cantar números';
+      } else if(r.fL === 0 && !avisoLinea){ avisoLinea = true; mostrarAlerta('¡Binguito!', 'Completaste la línea de la ' + LETRAS[letraL] + '. Avisa a la organización.'); }
+    }
+    function puedeJugar(){
+      const e = evaluar();
+      if(e.completo) return true;
+      msg.className = 'p-msg err'; msg.textContent = e.errores.size ? 'Corrige los números marcados en rojo para empezar.' : 'Completa tu cartón primero, o toca «Llenar con un ejemplo».';
+      inputs.forEach(x => { if(x && (x.value.trim() === '' || x.classList.contains('err'))){ x.classList.remove('falta'); void x.offsetWidth; x.classList.add('falta'); } });
+      const p = inputs.find(x => x && x.value.trim() === ''); if(p) p.focus();
+      return false;
+    }
+    function empezarSiHaceFalta(){ if(!pendientes.length && !llamados.length) pendientes = barajar(); bloquear(true); pintarJuego(); }
+    function cantar(){
+      if(jugando){ detener(); return; }
+      if(!puedeJugar()) return;
+      empezarSiHaceFalta(); jugando = true; btnCantar.textContent = 'Pausar'; llamar(); timer = setInterval(llamar, chkRap.checked ? 200 : 650);
+    }
+    function diez(){
+      if(!puedeJugar()) return;
+      if(jugando) detener();
+      empezarSiHaceFalta(); let k = 0; btnDiez.disabled = true;
+      const t = setInterval(() => { llamar(); k++; if(k >= 10 || !pendientes.length){ clearInterval(t); if(!avisoBingo) btnDiez.disabled = false; btnCantar.textContent = 'Seguir cantando'; } }, 110);
+    }
+    function reiniciar(){
+      detener(); llamados = []; pendientes = []; avisoLinea = false; avisoBingo = false; ult.innerHTML = ''; alerta.classList.remove('v');
+      bloquear(false); btnCantar.disabled = false; btnDiez.disabled = false; btnCantar.textContent = 'Cantar números';
+      cajas.forEach(cj => cj.classList.remove('marcada')); pintarJuego(); pintar();
+    }
+    inputs.forEach((x, i) => {
+      if(!x) return;
+      x.addEventListener('input', () => {
+        x.value = x.value.replace(/\D/g, '').slice(0, 2); pintar(); pintarJuego();
+        if(x.value.length === 2 || (x.value.length === 1 && Number(x.value) > 7)){ let j = i + 1; if(j === 12) j++; if(inputs[j]) inputs[j].focus(); }
+      });
+      x.addEventListener('keydown', (ev) => {
+        if(ev.key === 'Backspace' && x.value === ''){ let j = i - 1; if(j === 12) j--; if(inputs[j]){ inputs[j].focus(); ev.preventDefault(); } }
+        if(ev.key === ' ' || ev.key === 'Enter' || ev.key === ','){ ev.preventDefault(); let j = i + 1; if(j === 12) j++; if(inputs[j]) inputs[j].focus(); }
+      });
+      x.addEventListener('focus', () => { try{ x.select(); } catch(e){} });
+      x.addEventListener('paste', (ev) => {
+        const t = ((ev.clipboardData || window.clipboardData).getData('text')) || '', nums = (t.match(/\d+/g) || []).map(Number);
+        if(nums.length >= 24){ ev.preventDefault(); let k = 0; for(let j = 0; j < 25; j++){ if(j === 12) continue; inputs[j].value = String(nums[k++]).slice(0, 2); } pintar(); pintarJuego(); }
+      });
+    });
+    btnEj.addEventListener('click', () => { for(let i = 0; i < 25; i++){ if(i !== 12) inputs[i].value = String(CARTON[i % 5][Math.floor(i / 5)]); } pintar(); pintarJuego(); });
+    btnBor.addEventListener('click', () => { inputs.forEach(x => { if(x) x.value = ''; }); pintar(); pintarJuego(); if(inputs[0]) inputs[0].focus(); });
+    btnCantar.addEventListener('click', cantar); btnDiez.addEventListener('click', diez); btnRein.addEventListener('click', reiniciar);
+    chkRap.addEventListener('change', () => { if(jugando){ clearInterval(timer); timer = setInterval(llamar, chkRap.checked ? 200 : 650); } });
+    pintar(); pintarJuego();
+  })();
+
+  // ---------------- qué incluye: pestañas con demostración ----------------
+  (function incluye(){
+    const escena = $('expEscena'), tabs = Array.prototype.slice.call($('expTabs').querySelectorAll('button'));
+    function mkMini(){ const m = el('div', 'mini'); return m; }
+    // 1. rondas y premios
+    function escRondas(){
+      const p = el('div', 'ex ex1'), lista = el('div', 'rd-lista');
+      const R = [['13:30', '$100.000', 'B'], ['14:30', '$200.000', 'I'], ['15:35', '$300.000', 'N'], ['16:45', '$500.000', 'G']];
+      const filas = R.map(r => { const d = el('div', 'rd'); d.appendChild(el('b', '', r[0])); const s = el('span'); s.innerHTML = 'Bingo ' + r[1] + '<br>Binguito ' + r[2]; d.appendChild(s); lista.appendChild(d); return d; });
+      const pant = el('div', 'rd-pant'), inn = el('div', 'rd-in'), prem = el('div', 'rd-premio'), pb = el('b', '', '$100.000'); prem.appendChild(pb); prem.appendChild(el('span', '', 'Bingo'));
+      const cab = el('div', 'rd-cab'); LETRAS.forEach(L => cab.appendChild(el('span', '', L)));
+      const pat = el('div', 'rd-pat'), pis = []; for(let f = 0; f < 5; f++) for(let c = 0; c < 5; c++){ const i = el('i'); pis.push({ i: i, c: c }); pat.appendChild(i); }
+      const rt = el('div', 'rd-rot', 'Binguito: línea de la B'); inn.appendChild(prem); inn.appendChild(cab); inn.appendChild(pat); inn.appendChild(rt); pant.appendChild(inn);
+      p.appendChild(lista); p.appendChild(pant); escena.appendChild(p);
+      const dedo = crearDedo(p);
+      function ir(k){ filas.forEach((f, j) => f.classList.toggle('act', j === k)); pb.textContent = R[k][1]; [].forEach.call(cab.children, (s, c) => s.classList.toggle('on', c === k)); pis.forEach(x => x.i.classList.toggle('on', x.c === k)); rt.textContent = 'Binguito: línea de la ' + R[k][2]; }
+      ir(0);
+      const ctl = bucle(p, async (c) => {
+        ir(0); dedo.classList.remove('v'); await dormir(1100); if(c()) return;
+        for(const k of [1, 2, 3, 0]){ moverA(dedo, filas[k], p, 650); await dormir(700); if(c()) return; await tocar(dedo); ir(k); await dormir(1300); if(c()) return; }
+        dedo.classList.remove('v'); await dormir(600);
+      }, () => ir(2), true);
+      return { panel: p, ctl: ctl };
+    }
+    // 2. pausas con auspiciadores
+    function escPausa(){
+      const p = el('div', 'ex ex2'), ps = el('div', 'ps'), tab = el('div', 'ps-tab'), cs = [];
+      for(let i = 0; i < 75; i++){ const c = el('i'); cs.push(c); tab.appendChild(c); } [3, 8, 14, 20, 22, 31, 38, 40, 47, 52, 55, 61, 67, 70].forEach(i => cs[i].classList.add('on'));
+      const barra = el('div', 'ps-barra'); barra.style.zIndex = '4'; const bp = el('span', '', '⏸ Pausa'); barra.appendChild(bp);
+      const pausa = el('div', 'ps-pausa'), centro = el('div', 'ps-centro'); centro.appendChild(el('div', 'ps-logo', 'B')); const tit = el('div', 'ps-titulo'); centro.appendChild(tit); const prox = el('div', 'ps-prox', 'Próximo bingo · 15:35 · $300.000'); centro.appendChild(prox);
+      const lado = el('div', 'ps-lado'), aus = el('div', 'ps-aus'), AUS = [['Aramco', '#c0392b'], ['Termas', '#16a085'], ['Club K9', '#2980b9']];
+      const ausEls = AUS.map(a => { const d = el('div', '', a[0]); d.style.background = a[1]; aus.appendChild(d); return d; });
+      const qr = el('div', 'ps-qr'); qr.appendChild(qrSvg()); lado.appendChild(aus); lado.appendChild(qr);
+      pausa.appendChild(centro); pausa.appendChild(lado); ps.appendChild(tab); ps.appendChild(pausa); ps.appendChild(barra); p.appendChild(ps); escena.appendChild(p);
+      const dedo = crearDedo(ps);
+      const reset = () => { pausa.classList.remove('v'); tit.textContent = ''; prox.classList.remove('v'); ausEls.forEach(a => a.classList.remove('v')); bp.classList.remove('act'); bp.textContent = '⏸ Pausa'; dedo.classList.remove('v'); };
+      reset();
+      const ctl = bucle(p, async (c) => {
+        reset(); await dormir(1300); if(c()) return;
+        moverA(dedo, bp, ps, 700); await dormir(760); if(c()) return; await tocar(dedo);
+        bp.classList.add('act'); bp.textContent = '▶ Reanudar'; pausa.classList.add('v'); dedo.classList.remove('v'); await dormir(500); if(c()) return;
+        for(const ch of 'Torneo de Bandas'){ tit.textContent += ch; await dormir(55); if(c()) return; }
+        prox.classList.add('v');
+        for(let k = 0; k < 3; k++){ ausEls.forEach((a, j) => a.classList.toggle('v', j === k)); await dormir(1250); if(c()) return; }
+        moverA(dedo, bp, ps, 600); await dormir(660); if(c()) return; await tocar(dedo);
+        pausa.classList.remove('v'); bp.classList.remove('act'); bp.textContent = '⏸ Pausa'; dedo.classList.remove('v'); await dormir(1400);
+      }, () => { pausa.classList.add('v'); tit.textContent = 'Torneo de Bandas'; prox.classList.add('v'); ausEls[0].classList.add('v'); }, true);
+      return { panel: p, ctl: ctl };
+    }
+    // 3. tu marca
+    function escMarca(){
+      const p = el('div', 'ex ex3'), w = el('div', 'm3'), mini = el('div', 'mini'), fila = el('div', 'm3-fila');
+      const logo = el('div', 'm3-logo', 'L'), tit = el('div', 'm-tit'), tt = el('span'); tit.appendChild(tt); tit.appendChild(el('span', 'caret')); fila.appendChild(logo); fila.appendChild(tit); mini.appendChild(fila);
+      const tab = el('div', 'm-tab'), cs = []; for(let i = 0; i < 48; i++){ const c = el('i'); cs.push(c); tab.appendChild(c); } mini.appendChild(tab);
+      const panel = el('div', 'm3-panel'); panel.appendChild(el('div', 'rot', 'Elige tus colores')); const sw = el('div', 'm3-sw');
+      const pts = TEMAS.map(t => { const b = el('b'); b.style.background = 'linear-gradient(135deg,' + t[1] + ' 50%,' + t[2] + ' 50%)'; sw.appendChild(b); return b; }); panel.appendChild(sw);
+      w.appendChild(mini); w.appendChild(panel); p.appendChild(w); escena.appendChild(p);
+      aplicarPaletaEn(mini, TEMAS[0][1], TEMAS[0][2]);
+      const ctl = bucle(p, async (c) => {
+        tt.textContent = ''; logo.classList.remove('v'); cs.forEach(x => x.classList.remove('on')); pts.forEach(x => x.classList.remove('on')); aplicarPaletaEn(mini, TEMAS[0][1], TEMAS[0][2]);
+        await dormir(700); if(c()) return;
+        logo.classList.add('v'); await dormir(400);
+        for(const ch of 'Club Deportivo Los Pinos'){ tt.textContent += ch; await dormir(55); if(c()) return; }
+        for(let k = 0; k < TEMAS.length; k++){
+          pts.forEach((x, j) => x.classList.toggle('on', j === k)); aplicarPaletaEn(mini, TEMAS[k][1], TEMAS[k][2]);
+          for(let j = 0; j < 5; j++){ cs[Math.floor(Math.random() * 48)].classList.add('on'); await dormir(120); if(c()) return; }
+          await dormir(650); if(c()) return;
+        }
+        await dormir(800);
+      }, () => { tt.textContent = 'Club Deportivo Los Pinos'; logo.classList.add('v'); [2, 9, 15, 22, 30, 37, 41].forEach(i => cs[i].classList.add('on')); pts[0].classList.add('on'); }, true);
+      return { panel: p, ctl: ctl };
+    }
+    // 4. y además
+    function escMas(){
+      const p = el('div', 'ex ex4'), ul = el('ul', 'chk');
+      const T = ['Tablero en vivo del 1 al 75', 'Varios organizadores a la vez', 'Avisos para los cartones', 'Binguito y bingo en cada ronda', 'Acceso por fechas', 'Sin instalar nada'];
+      const lis = T.map(t => { const li = el('li'); li.appendChild(el('i', '', '✓')); li.appendChild(document.createTextNode(t)); ul.appendChild(li); return li; });
+      p.appendChild(ul); escena.appendChild(p);
+      const ctl = bucle(p, async (c) => {
+        lis.forEach(l => l.classList.remove('on')); await dormir(700); if(c()) return;
+        for(const l of lis){ l.classList.add('on'); await dormir(650); if(c()) return; }
+        await dormir(3000);
+      }, () => lis.forEach(l => l.classList.add('on')), true);
+      return { panel: p, ctl: ctl };
+    }
+    const esc = [escRondas(), escPausa(), escMarca(), escMas()], DUR = [8600, 9600, 9400, 7400];
+    let actual = 0, visible = false, auto = true, reloj = null;
+    function programar(){ clearTimeout(reloj); if(auto && visible && !reducir && !pausadas) reloj = setTimeout(() => mostrar((actual + 1) % 4), DUR[actual]); }
+    function mostrar(i){
+      actual = i;
+      tabs.forEach((t, k) => { t.setAttribute('aria-selected', String(k === i)); if(k === i){ t.style.setProperty('--dur', DUR[i] + 'ms'); const b = t.querySelector('.cw-barra'); b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; } });
+      esc.forEach((s, k) => { s.panel.classList.toggle('v', k === i); if(k === i){ if(visible) s.ctl.iniciar(); } else s.ctl.parar(); });
+      programar();
+    }
+    tabs.forEach((t, i) => t.addEventListener('click', () => { auto = false; $('expTabs').classList.add('manual'); clearTimeout(reloj); mostrar(i); }));
+    if('IntersectionObserver' in window && !reducir){
+      new IntersectionObserver(es => es.forEach(x => { visible = x.isIntersecting; if(visible){ esc[actual].ctl.iniciar(); programar(); } else { esc.forEach(s => s.ctl.parar()); clearTimeout(reloj); } }), { threshold: 0.3 }).observe(escena);
+    } else { visible = true; }
+    esc.forEach((s, k) => s.panel.classList.toggle('v', k === 0));
+    ganchos.push({ pausar: () => clearTimeout(reloj), reanudar: () => mostrar(actual) });
+    mostrar(0);
+  })();
+
+  // ---------------- vigencia del acceso: línea de tiempo con candado ----------------
+  (function vigencia(){
+    const cont = $('vigencia'); cont.innerHTML = ''; cont.style.position = 'relative';
+    const est = el('div', 'vg-estado'), cand = el('div', 'vg-candado abierto');
+    cand.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="aro" d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/><rect x="5" y="11" width="14" height="10" rx="2" fill="#fff"/></svg>';
+    const tx = el('div', 'vg-texto'), ttl = el('strong', '', 'Acceso vigente'), sub = el('span', '', 'Quedan 12 días'); tx.appendChild(ttl); tx.appendChild(sub); est.appendChild(cand); est.appendChild(tx);
+    const pista = el('div', 'vg-pista'), edit = el('div', 'vg-edit'), marca = el('div', 'vg-marca'); pista.appendChild(edit); pista.appendChild(marca);
+    const eje = el('div', 'vg-eje'), eHoy = el('span', '', 'Hoy'), eVence = el('span', '', 'Vence el 30-11'); eHoy.style.left = '4%'; eje.appendChild(eHoy); eje.appendChild(eVence);
+    const perm = el('div', 'vg-perm'), pOrg = el('div'), pPub = el('div'); pOrg.innerHTML = '<i>✓</i><span></span>'; pPub.innerHTML = '<i>✓</i><span>El público siempre puede ver el tablero</span>'; perm.appendChild(pOrg); perm.appendChild(pPub);
+    const ren = el('div', 'vg-renovar', 'Renovar +7 días');
+    [est, pista, eje, perm, ren].forEach(x => cont.appendChild(x));
+    const dedo = crearDedo(cont);
+    const V0 = 62, V1 = 86, INI = 4;
+    function textoOrg(ok, t){ pOrg.classList.toggle('no', !ok); pOrg.querySelector('i').textContent = ok ? '✓' : '✕'; pOrg.querySelector('span').textContent = t; }
+    function fijarVence(v, txt){ edit.style.width = v + '%'; eVence.style.left = v + '%'; eVence.textContent = txt; }
+    function vigente(sa){ cand.classList.add('abierto'); cand.classList.remove('cerrado'); ttl.textContent = 'Acceso vigente'; sub.textContent = sa; }
+    function vencido(){ cand.classList.remove('abierto'); cand.classList.add('cerrado'); ttl.textContent = 'El acceso venció'; sub.textContent = 'Pasó la fecha de término'; textoOrg(false, 'El organizador ya no puede editar'); }
+    function animar(d, h, ms, fn, c){ return new Promise(res => { const t0 = performance.now(); (function paso(t){ if(c()) return res(); const k = Math.min(1, (t - t0) / ms); fn(d + (h - d) * k); if(k < 1) requestAnimationFrame(paso); else res(); })(t0); }); }
+    function reset(v){ marca.style.transition = 'none'; marca.style.left = INI + '%'; fijarVence(V0, 'Vence el 30-11'); vigente('Quedan 12 días'); textoOrg(true, 'El organizador puede editar y marcar números'); ren.classList.remove('act'); dedo.classList.remove('v'); }
+    reset();
+    bucle(cont, async (c) => {
+      reset(); await dormir(1000); if(c()) return;
+      await animar(INI, V0, 4300, (x) => { marca.style.left = x + '%'; const dias = Math.max(0, Math.ceil((V0 - x) / ((V0 - INI) / 12))); sub.textContent = dias > 1 ? 'Quedan ' + dias + ' días' : (dias === 1 ? 'Queda 1 día' : 'Hoy es el último día'); }, c); if(c()) return;
+      vencido(); await animar(V0, V0 + 9, 900, (x) => { marca.style.left = x + '%'; }, c); if(c()) return;
+      await dormir(1900); if(c()) return;
+      moverA(dedo, ren, cont, 700); await dormir(760); if(c()) return; await tocar(dedo);
+      ren.classList.add('act'); fijarVence(V1, 'Vence el 07-12'); vigente('Renovado: quedan 7 días más'); textoOrg(true, 'El organizador vuelve a poder editar'); dedo.classList.remove('v');
+      await dormir(3000);
+    }, () => { fijarVence(V0, 'Vence el 30-11'); marca.style.transition = 'none'; marca.style.left = (V0 + 9) + '%'; vencido(); });
+  })();
+
+  // ---------------- preguntas con apertura animada ----------------
+  (function preguntas(){
+    document.querySelectorAll('.preguntas details').forEach(d => {
+      const resp = d.querySelector('p'), s = d.querySelector('summary');
+      s.addEventListener('click', (e) => {
+        if(reducir) return;
+        e.preventDefault();
+        if(d.open){
+          const h = resp.offsetHeight; const an = resp.animate([{ height: h + 'px', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: 240, easing: 'ease-in-out' });
+          an.onfinish = () => { d.open = false; };
+        } else {
+          d.open = true; const h = resp.offsetHeight; resp.animate([{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }], { duration: 300, easing: 'ease-out' });
+        }
+      });
+    });
+  })();
+
+  // ---------------- botón para pausar todas las animaciones ----------------
+  (function controlAnimaciones(){
+    const bt = $('pausaAnim'); if(!bt || reducir) return;
+    bt.hidden = false;
+    bt.addEventListener('click', () => {
+      pausadas = !pausadas;
+      document.body.classList.toggle('quieto', pausadas);
+      bt.setAttribute('aria-pressed', String(pausadas));
+      bt.textContent = pausadas ? 'Reanudar animaciones' : 'Pausar animaciones';
+      if(pausadas){ registro.forEach(r => { r.parar(); if(r.estatico) r.estatico(); }); ganchos.forEach(g => g.pausar()); }
+      else { registro.forEach(r => { if(!r.manual && r.visible()) r.iniciar(); }); ganchos.forEach(g => g.reanudar()); }
+    });
+  })();
+
+  // ---------------- aparición suave al bajar ----------------
+  (function aparicion(){
+    const els = document.querySelectorAll('.rev');
+    if(reducir || !('IntersectionObserver' in window)){ els.forEach(e => e.classList.add('visto')); return; }
+    const io = new IntersectionObserver(es => es.forEach(x => { if(x.isIntersecting){ x.target.classList.add('visto'); io.unobserve(x.target); } }), { threshold: 0.12 });
+    els.forEach(e => io.observe(e));
+  })();
+
+
+  // ---------------- formulario ----------------
+  const form = $('formulario'), estado = $('fEstado');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    estado.className = 'estado'; estado.textContent = '';
+    const nombre = $('fNombre').value.trim(), contacto = $('fContacto').value.trim();
+    if(!nombre){ estado.className = 'estado mal'; estado.textContent = 'Escribe tu nombre.'; $('fNombre').focus(); return; }
+    if(!contacto){ estado.className = 'estado mal'; estado.textContent = 'Déjanos un correo o un WhatsApp para responderte.'; $('fContacto').focus(); return; }
+    if($('fTrampa').value){ estado.className = 'estado ok'; estado.textContent = '¡Recibido! Te escribimos pronto.'; return; }       // un robot: se simula éxito
+    let ultimo = 0; try{ ultimo = Number(localStorage.getItem('bingoSolicitud') || 0); } catch(err){}
+    if(Date.now() - ultimo < 30000){ estado.className = 'estado mal'; estado.textContent = 'Espera unos segundos antes de enviar otra solicitud.'; return; }
+    const partes = [$('fMensaje').value.trim()]; if($('fFecha').value.trim()) partes.unshift('Fecha aproximada: ' + $('fFecha').value.trim());
+    const cuerpo = { nombre: nombre, contacto: contacto, ts: Date.now() };
+    if($('fEvento').value.trim()) cuerpo.evento = $('fEvento').value.trim();
+    const mensaje = partes.filter(Boolean).join('\n').slice(0, 600); if(mensaje) cuerpo.mensaje = mensaje;
+    $('fEnviar').disabled = true; estado.textContent = 'Enviando…';
+    try{
+      const r = await fetch(DB_URL + '/solicitudes.json', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) });
+      if(!r.ok) throw new Error('http ' + r.status);
+      try{ localStorage.setItem('bingoSolicitud', String(Date.now())); } catch(err){}
+      form.reset(); estado.className = 'estado ok'; estado.textContent = '¡Recibido! Te escribimos pronto.';
+    } catch(err){
+      estado.className = 'estado mal'; estado.textContent = 'No pudimos enviar tu solicitud. Revisa tu conexión e intenta de nuevo.';
+    }
+    $('fEnviar').disabled = false;
+  });
+})();
+</script>
+</body>
+</html>

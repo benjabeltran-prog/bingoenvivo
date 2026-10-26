@@ -554,6 +554,104 @@
     .pausa-anim{ right:10px; bottom:10px; font-size:.8rem; }
   }
 
+  /* ================= VERSIÓN CELULAR ================= */
+  .cta-fija{ display:none; }
+  .exp-desc{ display:none; }
+  @media (max-width: 640px){
+    .cabecera{ padding:14px 0; }
+    .cabecera .contenedor{ gap:10px; }
+    .marca{ white-space:nowrap; font-size:1.08rem; }
+    .cabecera .boton{ white-space:nowrap; padding:0 1em; font-size:.88rem; min-height:44px; margin-left:auto; }
+    .boton.chico{ min-height:44px; }
+    .portada{ padding:2px 0 34px; }
+    .portada .contenedor{ gap:24px; }
+    .portada h1{ font-size:clamp(1.95rem, 8.6vw, 2.3rem); margin-bottom:14px; }
+    .portada .bajada{ font-size:1.05rem; margin-bottom:18px; max-width:none; }
+    .portada .botones{ flex-wrap:nowrap; gap:10px; margin-bottom:12px; }
+    .portada .botones .boton{ flex:1; padding:0 .5em; min-height:48px; font-size:.95rem; white-space:nowrap; }
+    .portada .nota{ font-size:.88rem; }
+    .elegir .tema{ min-height:44px; }
+    .elegir input[type=color]{ width:48px; height:44px; }
+    .bola{ white-space:nowrap; }
+    section.seccion{ padding:52px 0; }
+    .intro{ margin-bottom:26px; }
+    .sub{ font-size:1.02rem; }
+    h2{ font-size:clamp(1.7rem, 7.4vw, 2.1rem); }
+
+    /* botón de pausa como ícono y botón fijo de cotización */
+    .pausa-anim{ left:10px; right:auto; bottom:10px; width:46px; height:46px; padding:0; font-size:0; display:grid; place-items:center; }
+    .pausa-anim::before{ content:'⏸'; font-size:1.15rem; line-height:1; }
+    .pausa-anim[aria-pressed="true"]::before{ content:'▶'; }
+    .cta-fija{ display:flex; align-items:center; position:fixed; right:10px; bottom:10px; z-index:55; background:var(--azul); color:#fff; font-weight:700; border-radius:99px; min-height:46px; padding:0 1.3em; text-decoration:none; box-shadow:0 8px 24px rgba(14,26,64,.35); visibility:hidden; transform:translateY(140%); transition:transform .35s, visibility .35s; }
+    .cta-fija.v{ visibility:visible; transform:none; }
+
+    /* pasos: tarjetas que se deslizan */
+    .pasos{ display:flex; gap:14px; overflow-x:auto; scroll-snap-type:x mandatory; border-top:0; margin-inline:-16px; padding:0 16px 8px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+    .pasos::-webkit-scrollbar{ display:none; }
+    .pasos li, .pasos li + li{ flex:0 0 84%; scroll-snap-align:center; border:1px solid var(--linea-osc); border-radius:18px; padding:14px 14px 18px; background:rgba(255,255,255,.04); }
+    .ilus{ height:170px; margin-bottom:16px; }
+    .pasos .num{ width:38px; height:38px; font-size:1.1rem; margin-bottom:12px; }
+    .pasos h3{ font-size:1.2rem; }
+    .pasos-puntos{ display:flex; justify-content:center; gap:10px; margin-top:14px; }
+    .pasos-puntos button{ all:unset; width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,.3); cursor:pointer; position:relative; transition:background-color .25s, transform .25s; }
+    .pasos-puntos button::after{ content:''; position:absolute; inset:-17px -6px; }
+    .pasos-puntos button.on{ background:var(--ambar); transform:scale(1.3); }
+
+    /* tres pantallas: proyector arriba y dos celulares lado a lado */
+    .vistas{ grid-template-columns:1fr 1fr; gap:24px 12px; }
+    .vistas .vista:first-child{ grid-column:1 / -1; }
+    .vista figure{ min-height:0; margin-bottom:12px; }
+    .vista .celular{ max-width:none; }
+    #vistaOrganizador, #vistaPublico{ min-height:130cqw !important; padding-bottom:8cqw; }
+    .vista h3{ font-size:1.05rem; }
+    .vista p{ font-size:.92rem; }
+
+    /* binguito y bingo: primero la animación y después la lista */
+    .gana-grid{ display:flex; flex-direction:column; gap:18px; }
+    .gana-grid > div:first-child{ display:contents; }
+    .gana-grid > div:first-child > h2{ order:1; }
+    .gana-grid > div:first-child > .sub{ order:2; margin-top:0; }
+    .gana-grid .gana-escena{ order:3; }
+    .gana-grid .gana-pasos{ order:4; margin-top:0; }
+    .gana-pasos li{ padding:12px 14px; }
+
+    /* cartones: teléfono primero y pasos compactos */
+    .cw{ display:flex; flex-direction:column; gap:20px; margin-bottom:32px; }
+    .cw-fono{ order:-1; }
+    .cw-pasos{ gap:6px; }
+    .cw-pasos button{ padding:12px 14px; grid-template-columns:34px 1fr; gap:12px; }
+    .cw-n{ width:34px; height:34px; }
+    .cw-pasos button:not([aria-current="step"]) .cw-t span{ display:none; }
+    .cw-pasos button:not([aria-current="step"]){ align-items:center; }
+    .cw-pasos button:not([aria-current="step"]) .cw-t strong{ margin:0; font-size:1.05rem; }
+    .p-letras button{ width:44px; height:44px; }
+    .p-rapido{ min-height:44px; }
+    .p-rapido input{ width:22px; height:22px; }
+
+    /* qué incluye: pestañas horizontales y la explicación debajo */
+    .exp{ gap:14px; }
+    .exp-tabs{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; margin-inline:-16px; padding:2px 16px 4px; }
+    .exp-tabs::-webkit-scrollbar{ display:none; }
+    .exp-tabs button{ flex:0 0 auto; width:auto; display:flex; align-items:center; padding:0 16px; min-height:46px; border:2px solid var(--linea); border-radius:99px; white-space:nowrap; }
+    .exp-tabs button strong{ margin:0; font-size:.98rem; }
+    .exp-tabs button span, .exp-tabs .cw-barra{ display:none; }
+    .exp-desc{ display:block; color:#38445f; font-size:1rem; min-height:4.8em; margin-top:2px; }
+
+    /* otros */
+    .preguntas summary{ min-height:48px; align-items:center; padding:4px 0; }
+    footer.pie a{ display:inline-block; padding:12px 0; }
+    .vg-eje{ font-size:.8rem; }
+  }
+
+  @media (max-width: 360px){
+    .cabecera .contenedor{ gap:8px; }
+    .marca{ font-size:1rem; gap:7px; }
+    .marca i{ width:26px; height:26px; font-size:.85rem; }
+    .cabecera .boton{ padding:0 .85em; font-size:.8rem; }
+    .portada h1{ font-size:1.85rem; }
+    .portada .botones .boton{ font-size:.88rem; }
+  }
+
   [aria-current="step"] .cw-barra, [aria-selected="true"] .cw-barra{ }
   @media (prefers-reduced-motion: reduce){ .cw-barra{ animation:none !important; width:100% !important; } .exp-tabs.manual .cw-barra{ display:none; } }
   .exp-tabs.manual .cw-barra{ display:none; }
@@ -627,6 +725,7 @@
         <li class="rev"><div class="ilus" id="ilus3" aria-hidden="true"></div><span class="num" aria-hidden="true">3</span><h3>Proyectas el tablero</h3><p>Abres tu enlace en el computador conectado al proyector. Los asistentes entran escaneando un código QR.</p></li>
         <li class="rev"><div class="ilus" id="ilus4" aria-hidden="true"></div><span class="num" aria-hidden="true">4</span><h3>Cantas desde el celular</h3><p>Marcas cada número en tu teléfono y aparece al instante en el proyector y en todos los celulares.</p></li>
       </ol>
+      <div class="pasos-puntos" id="pasosPuntos" aria-hidden="true"></div>
     </div>
   </section>
 
@@ -743,6 +842,7 @@
           <button role="tab" type="button" aria-selected="false" data-i="3"><strong>Y además</strong><span>Todo lo demás que viene incluido en cada bingo.</span><i class="cw-barra"></i></button>
         </div>
         <div class="exp-escena" id="expEscena" role="img" aria-label="Demostración animada de la función elegida."></div>
+        <p class="exp-desc" id="expDesc" aria-live="polite"></p>
       </div>
     </div>
   </section>
@@ -817,7 +917,8 @@
   </div>
 </footer>
 
-<button class="pausa-anim" id="pausaAnim" type="button" aria-pressed="false" hidden>Pausar animaciones</button>
+<button class="pausa-anim" id="pausaAnim" type="button" aria-pressed="false" aria-label="Pausar animaciones" hidden>Pausar animaciones</button>
+<a class="cta-fija" id="ctaFija" href="#pedir">Pedir cotización</a>
 <script>
 (function(){
   // ---------------- configuración de la página ----------------
@@ -844,7 +945,12 @@
     const celdaDe = pn => claro ? '#ffffff' : mezclar(pn, blanco, 0.14);
     let panel = panelDe(fondo);
     for(let i = 0; i < 60 && (contraste(tp, fondo) < 5 || contraste(tp, panel) < 4.8 || contraste(tp, celdaDe(panel)) < 4.7); i++){ fondo = mezclar(fondo, ext, 0.06); panel = panelDe(fondo); }
-    for(let i = 0; i < 30 && Math.max(contraste(acento, '#10141c'), contraste(acento, '#ffffff')) < 4.7; i++) acento = mezclar(acento, luminancia(acento) > 0.179 ? blanco : negro, 0.05);
+    const celdaAc = celdaDe(panel), extAc = contraste(celdaAc, blanco) >= contraste(celdaAc, negro) ? blanco : negro;
+    for(let i = 0; i < 40; i++){
+      const A = contraste(acento, celdaAc) >= 2.2, B = Math.max(contraste(acento, '#10141c'), contraste(acento, '#ffffff')) >= 4.7;
+      if(A && B) break;
+      acento = mezclar(acento, extAc, 0.06);
+    }
     const celda = celdaDe(panel), gris = claro ? '#aeb8c5' : '#b9c0cb';
     return { fondo, panel, acento, celda, claro, tp,
       header: asegurar(mezclar(acento, negro, claro ? 0.55 : 0.45), '#ffffff', 4.6, negro), gris, grisOsc: claro ? '#5b6676' : '#5f6a7a',
@@ -1527,6 +1633,8 @@
       actual = i;
       tabs.forEach((t, k) => { t.setAttribute('aria-selected', String(k === i)); if(k === i){ t.style.setProperty('--dur', DUR[i] + 'ms'); const b = t.querySelector('.cw-barra'); b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; } });
       esc.forEach((s, k) => { s.panel.classList.toggle('v', k === i); if(k === i){ if(visible) s.ctl.iniciar(); } else s.ctl.parar(); });
+      const desc = $('expDesc'); if(desc) desc.textContent = tabs[i].querySelector('span').textContent;
+      const barraTabs = $('expTabs'); if(barraTabs.scrollWidth > barraTabs.clientWidth + 4) barraTabs.scrollTo({ left: tabs[i].offsetLeft - (barraTabs.clientWidth - tabs[i].offsetWidth) / 2, behavior: reducir ? 'auto' : 'smooth' });
       programar();
     }
     tabs.forEach((t, i) => t.addEventListener('click', () => { auto = false; $('expTabs').classList.add('manual'); clearTimeout(reloj); mostrar(i); }));
@@ -1586,6 +1694,25 @@
     });
   })();
 
+  // ---------------- celular: puntitos de los pasos y botón fijo de cotización ----------------
+  (function movil(){
+    const ol = document.querySelector('#como .pasos'), cont = $('pasosPuntos');
+    if(ol && cont){
+      const lis = ol.querySelectorAll('li'), pts = [];
+      lis.forEach((li, i) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Ir al paso ' + (i + 1)); b.addEventListener('click', () => ol.scrollTo({ left: li.offsetLeft - (ol.clientWidth - li.offsetWidth) / 2, behavior: reducir ? 'auto' : 'smooth' })); cont.appendChild(b); pts.push(b); });
+      const marcar = () => { let mejor = 0, dist = 1e9; lis.forEach((li, i) => { const d = Math.abs(li.offsetLeft + li.offsetWidth / 2 - (ol.scrollLeft + ol.clientWidth / 2)); if(d < dist){ dist = d; mejor = i; } }); pts.forEach((p, i) => p.classList.toggle('on', i === mejor)); };
+      ol.addEventListener('scroll', marcar, { passive: true }); window.addEventListener('resize', marcar); marcar();
+    }
+    const cta = $('ctaFija'), pedir = $('pedir');
+    if(cta && pedir){
+      let enForm = false;
+      const act = () => cta.classList.toggle('v', window.scrollY > 650 && !enForm);
+      window.addEventListener('scroll', act, { passive: true });
+      if('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(x => { enForm = x.isIntersecting; act(); }), { threshold: 0.08 }).observe(pedir);
+      act();
+    }
+  })();
+
   // ---------------- botón para pausar todas las animaciones ----------------
   (function controlAnimaciones(){
     const bt = $('pausaAnim'); if(!bt || reducir) return;
@@ -1594,7 +1721,7 @@
       pausadas = !pausadas;
       document.body.classList.toggle('quieto', pausadas);
       bt.setAttribute('aria-pressed', String(pausadas));
-      bt.textContent = pausadas ? 'Reanudar animaciones' : 'Pausar animaciones';
+      bt.textContent = pausadas ? 'Reanudar animaciones' : 'Pausar animaciones'; bt.setAttribute('aria-label', bt.textContent);
       if(pausadas){ registro.forEach(r => { r.parar(); if(r.estatico) r.estatico(); }); ganchos.forEach(g => g.pausar()); }
       else { registro.forEach(r => { if(!r.manual && r.visible()) r.iniciar(); }); ganchos.forEach(g => g.reanudar()); }
     });

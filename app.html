@@ -1,0 +1,3488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Bingo en vivo</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzEiIGZpbGw9IiMyZjViZmYiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIyMiIgZmlsbD0iI2ZmZmZmZiIvPjx0ZXh0IHg9IjMyIiB5PSI0MiIgZm9udC1mYW1pbHk9IkFyaWFsLEhlbHZldGljYSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjI4IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjMmY1YmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5CPC90ZXh0Pjwvc3ZnPg==">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde-fondo: #f4f6fa;
+    --verde-panel: #e6e8ed;
+    --verde-header: #1b3384;
+    --verde-acento: #2f5bff;
+    --verde-acento-oscuro: #2649c7;
+    --dorado: #f5b400;
+    --dorado-oscuro: #a37b0b;
+    --dorado-texto: #8a5a00;
+    --gris-celda: #ffffff;
+    --gris-celda-hover: #eaefff;
+    --gris-claro: #aeb8c5;
+    --gris-oscuro: #5b6676;
+    --gris-texto: #272d3a;
+    --gris-suave: #5e636e;
+    --blanco: #0b1220;
+    --sombra: rgba(15,25,45,0.18);
+    --tinta: 11 18 32;
+    --linea: rgb(11 18 32 / 0.16);
+    --borde-celda: rgb(11 18 32 / 0.22);
+    --sobre-acento: #ffffff;
+    --sobre-dorado: #10141c;
+    --sobre-gris: #10141c;
+    --fondo-profundo: #ffffff;
+    --peligro: #c0392b;
+    --peligro-texto: #b3261e;
+    --peligro-fondo: #fdeceb;
+    --hero-1: #ccd4f0;
+    --hero-2: #e6e8ed;
+    --fondo-rgb: 244 246 250;
+    --acento-rgb: 47 91 255;
+    --dorado-rgb: 245 180 0;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0;
+    padding:0;
+    height:100%;
+    background: var(--verde-fondo);
+    background-image:
+      radial-gradient(circle at 10% 0%, rgb(var(--acento-rgb) / 0.06), transparent 40%),
+      radial-gradient(circle at 95% 100%, rgb(var(--dorado-rgb) / 0.05), transparent 40%);
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--gris-texto);
+  }
+
+  body.host{ overflow: hidden; }
+  body.mobile{ overflow-y: auto; overflow-x: hidden; }
+
+  /* ================= HOST (proyector) ================= */
+  .page{
+    height: 100vh;
+    display:flex;
+    flex-direction: column;
+    padding: 1.1vh 1.2vw;
+    gap: 1vh;
+  }
+
+  .topbar{
+    display:flex;
+    align-items: stretch;
+    gap: clamp(8px, 0.75vw, 14px);
+    flex-wrap: nowrap;
+  }
+
+  .panel{
+    background: var(--verde-panel);
+    border: 1px solid var(--linea);
+    border-radius: 14px;
+    box-shadow: 0 10px 26px var(--sombra);
+    padding: clamp(8px, 0.9vh, 14px) clamp(10px, 0.75vw, 14px);
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .brand{
+    flex: 1 1 auto;
+    display:flex;
+    align-items:center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .logo-box{
+    background: rgb(var(--tinta) / 0.04);
+    border: 1.5px dashed var(--gris-suave);
+    border-radius: 10px;
+    color: var(--gris-suave);
+    font-size: 0.7rem;
+    text-align:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.15s ease, color 0.15s ease;
+    flex-shrink: 0;
+    line-height: 1.2;
+    padding: 4px;
+  }
+  .logo-box:hover{ border-color: var(--verde-acento); color: var(--verde-acento); }
+  .logo-box img{ width:100%; height:100%; object-fit: contain; }
+  .logo-box.principal{
+    height: clamp(84px, 12.5vh, 160px);
+    min-width: clamp(84px, 12.5vh, 160px);
+    max-width: 34vh;
+    font-size: 0.85rem;
+  }
+  .logo-box.principal img{ width: auto; height: 100%; max-width: 100%; }
+  .logo-box.con-logo{ border-color: transparent; background: transparent; padding: 0; }
+  .logo-box{ position: relative; }
+  .logo-box.chico{
+    width: calc(var(--aus-base) * var(--aus-escala, 1));
+    height: calc(var(--aus-base) * var(--aus-escala, 1));
+    font-size: 0.68rem;
+  }
+  /* botón para quitar un auspiciador (aparece al pasar el mouse) */
+  .logo-box .quitar{
+    display:none; position:absolute; top:2px; right:2px; width:18px; height:18px; padding:0;
+    border:none; border-radius:50%; background: rgba(0,0,0,0.75); color:#fff;
+    font-size: 13px; line-height: 18px; text-align:center; cursor:pointer;
+  }
+  .logo-box.con-logo:hover .quitar{ display:block; }
+  .logo-box .quitar:hover{ background:var(--peligro); }
+
+  .brand h1{
+    margin:0;
+    font-family: 'Archivo Black', sans-serif;
+    font-weight: 400;
+    font-size: clamp(0.95rem, 2.2vh, 1.9rem);
+    color: var(--blanco);
+    letter-spacing: 0.02em;
+    line-height: 1.15;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .calls-panel{
+    flex: 1 1 auto;
+    flex-direction: row;
+    align-items: center;
+    gap: clamp(14px, 1.6vw, 28px);
+  }
+
+  .call-current{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .bola{
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: 'Archivo Black', sans-serif;
+    color: var(--sobre-acento);
+    box-shadow: inset 0 3px 6px rgba(255,255,255,0.35), inset 0 -6px 10px rgba(0,0,0,0.25), 0 4px 10px rgba(0,0,0,0.3);
+    flex-shrink: 0;
+  }
+  .bola.grande{ width: clamp(56px, 8vh, 92px); height: clamp(56px, 8vh, 92px); font-size: clamp(1.4rem, 3.4vh, 2.3rem); }
+  .bola.chica{ width: clamp(30px, 4.4vh, 48px); height: clamp(30px, 4.4vh, 48px); font-size: clamp(0.85rem, 1.8vh, 1.15rem); }
+  .bola.vacia{ background: var(--gris-celda) !important; color: var(--gris-suave); box-shadow:none; }
+
+  .bola-B{ background: var(--verde-acento); }
+  .bola-I{ background: var(--dorado); color: var(--sobre-dorado); }
+  .bola-N{ background: var(--gris-claro); color: var(--sobre-gris); }
+  .bola-G{ background: var(--verde-header); color: #ffffff !important; }
+  .bola-O{ background: var(--gris-oscuro); color: #ffffff !important; }
+
+  .call-label{
+    font-size: clamp(0.6rem, 1.1vh, 0.75rem);
+    letter-spacing: 0.14em;
+    color: var(--gris-suave);
+    text-transform: uppercase;
+  }
+
+  .digital-box{
+    background: var(--fondo-profundo);
+    border-radius: 10px;
+    padding: 6px 14px;
+    text-align:center;
+    min-width: 84px;
+    border: 1px solid rgb(var(--tinta) / 0.05);
+  }
+  .digital-label{
+    display:block;
+    font-size: clamp(0.55rem, 1vh, 0.68rem);
+    letter-spacing: 0.14em;
+    color: var(--gris-suave);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .digital-num{
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(1.3rem, 3vh, 2rem);
+    color: var(--verde-acento);
+  }
+
+  .history{
+    display:flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+  .history-label{
+    font-size: clamp(0.55rem, 1vh, 0.68rem);
+    letter-spacing: 0.14em;
+    color: var(--gris-suave);
+    text-transform: uppercase;
+  }
+  .history-balls{
+    display:flex;
+    gap: clamp(6px, 0.8vw, 12px);
+    align-items:center;
+    flex-wrap: nowrap;
+  }
+
+  .prize-panel{
+    align-items: center;
+    text-align:center;
+    flex: 0 0 auto;
+    min-width: clamp(150px, 15vw, 220px);
+    gap: 4px;
+  }
+  .prize-label{
+    font-size: clamp(0.6rem, 1.1vh, 0.75rem);
+    letter-spacing: 0.16em;
+    color: var(--blanco);
+    text-transform: uppercase;
+  }
+  #premioLabel{
+    cursor: text;
+    outline: none;
+    border: 1.5px dashed transparent;
+    border-radius: 6px;
+    padding: 1px 6px;
+    transition: border-color 0.15s ease;
+  }
+  #premioLabel:hover, #premioLabel:focus{ border-color: var(--gris-suave); }
+  .prize-value{
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(1.5rem, 3.6vh, 2.4rem);
+    color: var(--dorado-texto);
+    border: 1.5px dashed transparent;
+    border-radius: 8px;
+    padding: 2px 10px;
+    cursor: text;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .prize-value:hover, .prize-value:focus{ border-color: var(--dorado); }
+  .prize-hint{ font-size: 0.6rem; color: var(--gris-suave); opacity: 0.7; }
+
+  .sponsors{
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6px;
+  }
+  .sponsors-label{
+    font-size: clamp(0.55rem, 1vh, 0.68rem);
+    letter-spacing: 0.14em;
+    color: var(--gris-suave);
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .sponsor-slots{
+    --aus-base: clamp(40px, 5.6vh, 74px);
+    display:grid;
+    grid-template-columns: repeat(var(--cols, 4), calc(var(--aus-base) * var(--aus-escala, 1)));
+    gap: 6px;
+    justify-content: center;
+  }
+
+  /* QR panel */
+  .qr-panel{
+    flex: 0 0 auto;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    display: none;
+  }
+  .qr-panel.visible{ display: flex; }
+  .btn-qr{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: clamp(0.68rem, 1.1vh, 0.85rem);
+    letter-spacing: 0.03em;
+    color: var(--verde-fondo);
+    background: var(--verde-acento);
+    border: none;
+    padding: clamp(6px, 0.9vh, 10px) clamp(10px, 1.2vw, 16px);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  .btn-qr:hover{ opacity: 0.85; }
+  .btn-qr-secundario{
+    background: transparent;
+    color: var(--gris-suave);
+    border: 1.5px solid var(--gris-suave);
+    margin-top: 4px;
+  }
+  .btn-qr-secundario:hover{ color: var(--verde-acento); border-color: var(--verde-acento); opacity: 1; }
+  .qr-label{
+    font-size: clamp(0.55rem, 1vh, 0.68rem);
+    letter-spacing: 0.1em;
+    color: var(--gris-suave);
+    text-transform: uppercase;
+  }
+  .qr-room{
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(0.7rem, 1.4vh, 0.95rem);
+    color: var(--verde-acento);
+    letter-spacing: 0.1em;
+  }
+  .qr-aviso{
+    font-size: 0.58rem;
+    color: var(--dorado-texto);
+    max-width: 110px;
+    line-height: 1.25;
+  }
+
+  .board-wrap{
+    flex: 1 1 auto;
+    min-height: 0;
+    background: var(--verde-panel);
+    border: 1px solid var(--linea);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px var(--sombra);
+    padding: clamp(8px, 1vh, 16px);
+    display:flex;
+  }
+
+  .board{
+    flex: 1;
+    min-height: 0;
+    display:flex;
+    flex-direction: column;
+    gap: clamp(5px, 0.8vh, 10px);
+  }
+
+  .fila{
+    flex: 1;
+    min-height: 0;
+    display:grid;
+    grid-template-columns: clamp(52px, 4.6vw, 92px) repeat(15, 1fr);
+    gap: clamp(4px, 0.5vw, 10px);
+  }
+
+  .letra-label{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius: 10px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(1.2rem, 4vh, 2.2rem);
+    color: var(--blanco);
+    letter-spacing: 0.04em;
+  }
+  .letra-label.L-B{ background: var(--verde-acento); color: var(--sobre-acento); }
+  .letra-label.L-I{ background: var(--dorado); color: var(--sobre-dorado); }
+  .letra-label.L-N{ background: var(--gris-claro); color: var(--sobre-gris); }
+  .letra-label.L-G{ background: var(--verde-header); color: #ffffff; }
+  .letra-label.L-O{ background: var(--gris-oscuro); color: #ffffff; }
+
+  .celda{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: var(--gris-celda);
+    color: var(--gris-texto);
+    border-radius: 9px;
+    font-size: clamp(1rem, 3.4vh, 2rem);
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    border: 2px solid var(--borde-celda);
+    transition: transform 0.12s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    min-width: 0;
+  }
+  .celda:hover{ background: var(--gris-celda-hover); transform: translateY(-2px); }
+  .celda.marcada{
+    background: var(--verde-acento);
+    color: var(--sobre-acento);
+    border-color: var(--verde-acento-oscuro);
+    box-shadow: 0 6px 14px rgb(var(--acento-rgb) / 0.35), inset 0 0 0 2px rgba(255,255,255,0.15);
+    transform: scale(1.04);
+  }
+
+  .bottom-bar{
+    flex: 0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content: center;
+    gap: 1.4rem;
+  }
+  .contador{ font-size: clamp(0.8rem, 1.3vh, 1rem); color: var(--gris-suave); letter-spacing: 0.02em; }
+  .contador strong{ color: var(--verde-acento); font-size: 1.15em; }
+
+  .btn-limpiar{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: clamp(0.75rem, 1.2vh, 0.95rem);
+    letter-spacing: 0.04em;
+    color: var(--blanco);
+    background: transparent;
+    border: 2px solid var(--gris-suave);
+    padding: 0.5em 1.5em;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-limpiar:hover{ border-color: var(--verde-acento); color: var(--verde-acento); background: rgb(var(--acento-rgb) / 0.08); }
+  .btn-limpiar:active{ transform: scale(0.97); }
+
+  input[type="file"]{ display:none; }
+
+  .estado-conexion{
+    position: fixed;
+    top: 8px;
+    right: 10px;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    color: var(--gris-suave);
+    text-transform: uppercase;
+    display:flex;
+    align-items:center;
+    gap: 5px;
+    z-index: 50;
+  }
+  .punto{ width:7px; height:7px; border-radius:50%; background: var(--gris-oscuro); }
+  .punto.on{ background: var(--verde-acento); box-shadow: 0 0 6px var(--verde-acento); }
+
+  /* ================= MOBILE (celular) ================= */
+  .m-page{ display:none; }
+  body.mobile .page{ display:none; }
+  body.mobile .m-page{ display:block; }
+
+  .m-page{
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 14px 14px 40px;
+  }
+
+  .m-header{
+    text-align:center;
+    margin-bottom: 12px;
+  }
+  .m-logo-colegio{
+    display:none;
+    height: 88px;
+    width: auto;
+    max-width: 70%;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 14px;
+    padding: 6px 10px;
+    margin: 0 auto 8px;
+  }
+  .m-header h1{
+    font-family: 'Archivo Black', sans-serif;
+    font-weight: 400;
+    font-size: clamp(0.9rem, 5vw, 1.3rem);
+    white-space: nowrap;
+    color: var(--blanco);
+    margin: 4px 0 0;
+    letter-spacing: 0.02em;
+  }
+  .m-header .m-tag{
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    color: var(--verde-acento);
+    text-transform: uppercase;
+  }
+
+  .m-sponsors-card{ text-align:center; }
+  .m-sponsors-card .sponsors-label{ display:block; margin-bottom: 8px; }
+  /* ===== Auspiciadores: un logo a la vez, grande, con animación ===== */
+  .aus-carrusel{ position: relative; overflow: hidden; border-radius: 14px; }   /* recorta el deslizamiento para que nada sobresalga de la pantalla */
+  .aus-item{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:#fff; border-radius: 14px; padding: 8px; box-sizing: border-box;
+    opacity:0; transform: translateX(34px) scale(0.93); pointer-events:none;
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .aus-item.activo{ opacity:1; transform: none; }
+  .aus-item.saliendo{ opacity:0; transform: translateX(-34px) scale(0.93); }
+  .aus-item img{ width:100%; height:100%; object-fit: contain; }
+  .aus-puntos{ display:flex; gap: 5px; justify-content:center; flex-wrap: wrap; min-height: 6px; }
+  .aus-punto{ width: 6px; height: 6px; border-radius: 50%; background: rgb(var(--tinta) / 0.28); transition: background 0.3s ease, transform 0.3s ease; }
+  .aus-punto.on{ background: var(--dorado); transform: scale(1.3); }
+  @media (prefers-reduced-motion: reduce){
+    .aus-item, .aus-item.saliendo{ transform: none; transition: opacity 0.4s ease; }
+  }
+  /* proyector */
+  .p-aus{ width: clamp(170px, 14vw, 280px); height: clamp(84px, 11.5vh, 140px); }
+  .sponsors{ position: relative; }
+  .aus-editar{
+    position:absolute; top: 5px; right: 7px; font-family:'Space Grotesk', sans-serif; font-size: 0.58rem; font-weight: 600;
+    padding: 2px 8px; border-radius: 999px; border: 1px solid var(--gris-suave); background: transparent; color: var(--gris-suave);
+    cursor:pointer; opacity: 0; transition: opacity 0.2s ease;
+  }
+  .sponsors:hover .aus-editar, .aus-editar:focus, .aus-editar.activo{ opacity: 1; }
+  .aus-editar.activo{ border-color: var(--dorado); color: var(--dorado-texto); }
+  /* celular del público */
+  .m-aus{ width: 100%; height: clamp(120px, 40vw, 170px); }
+  .m-sponsors-card .aus-puntos{ margin-top: 10px; }
+
+
+  .m-card{
+    background: var(--verde-panel);
+    border: 1px solid var(--linea);
+    border-radius: 14px;
+    box-shadow: 0 10px 24px var(--sombra);
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .m-call-row{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+  }
+  .m-call-row .bola.grande{ width: 78px; height: 78px; font-size: 1.9rem; }
+  .m-call-info{ display:flex; flex-direction: column; gap: 8px; flex:1; min-width:0; }
+  .m-prev-line{ display:flex; align-items:center; gap: 8px; }
+  .m-prev-line .digital-box{ min-width: 60px; padding: 4px 10px; }
+  .m-prev-line .digital-num{ font-size: 1.1rem; }
+
+  .m-history-balls{ display:flex; gap: 8px; flex-wrap: wrap; }
+  .m-history-balls .bola.chica{ width: 34px; height: 34px; font-size: 0.85rem; }
+
+  .m-prize{ text-align:center; }
+  .m-prize .prize-label{ display:block; margin-bottom: 2px; }
+  .m-prize .prize-value-display{
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 1.7rem;
+    color: var(--dorado-texto);
+  }
+
+  .m-board{
+    display:flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .m-fila{
+    display:grid;
+    grid-template-columns: 34px repeat(15, 1fr);
+    gap: 3px;
+  }
+  .m-letra{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius: 6px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 0.85rem;
+  }
+  .m-letra.L-B{ background: var(--verde-acento); color:var(--sobre-acento); }
+  .m-letra.L-I{ background: var(--dorado); color:var(--sobre-dorado); }
+  .m-letra.L-N{ background: var(--gris-claro); color:var(--sobre-gris); }
+  .m-letra.L-G{ background: var(--verde-header); color: #ffffff; }
+  .m-letra.L-O{ background: var(--gris-oscuro); color: #ffffff; }
+
+  .m-celda{
+    aspect-ratio: 1/1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: var(--gris-celda);
+    color: var(--gris-texto);
+    border-radius: 6px;
+    font-size: 0.62rem;
+    font-weight: 600;
+  }
+  .m-celda.marcada{
+    background: var(--verde-acento);
+    color: var(--sobre-acento);
+  }
+
+  .m-footer-nota{
+    text-align:center;
+    font-size: 0.66rem;
+    color: var(--gris-suave);
+    margin-top: 14px;
+    line-height: 1.4;
+  }
+
+  /* ================= CONTROL (admin desde el celular) ================= */
+  body.cargando{ overflow: hidden; }
+  body.cargando .page, body.cargando .m-page, body.cargando .c-page{ display:none; }
+  body.control{ overflow-y: auto; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+  body.control .page, body.control .m-page{ display:none; }
+  .c-page{ display:none; max-width: 520px; margin: 0 auto; padding: 0 14px 120px; }
+  body.control .c-page{ display:block; }
+
+  /* barra superior fija */
+  .c-topbar{
+    position: sticky; top: 0; z-index: 30;
+    display:flex; align-items:center; gap: 10px;
+    margin: 0 -14px 12px; padding: 10px 14px;
+    background: rgb(var(--fondo-rgb) / 0.94);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgb(var(--tinta) / 0.07);
+  }
+  .c-logo{
+    display:none; flex-shrink:0;
+    height: 42px; width: auto; max-width: 72px; object-fit: contain;
+    background:#fff; border-radius: 8px; padding: 3px 5px;
+  }
+  .c-titulo{ flex:1; min-width:0; }
+  .c-titulo h1{
+    margin:0; font-family:'Archivo Black', sans-serif; font-weight:400;
+    font-size: clamp(0.8rem, 4vw, 1.1rem); color: var(--blanco);
+    white-space: nowrap;
+  }
+  .c-estado .estado-conexion{ position: static; top:auto; right:auto; margin-top: 3px; font-size: 0.6rem; }
+  .c-pill{
+    flex-shrink:0; font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 700; color:var(--sobre-dorado); background: var(--dorado);
+    padding: 5px 9px; border-radius: 999px;
+  }
+
+  /* tarjeta principal: llamada actual */
+  .c-hero{ background: linear-gradient(160deg, var(--hero-1) 0%, var(--hero-2) 70%); }
+  .c-hero-top{ display:flex; align-items:center; gap: 16px; }
+  .c-hero .bola.grande{ width: 96px; height: 96px; font-size: 2.5rem; }
+  .c-hero-info{ min-width:0; display:flex; flex-direction:column; gap: 3px; }
+  .c-etq{ font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gris-suave); }
+  .c-callout{ font-family:'Archivo Black', sans-serif; font-size: 2.1rem; line-height: 1.05; color: var(--blanco); }
+  .c-prev{ font-size: 0.85rem; color: var(--gris-suave); }
+  .c-prev strong{ color: var(--blanco); font-weight: 600; }
+  .c-ultimas-wrap{
+    display:flex; align-items:center; gap: 10px; margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid rgb(var(--tinta) / 0.08);
+  }
+  .c-ultimas-wrap .c-etq{ flex-shrink:0; width: 62px; line-height: 1.3; }
+  .c-ultimas{ display:flex; align-items:center; gap: 6px; flex:1; min-width:0; }
+  .c-ultimas .bola.chica{ width: 38px; height: 38px; font-size: 0.95rem; }
+  .c-ultimas:empty::before{ content:'Aún no hay llamadas anteriores'; font-size: 0.75rem; color: var(--gris-suave); }
+
+  /* letras + números */
+  .c-tabs{ display:grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; }
+  .c-tab{
+    --c: var(--verde-acento); --on:var(--sobre-acento);
+    border: 1.5px solid rgb(var(--tinta) / 0.08); border-bottom: 4px solid var(--c);
+    border-radius: 12px; padding: 8px 0 6px; cursor:pointer; touch-action: manipulation;
+    background: rgb(var(--tinta) / 0.05); color: var(--blanco);
+    font-family:'Archivo Black', sans-serif; font-size: 1.35rem; line-height: 1.1;
+    transition: background-color .15s ease, color .15s ease;
+  }
+  .c-tab small{ display:block; margin-top:2px; font-family:'Space Grotesk', sans-serif; font-size: 0.62rem; font-weight: 600; opacity: 0.8; }
+  .c-tab.L-I{ --c: var(--dorado); --on:var(--sobre-dorado); }
+  .c-tab.L-N{ --c: var(--gris-claro); --on:var(--sobre-gris); }
+  .c-tab.L-G{ --c:var(--verde-acento-oscuro); --on:#ffffff; }
+  .c-tab.L-O{ --c:var(--gris-oscuro); --on:#ffffff; }
+  .c-tab.activa{ background: var(--c); color: var(--on); border-color: var(--c); }
+
+  .c-grid{ display:grid; grid-template-columns: repeat(5, 1fr); gap: 9px; }
+  .c-num{
+    aspect-ratio: 1 / 1; border: 2px solid transparent; border-radius: 14px;
+    background: var(--gris-celda); color: var(--gris-texto);
+    font-family:'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.5rem;
+    cursor:pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none;
+    transition: transform .08s ease, background-color .12s ease;
+  }
+  .c-num:active{ transform: scale(0.92); }
+  .c-num.marcada{
+    background: var(--verde-acento); color:var(--sobre-acento); border-color: var(--verde-acento-oscuro);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.18);
+  }
+  .c-num.actual{ box-shadow: 0 0 0 3px var(--dorado), inset 0 0 0 2px rgba(255,255,255,0.18); }
+
+  .c-progreso{ height: 6px; border-radius: 999px; background: rgb(var(--tinta) / 0.08); margin-top: 14px; overflow:hidden; }
+  .c-progreso-barra{ height:100%; width:0; background: var(--verde-acento); border-radius: 999px; transition: width .25s ease; }
+  .c-resumen{ text-align:center; font-size: 0.8rem; color: var(--gris-suave); margin-top: 8px; }
+  .c-resumen strong{ color: var(--verde-acento); font-size: 1.05em; }
+
+  /* secciones plegables */
+  .c-det{ padding: 0; }
+  .c-det summary{
+    list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap: 10px;
+    padding: 14px; font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gris-texto); font-weight: 600;
+  }
+  .c-det summary::-webkit-details-marker{ display:none; }
+  .c-det summary::after{ content:'▾'; color: var(--gris-suave); transition: transform .15s ease; }
+  .c-det[open] summary::after{ transform: rotate(180deg); }
+  .c-sum-valor{ margin-left:auto; font-family:'Archivo Black', sans-serif; letter-spacing: 0; text-transform:none; font-size: 0.95rem; color: var(--dorado-texto); max-width: 48%; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .c-det-cuerpo{ padding: 0 14px 14px; }
+  .c-input{
+    width:100%; background:var(--fondo-profundo); border: 1px solid rgb(var(--tinta) / 0.14); border-radius: 10px;
+    color: var(--blanco); font-family:'Space Grotesk', sans-serif; font-size: 1rem;
+    padding: 11px 12px; margin: 4px 0 12px;
+  }
+  .c-input:focus{ outline: 2px solid var(--verde-acento); }
+  .c-chips{ display:flex; flex-wrap:wrap; gap: 6px; padding: 0 14px 14px; }
+  .c-chips:empty::before{ content:'Todavía no se ha llamado ningún número'; font-size: 0.8rem; color: var(--gris-suave); }
+  .c-chip{
+    font-family:'Archivo Black', sans-serif; font-size: 0.8rem; padding: 6px 10px; border-radius: 999px;
+    background: var(--verde-acento); color:var(--sobre-acento);
+  }
+  .c-chip.L-I{ background: var(--dorado); color:var(--sobre-dorado); }
+  .c-chip.L-N{ background: var(--gris-claro); color:var(--sobre-gris); }
+  .c-chip.L-G{ background:var(--verde-acento-oscuro); color:#fff; }
+  .c-chip.L-O{ background:var(--gris-oscuro); color:#fff; }
+  .c-nota{ text-align:center; font-size: 0.68rem; color: var(--gris-suave); line-height: 1.45; margin: 6px 0 0; }
+
+  /* barra de acciones fija abajo (al alcance del pulgar) */
+  .c-bar{
+    position: fixed; left:0; right:0; bottom:0; z-index: 40;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: rgb(var(--fondo-rgb) / 0.96);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border-top: 1px solid rgb(var(--tinta) / 0.08);
+  }
+  .c-bar-in{ max-width: 520px; margin: 0 auto; display:flex; gap: 10px; }
+  .c-btn{
+    border-radius: 14px; padding: 14px 10px; cursor:pointer; touch-action: manipulation;
+    font-family:'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.95rem;
+    border: 2px solid var(--gris-suave); background: transparent; color: var(--blanco);
+  }
+  .c-btn:active{ transform: scale(0.97); }
+  .c-btn:disabled{ opacity: 0.35; cursor: default; }
+  .c-btn-prim{ flex: 2; background: var(--verde-header); border-color: var(--verde-acento-oscuro); }
+  .c-btn-peligro{ flex: 1; border-color:var(--peligro); color:var(--peligro-texto); }
+
+  .c-toast{
+    position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); z-index: 50;
+    transform: translateX(-50%) translateY(8px); opacity: 0; pointer-events:none;
+    background: rgba(0,0,0,0.85); color: var(--blanco); font-size: 0.85rem; font-weight: 600;
+    padding: 9px 16px; border-radius: 999px; white-space: nowrap;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .c-toast.visible{ opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* En pantallas menores se oculta la etiqueta "Llamada actual" para que
+     el panel del binguito quepa sin desbordar el encabezado. */
+  @media (max-width: 1700px){ .call-label{ display:none; } }
+
+  /* ================= BINGUITO (letra que hay que formar en el cartón) ================= */
+  .patron{
+    display:grid; grid-template-columns: repeat(5, var(--pc, 18px)); grid-template-rows: calc(var(--pc, 18px) * 0.8) repeat(5, var(--pc, 18px));
+    gap: var(--pg, 3px);
+  }
+  .pat-cab{ display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk', sans-serif; font-weight:700; line-height:1;
+    font-size: max(8px, calc(var(--pc, 18px) * 0.62)); color: rgb(var(--tinta) / 0.45); }
+  .pat-cab.on{ color: var(--dorado-texto); }
+  .pat-celda{ background: rgb(var(--tinta) / 0.09); border-radius: 3px; }
+  .pat-celda.on{ background: var(--dorado); box-shadow: 0 0 6px rgb(var(--dorado-rgb) / 0.45); }
+
+  .binguito-panel{ flex: 0 0 auto; align-items:center; text-align:center; gap: 5px; display:none; }
+  .binguito-panel .patron{ --pc: clamp(10px, 1.9vh, 24px); --pg: clamp(2px, 0.3vh, 4px); }
+  .bin-label{ font-size: clamp(0.55rem, 1vh, 0.68rem); letter-spacing: 0.16em; text-transform: uppercase; color: var(--blanco); }
+  .bin-letra{ font-family:'Archivo Black', sans-serif; font-size: clamp(0.75rem, 1.5vh, 1.05rem); color: var(--dorado-texto); letter-spacing: 0.08em; }
+
+  .sel-ronda{ display:flex; align-items:center; gap: 8px; font-size: clamp(0.75rem, 1.2vh, 0.95rem); color: var(--gris-suave); letter-spacing: 0.04em; }
+  .sel-ronda select{
+    font-family:'Space Grotesk', sans-serif; font-weight: 600; font-size: inherit; color: var(--blanco);
+    background: transparent; border: 2px solid var(--gris-suave); border-radius: 999px;
+    padding: 0.45em 1em; cursor: pointer; max-width: 46vw;
+  }
+  .sel-ronda select:hover{ border-color: var(--verde-acento); }
+  .sel-ronda option{ background:var(--verde-fondo); color:#fff; }
+
+  /* espectador */
+  .m-binguito{ padding: 10px 14px; }
+  .m-bin-fila{ display:flex; align-items:center; justify-content:center; gap: 14px; }
+  .m-binguito .prize-label{ margin: 0; }
+  .m-binguito .patron{ --pc: 11px; --pg: 2px; }
+
+  /* control (celular) */
+  .c-rondas{ display:flex; flex-direction:column; gap: 8px; margin-bottom: 14px; }
+  .c-ronda{
+    display:flex; align-items:center; gap: 12px; width:100%; text-align:left; padding: 11px 12px;
+    border-radius: 12px; border: 1.5px solid rgb(var(--tinta) / 0.1); background: rgb(var(--tinta) / 0.04);
+    color: var(--blanco); cursor:pointer; touch-action: manipulation; font-family:'Space Grotesk', sans-serif;
+  }
+  .c-ronda:active{ transform: scale(0.98); }
+  .c-ronda-hora{ font-family:'Archivo Black', sans-serif; color: var(--dorado-texto); font-size: 0.95rem; min-width: 50px; }
+  .c-ronda-nombre{ flex:1; min-width:0; font-size: 0.9rem; font-weight: 600; line-height: 1.25; }
+  .c-ronda-nombre b{ display:block; color: var(--dorado-texto); font-family:'Archivo Black', sans-serif; font-weight:400; font-size: 1rem; }
+  .c-ronda-bin{ font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gris-suave); text-align:right; }
+  .c-ronda.activa{ background: var(--verde-header); border-color: var(--verde-acento); }
+  .c-ronda.activa .c-ronda-bin{ color: var(--dorado-texto); }
+  .c-binlet{ display:grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 4px 0 14px; }
+  .c-binbtn{
+    padding: 11px 0; border-radius: 10px; border: 1.5px solid rgb(var(--tinta) / 0.12); background: rgb(var(--tinta) / 0.05);
+    color: var(--blanco); font-family:'Archivo Black', sans-serif; font-size: 1rem; cursor:pointer; touch-action: manipulation;
+  }
+  .c-binbtn.activa{ background: var(--dorado); color:var(--sobre-dorado); border-color: var(--dorado); }
+  .c-binbtn.ninguno{ font-family:'Space Grotesk', sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .c-bin-prev{ display:flex; justify-content:center; }
+  .c-bin-prev .patron{ --pc: 18px; --pg: 3px; }
+  #cRondaResumen{ max-width: 62%; }
+
+  /* el indicador fijo arriba no debe mezclarse con el contenido al hacer scroll */
+  body.mobile .estado-conexion{ background: rgb(var(--fondo-rgb) / 0.88); padding: 3px 10px; border-radius: 999px; }
+
+  /* ================= MIS CARTONES (espectador) ================= */
+  /* sección plegable al final de la vista del asistente */
+  .m-cartones{ padding: 0; }
+  .m-cartones > summary{ list-style:none; cursor:pointer; display:flex; align-items:center; gap: 10px; padding: 14px; }
+  .m-cartones > summary::-webkit-details-marker{ display:none; }
+  .m-cartones > summary::after{ content:'▾'; color: var(--gris-suave); transition: transform .15s ease; }
+  .m-cartones[open] > summary::after{ transform: rotate(180deg); }
+  .mc-sum-tit{ font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blanco); font-weight: 600; }
+  .m-cartones .mc-resumen{ margin-left:auto; text-align:right; }
+  .m-cartones .mc-resumen.gano{ color: var(--dorado-texto); font-weight: 700; }
+  .mc-seccion{ padding: 0 14px 14px; }
+  .mc-resumen{ font-size: 0.75rem; color: var(--gris-suave); }
+  .mc-ayuda{ margin: 6px 0 12px; font-size: 0.85rem; color: var(--gris-texto); line-height: 1.4; }
+  .mc-btn{
+    width:100%; padding: 13px; border-radius: 12px; cursor:pointer; touch-action: manipulation;
+    font-family:'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.95rem;
+    border: 2px solid var(--verde-acento); background: transparent; color: var(--verde-acento);
+  }
+  .mc-btn.prim{ background: var(--verde-acento); color:var(--sobre-acento); }
+  .mc-btn.sec{ border-color: var(--gris-suave); color: var(--blanco); }
+  .mc-btn:active{ transform: scale(0.98); }
+  .mc-opciones{ display:flex; flex-direction:column; gap: 8px; margin-top: 12px; font-size: 0.8rem; color: var(--gris-texto); }
+  .mc-opciones label{ display:flex; align-items:center; gap: 8px; }
+  .mc-aviso{ margin: 10px 0 0; font-size: 0.68rem; color: var(--gris-suave); line-height: 1.45; }
+
+  .mc-carton{ background: rgb(var(--tinta) / 0.04); border: 1px solid rgb(var(--tinta) / 0.08); border-radius: 14px; margin-bottom: 10px; }
+  .mc-carton.gano{ border-color: var(--dorado); box-shadow: 0 0 0 1px var(--dorado), 0 0 18px rgb(var(--dorado-rgb) / 0.25); }
+  .mc-carton summary{ list-style:none; cursor:pointer; display:flex; align-items:center; gap: 8px; padding: 11px 12px; }
+  .mc-carton summary::-webkit-details-marker{ display:none; }
+  .mc-nombre{ font-weight: 700; font-size: 0.92rem; flex:1; min-width:0; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mc-chip{ font-size: 0.62rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; background: rgb(var(--tinta) / 0.08); color: var(--gris-texto); white-space: nowrap; }
+  .mc-chip.ok{ background: var(--dorado); color:var(--sobre-dorado); }
+  .mc-chip.cerca{ background: rgb(var(--acento-rgb) / 0.25); color: var(--verde-acento); }
+  .mc-cuerpo{ padding: 0 12px 12px; }
+  .mc-celdas{ display:grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 250px; margin: 2px auto 10px; }
+  .mc-ch{ text-align:center; font-size: 0.62rem; font-weight: 700; color: rgb(var(--tinta) / 0.4); letter-spacing: 0.04em; }
+  .mc-ch.on{ color: var(--dorado-texto); }
+  .mc-c{ aspect-ratio: 1 / 1; display:flex; align-items:center; justify-content:center; border-radius: 8px; background: var(--gris-celda); color: var(--gris-texto); font-weight: 700; font-size: 0.95rem; }
+  .mc-c.on{ background: var(--verde-acento); color:var(--sobre-acento); }
+  .mc-c.pat{ box-shadow: inset 0 0 0 2px var(--dorado); }
+  .mc-c.libre{ background: var(--verde-panel); color: var(--dorado-texto); font-size: 0.55rem; letter-spacing: 0.04em; }
+  .mc-estado{ font-size: 0.8rem; color: var(--gris-texto); line-height: 1.5; text-align:center; }
+  .mc-estado strong{ color: var(--dorado-texto); }
+  .mc-acciones{ display:flex; gap: 8px; margin-top: 10px; }
+  .mc-acciones button{ flex:1; padding: 9px; border-radius: 10px; border: 1.5px solid rgb(var(--tinta) / 0.2); background: transparent; color: var(--blanco); font-family:'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.8rem; cursor:pointer; }
+  .mc-acciones button.borrar{ border-color:var(--peligro); color:var(--peligro-texto); }
+
+  /* editor de cartón (hoja inferior) */
+  .mc-modal{ position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.72); display:none; align-items:flex-end; justify-content:center; }
+  .mc-modal.abierto{ display:flex; }
+  .mc-hoja{ width:100%; max-width: 480px; max-height: 94vh; overflow-y:auto; background: var(--verde-panel); border-radius: 18px 18px 0 0; padding: 16px 16px 22px; color: var(--gris-texto); }
+  .mc-hoja-cab{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px; }
+  .mc-hoja-cab strong{ font-family:'Archivo Black', sans-serif; font-weight:400; font-size: 1.05rem; color: var(--blanco); }
+  .mc-x{ background:none; border:none; color: var(--gris-suave); font-size: 1.4rem; cursor:pointer; padding: 4px 8px; }
+  .mc-texto{ width:100%; background:var(--fondo-profundo); border: 1px solid rgb(var(--tinta) / 0.14); border-radius: 10px; color: var(--blanco); font-family:'Space Grotesk', sans-serif; font-size: 1rem; padding: 10px 12px; margin-bottom: 12px; }
+  .mc-cols{ display:grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 6px; }
+  .mc-cols .m-letra{ padding: 6px 0; }
+  .mc-grid{ display:grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .mc-in{
+    width:100%; aspect-ratio: 1 / 1; text-align:center; font-family:'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700;
+    background:var(--fondo-profundo); color: var(--blanco); border: 2px solid rgb(var(--tinta) / 0.15); border-radius: 10px; padding: 0;
+  }
+  .mc-in:focus{ outline:none; border-color: var(--verde-acento); box-shadow: 0 0 0 2px rgb(var(--acento-rgb) / 0.35); }
+  .mc-in.err{ border-color:#d9534f; background: var(--peligro-fondo); }
+  .mc-in.aviso{ border-color: var(--dorado); }
+  .mc-in:disabled{ background: var(--verde-panel); border-color: transparent; color: var(--dorado-texto); font-size: 0.6rem; }
+  .mc-libre-fila{ display:flex; align-items:center; gap: 8px; font-size: 0.85rem; margin: 12px 0 6px; }
+  .mc-hoja details{ margin-top: 8px; font-size: 0.85rem; }
+  .mc-hoja details summary{ cursor:pointer; color: var(--verde-acento); }
+  .mc-hoja textarea{ width:100%; min-height: 70px; margin-top: 8px; background:var(--fondo-profundo); color: var(--blanco); border: 1px solid rgb(var(--tinta) / 0.14); border-radius: 10px; padding: 10px; font-family:'Space Grotesk', sans-serif; font-size: 0.95rem; }
+  .mc-error{ min-height: 1.2em; margin: 10px 0 4px; font-size: 0.8rem; color:var(--peligro-texto); line-height: 1.4; }
+  .mc-error.info{ color: var(--gris-suave); }
+  .mc-pie{ display:flex; gap: 10px; margin-top: 8px; }
+  .mc-pie .mc-btn{ flex:1; }
+
+  /* aviso de binguito / bingo */
+  .mc-alerta{
+    position: fixed; left: 12px; right: 12px; top: 12px; z-index: 200; max-width: 456px; margin: 0 auto;
+    padding: 16px; border-radius: 18px; text-align:center;
+    background: linear-gradient(135deg, #cba135, #ecd07a); color:var(--sobre-dorado); box-shadow: 0 14px 44px rgba(0,0,0,0.55);
+    transform: translateY(-160%); transition: transform .3s ease; pointer-events:none;
+  }
+  .mc-alerta.visible{ transform: translateY(0); pointer-events:auto; }
+  .mc-al-tit{ font-family:'Archivo Black', sans-serif; font-size: 1.8rem; line-height: 1.1; }
+  .mc-al-txt{ font-size: 0.95rem; font-weight: 600; margin: 6px 0 12px; line-height: 1.35; }
+  .mc-al-btn{ background:var(--sobre-dorado); color:#f4e3a8; border:none; border-radius: 999px; padding: 10px 26px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 0.9rem; cursor:pointer; }
+
+
+  /* binguito ya entregado */
+  .bin-estado{ font-size: clamp(0.55rem, 1vh, 0.7rem); letter-spacing: 0.12em; text-transform: uppercase; color: var(--blanco); font-weight: 700; background: rgb(var(--dorado-rgb) / 0.28); padding: 2px 8px; border-radius: 999px; }
+  .binguito-panel.entregado .patron{ opacity: 0.35; }
+  .btn-bin.activo{ border-color: var(--dorado); color: var(--dorado-texto); }
+  .m-bin-txt{ display:flex; flex-direction:column; align-items:flex-end; gap: 4px; }
+  .m-bin-estado{ font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dorado-texto); font-weight: 700; }
+  .m-binguito.entregado .patron{ opacity: 0.35; }
+  .c-binest{ display:flex; align-items:center; justify-content:space-between; gap: 12px; padding: 12px 14px; }
+  .c-binest.entregado{ border-color: var(--dorado); }
+  .c-binest-txt{ min-width: 0; }
+  .c-binest-txt strong{ display:block; font-size: 0.95rem; color: var(--blanco); font-weight: 600; margin-top: 2px; }
+  .c-binest .c-btn{ width:auto; flex-shrink:0; padding: 10px 14px; font-size: 0.85rem; }
+  .c-binest.entregado .c-btn{ border-color: var(--dorado); color: var(--dorado-texto); }
+
+
+
+  /* ================= PANTALLA DE ESPERA (pausa del bingo) ================= */
+  .pausa-pantalla{
+    position: fixed; inset: 0; z-index: 80; display: none; align-items: center; justify-content: space-around; gap: 3vw;
+    padding: 4vh 4vw; color: var(--blanco);
+    background: radial-gradient(circle at 15% 10%, rgb(var(--acento-rgb) / 0.18), transparent 45%), radial-gradient(circle at 90% 95%, rgb(var(--dorado-rgb) / 0.14), transparent 45%), var(--verde-fondo);
+  }
+  .pausa-reloj{ position:absolute; top: 3vh; right: 3vw; font-family:'Archivo Black', sans-serif; font-size: clamp(1.4rem, 3.2vh, 2.4rem); color: var(--gris-suave); }
+  .pausa-centro{ flex: 1 1 55%; min-width: 0; display:flex; flex-direction:column; align-items:center; text-align:center; gap: 2.2vh; }
+  .pausa-logo{ display:none; max-height: 22vh; max-width: 30vw; object-fit: contain; background:#fff; border-radius: 16px; padding: 10px; }
+  .pausa-marca{ font-family:'Archivo Black', sans-serif; font-size: clamp(1rem, 2.6vh, 1.9rem); letter-spacing: 0.06em; color: var(--gris-suave); text-transform: uppercase; }
+  .pausa-titulo{ font-family:'Archivo Black', sans-serif; font-size: clamp(2.8rem, 10.5vh, 8rem); line-height: 1.04; color: var(--blanco); overflow-wrap: anywhere; }
+  .pausa-detalle{ font-size: clamp(1.2rem, 3.6vh, 2.6rem); color: var(--gris-texto); font-weight: 600; }
+  .pausa-proxima{ font-size: clamp(1.1rem, 3.1vh, 2.3rem); font-weight: 700; color: var(--dorado-texto); background: rgb(var(--dorado-rgb) / 0.14); border: 2px solid var(--dorado); padding: 1.4vh 2.2vw; border-radius: 999px; }
+  .pausa-lado{ flex: 0 1 36%; display:flex; flex-direction:column; align-items:center; gap: 2vh; }
+  .pausa-aus-tit{ font-size: clamp(0.8rem, 1.8vh, 1.2rem); letter-spacing: 0.2em; text-transform: uppercase; color: var(--gris-suave); }
+  .pausa-aus{ width: min(32vw, 560px); height: min(24vh, 250px); }
+  .pausa-qr{ display:flex; flex-direction:column; align-items:center; gap: 1vh; font-size: clamp(0.8rem, 1.8vh, 1.2rem); color: var(--gris-suave); text-align:center; }
+  .pausa-qr > div{ background:#fff; padding: 10px; border-radius: 12px; line-height: 0; }
+  .pausa-volver{
+    position:absolute; bottom: 2.5vh; left: 50%; transform: translateX(-50%); font-family:'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem;
+    color: var(--blanco); background: transparent; border: 2px solid var(--gris-suave); padding: 0.55em 1.6em; border-radius: 999px; cursor:pointer; opacity: 0; transition: opacity 0.2s ease;
+  }
+  .pausa-volver.visible, .pausa-volver:focus{ opacity: 1; }
+  .btn-pausa.activo{ border-color: var(--dorado); color: var(--dorado-texto); }
+
+  /* ventana para elegir el motivo de la pausa */
+  .pausa-etq{ display:block; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gris-suave); margin: 10px 0 4px; }
+  .pausa-chips{ display:flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 12px; }
+  .pausa-chip{ border: 1.5px solid rgb(var(--tinta) / 0.18); background: rgb(var(--tinta) / 0.05); color: var(--gris-texto); border-radius: 999px; padding: 8px 14px; font-family:'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.85rem; cursor:pointer; }
+  .pausa-chip:hover{ border-color: var(--dorado); }
+
+  /* control (teléfono): botón de pausa en la barra inferior */
+  .c-bar .c-btn{ padding: 14px 6px; font-size: 0.88rem; }
+  .c-btn-pausa{ flex: 1.3; border-color: var(--dorado); color: var(--dorado-texto); }
+  .c-btn-pausa.activo{ background: var(--dorado); color: var(--sobre-dorado); }
+
+  /* ===== acceso, configuración y pantalla sin sala ===== */
+  .acc-texto{ font-size: 0.95rem; color: var(--gris-texto); margin: 4px 0 12px; line-height: 1.4; }
+  .acc-error{ min-height: 1.2em; color: var(--peligro-texto); font-size: 0.88rem; margin: -4px 0 10px; }
+  .sin-sala{ position: fixed; inset: 0; z-index: 200; display:flex; align-items:center; justify-content:center; padding: 20px; background: var(--verde-fondo); }
+  .sin-sala-caja{ width: 100%; max-width: 380px; text-align: center; }
+  .sin-sala-caja h1{ font-family:'Archivo Black', sans-serif; font-weight: 400; font-size: 1.8rem; color: var(--blanco); margin-bottom: 8px; }
+  .sin-sala-caja p{ color: var(--gris-texto); margin-bottom: 14px; }
+  .sin-sala-caja .mc-btn{ width: 100%; }
+  .cfg-hoja{ max-width: 600px; }
+  .cfg-temas{ display:flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 12px; }
+  .cfg-tema{ display:flex; align-items:center; gap: 8px; border: 1.5px solid rgb(var(--tinta) / 0.18); background: transparent; color: var(--gris-texto); border-radius: 999px; padding: 5px 13px 5px 5px; font-family:'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.82rem; cursor: pointer; }
+  .cfg-tema i{ display:block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgb(var(--tinta) / 0.25); }
+  .cfg-tema.activo{ border-color: var(--verde-acento); box-shadow: 0 0 0 1px var(--verde-acento); }
+  .cfg-colores{ display:flex; flex-wrap: wrap; gap: 18px; margin-bottom: 6px; }
+  .cfg-colores label{ display:flex; align-items:center; gap: 8px; font-size: 0.88rem; color: var(--gris-texto); }
+  .cfg-colores input[type=color]{ width: 46px; height: 34px; padding: 0; border: 1px solid rgb(var(--tinta) / 0.25); border-radius: 8px; background: none; cursor: pointer; }
+  .cfg-nota{ font-size: 0.78rem; color: var(--gris-suave); min-height: 1.1em; margin: 2px 0 8px; }
+  .cfg-ronda{ display:grid; grid-template-columns: 66px 1fr 1fr 96px auto; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .cfg-ronda .mc-texto{ margin: 0; padding: 8px 8px; font-size: 0.9rem; min-width: 0; }
+  .cfg-ronda .cfg-acciones{ display:flex; gap: 4px; }
+  .cfg-ronda .cfg-acciones button{ width: 30px; height: 34px; border: 1px solid rgb(var(--tinta) / 0.2); background: transparent; color: var(--gris-texto); border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+  .cfg-ronda .cfg-acciones button.borrar{ color: var(--peligro-texto); border-color: var(--peligro); }
+  .cfg-ronda .cfg-acciones button:disabled{ opacity: 0.3; cursor: default; }
+  @media (max-width: 560px){
+    .cfg-ronda{ grid-template-columns: 66px 1fr 96px; }
+    .cfg-ronda .cfg-r-premio{ grid-column: 1 / 3; }
+    .cfg-ronda .cfg-acciones{ grid-column: 3; justify-content: flex-end; }
+  }
+  .cfg-agregar{ width: 100%; border: 1.5px dashed rgb(var(--tinta) / 0.3); background: transparent; color: var(--gris-texto); border-radius: 10px; padding: 10px; font-family:'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; margin: 2px 0 14px; }
+  .cfg-lic{ font-size: 0.82rem; color: var(--gris-suave); margin: 2px 0 10px; }
+  .c-vacio{ font-size: 0.88rem; color: var(--gris-suave); padding: 6px 2px 10px; line-height: 1.4; }
+  .c-gear{ margin-left: auto; flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid rgb(var(--tinta) / 0.18); background: transparent; color: var(--gris-texto); font-size: 1.15rem; cursor: pointer; }
+  .m-admin{ text-align: center; margin-top: 10px; }
+  .m-admin a{ color: var(--gris-suave); font-size: 0.78rem; text-decoration: underline; }
+</style>
+</head>
+<body class="cargando">
+
+  <div class="estado-conexion" id="estadoConexion">
+    <span class="punto" id="puntoConexion"></span>
+    <span id="textoConexion">Modo local</span>
+  </div>
+
+  <!-- ======================= VISTA HOST (proyector) ======================= -->
+  <div class="page" id="vistaHost">
+
+    <div class="topbar">
+      <div class="panel brand">
+        <div class="logo-box principal" id="logoColegio">LOGO<br>COLEGIO</div>
+        <h1 class="js-titulo">Bingo</h1>
+      </div>
+
+      <div class="panel calls-panel">
+        <div class="call-current">
+          <div class="bola grande vacia" id="bolaActual">-</div>
+          <span class="call-label">Llamada&nbsp;actual</span>
+        </div>
+
+        <div class="digital-box">
+          <span class="digital-label">Anterior</span>
+          <span class="digital-num" id="numAnterior">--</span>
+        </div>
+
+        <div class="history">
+          <span class="history-label">Últimas 5 llamadas</span>
+          <div class="history-balls" id="historyBalls"></div>
+        </div>
+      </div>
+
+      <div class="panel prize-panel">
+        <span class="prize-label" contenteditable="true" id="premioLabel" spellcheck="false">Premio</span>
+        <div class="prize-value" contenteditable="true" id="premioValor" spellcheck="false">—</div>
+        <span class="prize-hint">clic para editar</span>
+      </div>
+
+      <div class="panel binguito-panel" id="panelBinguito">
+        <span class="bin-label">Binguito</span>
+        <div id="binPatron"></div>
+        <span class="bin-letra" id="binLetra">Letra B</span>
+      </div>
+
+      <div class="panel qr-panel" id="qrPanel">
+        <span class="qr-label">Ver en el celular</span>
+        <button class="btn-qr" id="btnImprimirQR" type="button">Imprimir QR</button>
+        <span class="qr-room" id="qrRoomTexto">Sala ----</span>
+      </div>
+
+      <div class="panel sponsors">
+        <span class="sponsors-label">Auspiciadores</span>
+        <div class="aus-carrusel p-aus" id="ausCarrusel" style="display:none"></div>
+        <div class="aus-puntos" id="ausPuntos" style="display:none"></div>
+        <div class="sponsor-slots" id="sponsorSlots">
+        </div>
+        <button class="aus-editar" id="ausEditar" type="button" style="display:none">✎ Editar</button>
+      </div>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn-limpiar" id="btnConfig" type="button">⚙ Configurar</button>
+      <button class="btn-limpiar" id="btnTema" type="button">☀ Modo claro</button>
+      <label class="sel-ronda">Ronda <select id="selRonda"></select></label>
+      <span class="contador"><strong id="contadorNum">0</strong> números marcados</span>
+      <button class="btn-limpiar btn-pausa" id="btnPausa" type="button">⏸ Pausa</button>
+      <button class="btn-limpiar btn-bin" id="btnBinguito" style="display:none">Marcar binguito entregado</button>
+      <button class="btn-limpiar" id="btnLimpiar">Limpiar selecciones</button>
+    </div>
+
+  </div>
+
+  <!-- ======================= VISTA MOBILE (celular) ======================= -->
+  <div class="m-page" id="vistaMobile">
+    <div class="m-header">
+      <img id="mLogoColegio" class="m-logo-colegio" alt="Logo">
+      <div class="m-tag">Bingo en vivo</div>
+      <h1 class="js-titulo">Bingo</h1>
+    </div>
+
+    <div class="m-card m-call-row">
+      <div class="bola grande vacia" id="mBolaActual">-</div>
+      <div class="m-call-info">
+        <div class="m-prev-line">
+          <div class="digital-box">
+            <span class="digital-label">Anterior</span>
+            <span class="digital-num" id="mNumAnterior">--</span>
+          </div>
+        </div>
+        <div>
+          <span class="history-label">Últimas llamadas</span>
+          <div class="m-history-balls" id="mHistoryBalls"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="m-card m-prize">
+      <span class="prize-label" id="mPremioLabel">Premio de este bingo</span>
+      <div class="prize-value-display" id="mPremioValor">—</div>
+    </div>
+
+    <div class="m-card m-binguito" id="mBinguitoCard" style="display:none;">
+      <div class="m-bin-fila">
+        <div class="m-bin-txt">
+          <span class="prize-label">Binguito</span>
+          <span class="m-bin-estado" id="mBinEstado" style="display:none">Entregado ✓</span>
+        </div>
+        <div id="mPatron"></div>
+      </div>
+    </div>
+
+    <div class="m-card m-sponsors-card" id="mSponsorsCard" style="display:none;">
+      <span class="sponsors-label">Auspiciadores</span>
+      <div class="aus-carrusel m-aus" id="mSponsorRow"></div>
+      <div class="aus-puntos" id="mAusPuntos"></div>
+    </div>
+
+    <div class="m-card">
+      <div class="m-board" id="mBoard"></div>
+    </div>
+
+    <details class="m-card m-cartones" id="mCartonesCard">
+      <summary>
+        <span class="mc-sum-tit">Mis cartones</span>
+        <span class="mc-resumen" id="mcResumen"></span>
+      </summary>
+      <div class="mc-seccion">
+        <p class="mc-ayuda" id="mcAyuda">Agrega tus cartones y esta página te avisa cuando completes el binguito o el bingo.</p>
+        <div id="mcLista"></div>
+        <button class="mc-btn" id="mcAgregar" type="button">+ Agregar cartón</button>
+        <div class="mc-opciones">
+          <label><input type="checkbox" id="mcSonido" checked> Sonido y vibración al ganar</label>
+          <label><input type="checkbox" id="mcPantalla" checked> Mantener la pantalla encendida</label>
+          <button class="mc-btn sec" id="mcProbar" type="button" style="margin-top:2px">🔊 Probar sonido</button>
+        </div>
+        <p class="mc-aviso">Si no oyes nada, sube el volumen y revisa que el teléfono no esté en silencio. Es solo una ayuda: el premio lo valida la organización con tu cartón. Para recibir avisos, deja esta página abierta con la pantalla encendida. Tus cartones se guardan solo en este teléfono.</p>
+      </div>
+    </details>
+
+    <p class="m-footer-nota">Esta pantalla se actualiza sola a medida que se cantan los números.<br>No necesitas recargar ni marcar nada aquí.</p>
+    <p class="m-admin"><a id="mAdminLink" href="#">Acceso organizador</a></p>
+  </div>
+
+
+  <!-- ======================= VISTA CONTROL (admin desde el celular) ======================= -->
+  <div class="c-page" id="vistaControl">
+
+    <header class="c-topbar">
+      <img class="c-logo" id="cLogo" alt="Logo">
+      <div class="c-titulo">
+        <h1 class="js-titulo">Bingo</h1>
+        <div class="c-estado" id="cEstado"></div>
+      </div>
+      <button class="c-gear" id="cConfig" type="button" aria-label="Configurar el bingo">⚙</button>
+    </header>
+
+    <section class="m-card c-binest" id="cBinEstado" style="display:none">
+      <div class="c-binest-txt"><span class="c-etq">Binguito</span><strong id="cBinEstadoTxt">Letra B · en juego</strong></div>
+      <button class="c-btn" id="cBinEntregado" type="button">Marcar entregado</button>
+    </section>
+
+    <section class="m-card c-hero">
+      <div class="c-hero-top">
+        <div class="bola grande vacia" id="cBolaActual">-</div>
+        <div class="c-hero-info">
+          <span class="c-etq">Llamada actual</span>
+          <div class="c-callout" id="cCallout">Sin llamadas</div>
+          <div class="c-prev">Anterior: <strong id="cNumAnterior">--</strong></div>
+        </div>
+      </div>
+      <div class="c-ultimas-wrap">
+        <span class="c-etq">Últimas llamadas</span>
+        <div class="c-ultimas" id="cUltimas"></div>
+      </div>
+    </section>
+
+    <section class="m-card">
+      <div class="c-tabs" id="cTabs"></div>
+      <div class="c-grid" id="cGrid"></div>
+      <div class="c-progreso"><div class="c-progreso-barra" id="cBarra"></div></div>
+      <div class="c-resumen"><strong id="cContador">0</strong> de 75 números llamados</div>
+    </section>
+
+    <details class="m-card c-det" id="cDetRonda">
+      <summary><span>Ronda y binguito</span><span class="c-sum-valor" id="cRondaResumen">Sin ronda</span></summary>
+      <div class="c-det-cuerpo">
+        <span class="c-etq">Programa (al elegir, cambia premio y binguito)</span>
+        <div class="c-rondas" id="cRondas"></div>
+        <span class="c-etq">Letra del binguito</span>
+        <div class="c-binlet" id="cBinLet"></div>
+        <div class="c-bin-prev" id="cBinPrev"></div>
+      </div>
+    </details>
+
+    <details class="m-card c-det">
+      <summary><span>Premio</span><span class="c-sum-valor" id="cPremioResumen">—</span></summary>
+      <div class="c-det-cuerpo">
+        <span class="c-etq">Título del premio</span>
+        <input class="c-input" id="cPremioLabel" type="text" maxlength="40" placeholder="Premio" autocomplete="off">
+        <span class="c-etq">Monto o premio</span>
+        <input class="c-input" id="cPremioValor" type="text" maxlength="40" placeholder="Ej. $100.000" autocomplete="off">
+      </div>
+    </details>
+
+    <details class="m-card c-det">
+      <summary><span>Historial de llamadas</span><span class="c-sum-valor" id="cHistCount">0</span></summary>
+      <div class="c-chips" id="cChips"></div>
+    </details>
+
+    <p class="c-nota">Lo que marques aquí se ve al instante en el proyector y en los celulares.<br>Los logos se cambian desde el proyector.</p>
+
+    <div class="c-bar">
+      <div class="c-bar-in">
+        <button class="c-btn c-btn-prim" id="cDeshacer" type="button">↩ Deshacer</button>
+        <button class="c-btn c-btn-pausa" id="cPausa" type="button">⏸ Pausa</button>
+        <button class="c-btn c-btn-peligro" id="cLimpiar" type="button">Limpiar</button>
+      </div>
+    </div>
+    <div class="c-toast" id="cToast"></div>
+  </div>
+
+  <!-- ======================= EDITOR DE CARTÓN Y AVISO (espectador) ======================= -->
+  <!-- ======================= ACCESO DEL ORGANIZADOR, CONFIGURACIÓN Y SIN SALA ======================= -->
+  <div class="mc-modal" id="accesoModal">
+    <div class="mc-hoja">
+      <div class="mc-hoja-cab"><strong>Acceso del organizador</strong></div>
+      <p class="acc-texto">Ingresa el código de acceso de tu bingo <b id="accesoSala"></b>.</p>
+      <input class="mc-texto" id="accesoClave" type="password" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Código de acceso">
+      <p class="acc-error" id="accesoError" role="alert"></p>
+      <div class="mc-pie">
+        <button class="mc-btn sec" id="accesoPublico" type="button">Ver como público</button>
+        <button class="mc-btn prim" id="accesoEntrar" type="button">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mc-modal" id="configModal">
+    <div class="mc-hoja cfg-hoja">
+      <div class="mc-hoja-cab"><strong>Configurar tu bingo</strong><button class="mc-x" id="cfgCerrar" type="button" aria-label="Cerrar">✕</button></div>
+      <span class="pausa-etq">Nombre del bingo</span>
+      <input class="mc-texto" id="cfgTitulo" type="text" maxlength="60" placeholder="Ej. Bingo de la Junta de Vecinos" autocomplete="off">
+      <span class="pausa-etq">Colores</span>
+      <div class="cfg-temas" id="cfgTemas"></div>
+      <div class="cfg-colores">
+        <label>Fondo <input type="color" id="cfgFondo" value="#f4f6fa"></label>
+        <label>Color principal <input type="color" id="cfgAcento" value="#2f5bff"></label>
+      </div>
+      <p class="cfg-nota" id="cfgNota"></p>
+      <span class="pausa-etq">Rondas del bingo</span>
+      <div id="cfgRondas"></div>
+      <button class="cfg-agregar" id="cfgAgregar" type="button">+ Agregar ronda</button>
+      <span class="pausa-etq">Motivos de pausa frecuentes (separados por coma)</span>
+      <input class="mc-texto" id="cfgPausas" type="text" maxlength="200" placeholder="Pausa, Descanso, Show" autocomplete="off">
+      <p class="cfg-lic" id="cfgLicencia"></p>
+      <p class="acc-error" id="cfgError" role="alert"></p>
+      <div class="mc-pie">
+        <button class="mc-btn sec" id="cfgCancelar" type="button">Cancelar</button>
+        <button class="mc-btn prim" id="cfgGuardar" type="button">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sin-sala" id="sinSala" style="display:none">
+    <div class="sin-sala-caja">
+      <h1>Bingo en vivo</h1>
+      <p>Escribe el nombre de tu bingo para entrar.</p>
+      <input class="mc-texto" id="sinSalaNombre" type="text" maxlength="41" placeholder="mi-bingo" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <p class="acc-error" id="sinSalaError" role="alert"></p>
+      <button class="mc-btn prim" id="sinSalaEntrar" type="button">Entrar</button>
+    </div>
+  </div>
+
+  <!-- ======================= PANTALLA DE ESPERA (proyector) Y VENTANA DE PAUSA ======================= -->
+  <div class="pausa-pantalla" id="pausaPantalla">
+    <div class="pausa-reloj" id="pausaReloj"></div>
+    <div class="pausa-centro">
+      <img class="pausa-logo" id="pausaLogo" alt="Logo del colegio">
+      <div class="pausa-marca js-titulo">Bingo</div>
+      <div class="pausa-titulo" id="pausaTituloGrande">Pausa</div>
+      <div class="pausa-detalle" id="pausaDetalleGrande"></div>
+      <div class="pausa-proxima" id="pausaProximaTxt"></div>
+    </div>
+    <div class="pausa-lado">
+      <div id="pausaAusCaja" style="display:none; width:100%; display:none; flex-direction:column; align-items:center; gap: 1.2vh;">
+        <div class="pausa-aus-tit">Auspiciadores</div>
+        <div class="aus-carrusel pausa-aus" id="pausaAus"></div>
+        <div class="aus-puntos" id="pausaAusPuntos"></div>
+      </div>
+      <div class="pausa-qr" id="pausaQrCaja" style="display:none">
+        <div id="pausaQr"></div>
+        <span>Sigue los números en tu celular</span>
+      </div>
+    </div>
+    <button class="pausa-volver" id="pausaVolver" type="button">▶ Volver al bingo</button>
+  </div>
+
+  <div class="mc-modal" id="pausaModal">
+    <div class="mc-hoja">
+      <div class="mc-hoja-cab"><strong>Pausa del bingo</strong><button class="mc-x" id="pausaCerrar" type="button" aria-label="Cerrar">✕</button></div>
+      <span class="pausa-etq">¿Qué está pasando?</span>
+      <div class="pausa-chips" id="pausaChips"></div>
+      <input class="mc-texto" id="pausaTitulo" type="text" maxlength="40" placeholder="Pausa" autocomplete="off">
+      <input class="mc-texto" id="pausaDetalle" type="text" maxlength="70" placeholder="Mensaje (opcional), ej. Volvemos en unos minutos" autocomplete="off">
+      <span class="pausa-etq">Próximo bingo</span>
+      <select class="mc-texto" id="pausaProxima"></select>
+      <div class="mc-pie">
+        <button class="mc-btn sec" id="pausaCancelar" type="button">Cancelar</button>
+        <button class="mc-btn prim" id="pausaPoner" type="button">Poner pausa</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mc-modal" id="mcModal">
+    <div class="mc-hoja">
+      <div class="mc-hoja-cab"><strong id="mcTituloEditor">Nuevo cartón</strong><button class="mc-x" id="mcCerrar" type="button" aria-label="Cerrar">✕</button></div>
+      <input class="mc-texto" id="mcNombre" type="text" maxlength="24" placeholder="Nombre (opcional), ej. Cartón 1" autocomplete="off">
+      <div class="mc-cols"><span class="m-letra L-B">B</span><span class="m-letra L-I">I</span><span class="m-letra L-N">N</span><span class="m-letra L-G">G</span><span class="m-letra L-O">O</span></div>
+      <div class="mc-grid" id="mcGrid"></div>
+      <label class="mc-libre-fila"><input type="checkbox" id="mcLibre" checked> El centro es casilla libre</label>
+      <details>
+        <summary>Pegar los 24 números de una vez</summary>
+        <textarea id="mcPegar" placeholder="En orden, fila por fila (izquierda a derecha, arriba a abajo). Sirve con espacios, comas o saltos de línea."></textarea>
+        <button class="mc-btn sec" id="mcImportar" type="button" style="margin-top:8px">Cargar números</button>
+      </details>
+      <div class="mc-error" id="mcError"></div>
+      <div class="mc-pie">
+        <button class="mc-btn sec" id="mcCancelar" type="button">Cancelar</button>
+        <button class="mc-btn prim" id="mcGuardar" type="button">Guardar cartón</button>
+      </div>
+    </div>
+  </div>
+  <div class="mc-alerta" id="mcAlerta" role="alert" aria-live="assertive">
+    <div class="mc-al-tit" id="mcAlTit"></div>
+    <div class="mc-al-txt" id="mcAlTxt"></div>
+    <button class="mc-al-btn" id="mcAlOk" type="button">Entendido</button>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+  /* =========================================================================
+     CONFIGURACIÓN FIREBASE
+     ---------------------------------------------------------------------
+     Para que el QR y la vista móvil funcionen EN TIEMPO REAL entre
+     dispositivos, pega aquí los datos de tu proyecto gratuito de Firebase:
+
+     1. Ve a https://console.firebase.google.com -> crear proyecto (gratis).
+     2. Dentro del proyecto: Build -> Realtime Database -> Crear base de datos
+        -> luego publica las reglas de seguridad indicadas en las instrucciones.
+     3. Ve a Configuración del proyecto -> tus apps -> Web (</>) -> copia el
+        objeto de configuración y pégalo abajo, reemplazando el de ejemplo.
+     4. Sube este archivo a un hosting real (Firebase Hosting, GitHub Pages,
+        Netlify) o sírvelo desde tu WiFi local, ya que un archivo abierto con
+        doble clic (file://) no es alcanzable desde otros celulares.
+     ========================================================================= */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCqzLZ2lYvjkJi8zKFdId5eknfm5yA6xKA",
+    authDomain: "bingo-oxford-school.firebaseapp.com",
+    databaseURL: "https://bingo-oxford-school-default-rtdb.firebaseio.com",
+    projectId: "bingo-oxford-school",
+    storageBucket: "bingo-oxford-school.firebasestorage.app",
+    messagingSenderId: "465865636119",
+    appId: "1:465865636119:web:d2261f0090b3e5b9cd1f52"
+  };
+
+  const firebaseConfigurado = firebaseConfig.apiKey !== "TU_API_KEY";
+  let dbRef = null;
+
+  if(firebaseConfigurado){
+    try{
+      firebase.initializeApp(firebaseConfig);
+      window.__fbDb = firebase.database();
+      window.__fbAuth = firebase.auth();
+      // solo para pruebas locales con el emulador de Firebase (nunca ocurre en un dominio real)
+      if(location.hostname === 'localhost' && new URLSearchParams(location.search).get('emulador') === '1'){
+        window.__fbDb.useEmulator('127.0.0.1', 9000);
+        window.__fbAuth.useEmulator('http://127.0.0.1:9099', { disableWarnings: true });
+      }
+    } catch(e){ console.warn('Firebase no se pudo iniciar:', e); }
+  }
+
+  const rangos = [
+    { letra: 'B', inicio: 1,  fin: 15 },
+    { letra: 'I', inicio: 16, fin: 30 },
+    { letra: 'N', inicio: 31, fin: 45 },
+    { letra: 'G', inicio: 46, fin: 60 },
+    { letra: 'O', inicio: 61, fin: 75 }
+  ];
+
+  function letraDeNumero(n){
+    // si llegara un número fuera de 1 a 75 no debe romper la pantalla de nadie
+    const r = rangos.find(x => n >= x.inicio && n <= x.fin);
+    return r ? r.letra : 'B';
+  }
+
+  function crearBola(n, clase){
+    const b = document.createElement('div');
+    b.className = 'bola ' + clase + ' bola-' + letraDeNumero(n);
+    b.textContent = n;
+    return b;
+  }
+
+  // ---------------------------------------------------------------------
+  // TEMA: a partir del color de fondo y del color de acento se calcula toda la paleta.
+  // Si el fondo es claro, el tema es claro; si es oscuro, oscuro. Los textos se eligen
+  // solos para que siempre se lean (blanco o casi negro según el color que tengan debajo).
+  // ---------------------------------------------------------------------
+  function hexARgb(h){
+    h = String(h || '').replace('#', '').trim();
+    if(h.length === 3) h = h.split('').map(c => c + c).join('');
+    if(!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+    const n = parseInt(h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function rgbAHex(v){ return '#' + v.map(x => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, '0')).join(''); }
+  function mezclar(a, b, t){
+    const A = hexARgb(a), B = hexARgb(b);
+    return rgbAHex(A.map((v, i) => v + (B[i] - v) * t));
+  }
+  function luminancia(h){
+    const c = hexARgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+  function contraste(a, b){
+    const x = luminancia(a), y = luminancia(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  }
+  // texto (casi negro o blanco) con mejor contraste sobre un color
+  function textoSobre(fondo){
+    return contraste(fondo, '#10141c') >= contraste(fondo, '#ffffff') ? '#10141c' : '#ffffff';
+  }
+  function rgbTriple(h){ return hexARgb(h).join(' '); }
+
+  // acerca un color a un extremo (negro o blanco) hasta que contraste lo suficiente con otro
+  function asegurar(color, ref, min, extremo){
+    let c = color;
+    for(let i = 0; i < 30 && contraste(c, ref) < min; i++) c = mezclar(c, extremo, 0.12);
+    return c;
+  }
+
+  function calcularPaleta(fondoElegido, acento){
+    let fondo = hexARgb(fondoElegido) ? fondoElegido : '#f4f6fa';
+    acento = hexARgb(acento) ? acento : '#2f5bff';
+    const negro = '#0b1220', blanco = '#ffffff', ambar = '#f5b400';
+    const claro = luminancia(fondo) > 0.179;     // por debajo de este punto el texto blanco contrasta más que el negro
+    const textoPrincipal = claro ? negro : '#f7f9fc';
+    const extremo = claro ? blanco : negro;
+    const panelDe = (f) => claro ? mezclar(f, negro, 0.06) : mezclar(f, blanco, 0.09);
+    // si el fondo elegido es un tono medio, se aleja un poco del medio para que el texto siempre se lea
+    const celdaDe = (pn) => claro ? '#ffffff' : mezclar(pn, blanco, 0.14);
+    let panel = panelDe(fondo);
+    for(let i = 0; i < 60 && (contraste(textoPrincipal, fondo) < 5 || contraste(textoPrincipal, panel) < 4.8 || contraste(textoPrincipal, celdaDe(panel)) < 4.7); i++){
+      fondo = mezclar(fondo, extremo, 0.06);
+      panel = panelDe(fondo);
+    }
+    // si el acento es un tono medio, se afina un poco para que el número sobre él se lea bien
+    for(let i = 0; i < 30 && Math.max(contraste(acento, '#10141c'), contraste(acento, '#ffffff')) < 4.7; i++){
+      acento = mezclar(acento, luminancia(acento) > 0.179 ? blanco : negro, 0.05);
+    }
+    const p = {};
+    p.claro = claro;
+    p.fondo = fondo;
+    p.ajustado = fondo.toLowerCase() !== String(fondoElegido).toLowerCase();
+    p.panel = panel;
+    p.acento = acento;
+    p.acentoOscuro = mezclar(acento, negro, 0.25);
+    p.header = asegurar(mezclar(acento, negro, claro ? 0.55 : 0.45), '#ffffff', 4.6, negro);
+    p.celda = celdaDe(panel);
+    p.celdaHover = claro ? mezclar('#ffffff', acento, 0.10) : mezclar(panel, blanco, 0.22);
+    p.gris = claro ? '#aeb8c5' : '#b9c0cb';
+    p.grisOscuro = claro ? '#5b6676' : '#5f6a7a';
+    p.blanco = textoPrincipal;
+    p.texto = asegurar(claro ? mezclar(negro, fondo, 0.12) : mezclar(blanco, fondo, 0.15), p.celda, 5, claro ? negro : blanco);
+    p.suave = asegurar(mezclar(textoPrincipal, panel, 0.38), panel, 4.6, textoPrincipal);
+    p.tinta = claro ? '11 18 32' : '255 255 255';
+    p.sombra = claro ? 'rgba(15,25,45,0.18)' : 'rgba(0,0,0,0.35)';
+    p.dorado = ambar;
+    p.doradoOscuro = mezclar(ambar, negro, 0.35);
+    p.doradoTexto = asegurar(claro ? '#8a5a00' : '#e8bb55', panel, 3.4, claro ? negro : blanco);
+    p.sobreAcento = textoSobre(acento);
+    p.sobreDorado = textoSobre(ambar);
+    p.sobreGris = textoSobre(p.gris);
+    p.fondoProfundo = claro ? '#ffffff' : mezclar(fondo, negro, 0.45);
+    p.linea = claro ? 'rgb(11 18 32 / 0.16)' : 'rgb(255 255 255 / 0.06)';
+    p.bordeCelda = claro ? 'rgb(11 18 32 / 0.22)' : 'transparent';
+    p.peligro = claro ? '#c0392b' : '#b5483f';
+    p.peligroTexto = claro ? '#b3261e' : '#ee968d';
+    p.peligroFondo = claro ? '#fdeceb' : '#2b1210';
+    let t = claro ? 0.14 : 0.20;
+    p.hero1 = mezclar(panel, acento, t);
+    while(t > 0 && contraste(textoPrincipal, p.hero1) < 4.8){ t -= 0.03; p.hero1 = mezclar(panel, acento, Math.max(0, t)); }
+    p.hero2 = panel;
+    p.fondoRgb = rgbTriple(fondo);
+    p.acentoRgb = rgbTriple(acento);
+    p.doradoRgb = rgbTriple(ambar);
+    return p;
+  }
+
+  // nombre de variable CSS -> valor de la paleta
+  function variablesDePaleta(p){
+    return {
+      '--verde-fondo': p.fondo, '--verde-panel': p.panel, '--verde-header': p.header,
+      '--verde-acento': p.acento, '--verde-acento-oscuro': p.acentoOscuro,
+      '--dorado': p.dorado, '--dorado-oscuro': p.doradoOscuro, '--dorado-texto': p.doradoTexto,
+      '--gris-celda': p.celda, '--gris-celda-hover': p.celdaHover,
+      '--gris-claro': p.gris, '--gris-oscuro': p.grisOscuro,
+      '--gris-texto': p.texto, '--gris-suave': p.suave, '--blanco': p.blanco,
+      '--sombra': p.sombra, '--tinta': p.tinta, '--linea': p.linea, '--borde-celda': p.bordeCelda,
+      '--sobre-acento': p.sobreAcento, '--sobre-dorado': p.sobreDorado, '--sobre-gris': p.sobreGris,
+      '--fondo-profundo': p.fondoProfundo,
+      '--peligro': p.peligro, '--peligro-texto': p.peligroTexto, '--peligro-fondo': p.peligroFondo,
+      '--hero-1': p.hero1, '--hero-2': p.hero2,
+      '--fondo-rgb': p.fondoRgb, '--acento-rgb': p.acentoRgb, '--dorado-rgb': p.doradoRgb
+    };
+  }
+
+  const TEMA_BASE = { fondo: '#f4f6fa', acento: '#2f5bff' };
+  const TEMAS_PREDEFINIDOS = [
+    { nombre: 'Claro',      fondo: '#f4f6fa', acento: '#2f5bff' },
+    { nombre: 'Oscuro',     fondo: '#10151f', acento: '#5b8cff' },
+    { nombre: 'Bosque',     fondo: '#0c231b', acento: '#3fae72' },
+    { nombre: 'Océano',     fondo: '#0b2540', acento: '#22b8cf' },
+    { nombre: 'Atardecer',  fondo: '#2a1814', acento: '#ff7a45' },
+    { nombre: 'Rosa',       fondo: '#fff4f8', acento: '#d6336c' }
+  ];
+
+  // ---------------------------------------------------------------------
+  // SALA, ACCESO Y ROL
+  // ---------------------------------------------------------------------
+  // Cada bingo tiene su propia sala, que sale del subdominio:
+  //     https://mi-bingo.tudominio.com   ->   sala "mi-bingo"
+  // Para pruebas (o si el sitio no usa subdominios) se puede forzar con ?sala=mi-bingo
+  //
+  // ACCESO: todos ven la vista del público (solo lectura). Para organizar hay que abrir ?admin=1
+  // e ingresar el código del bingo. El código lo valida la base de datos (reglas de seguridad) y
+  // solo funciona mientras el acceso del bingo esté vigente.
+  const params = new URLSearchParams(location.search);
+  const HOSTS_SIN_SUBDOMINIO = ['github.io', 'workers.dev', 'pages.dev', 'netlify.app', 'vercel.app', 'web.app', 'firebaseapp.com'];
+  const SUBDOMINIOS_RESERVADOS = ['www', 'app', 'admin', 'api', 'demo-landing'];
+
+  function esSalaValida(s){ return /^[a-z0-9][a-z0-9-]{1,40}$/.test(s); }
+  function obtenerSala(){
+    const p = (params.get('sala') || '').trim().toLowerCase();
+    if(p) return esSalaValida(p) ? p : null;
+    const h = location.hostname.toLowerCase();
+    if(!h || /^[\d.]+$/.test(h) || h.indexOf(':') >= 0) return null;
+    if(HOSTS_SIN_SUBDOMINIO.some(d => h === d || h.endsWith('.' + d))) return null;
+    const partes = h.split('.');
+    if(partes.length < 3) return null;
+    const sub = partes[0];
+    if(SUBDOMINIOS_RESERVADOS.indexOf(sub) >= 0) return null;
+    return esSalaValida(sub) ? sub : null;
+  }
+  let room = obtenerSala();
+  const esVistaMovilExplicita = params.get('vista') === 'movil';
+
+  const $ = (id) => document.getElementById(id);
+
+  // vigencia del acceso de este bingo: { vence: milisegundos }
+  let licencia = null;
+  const llaveAcceso = () => 'bingoAcceso:' + room;
+  function accesoVigente(){ return !!licencia && Number(licencia.vence) > Date.now(); }
+  function fechaCorta(ms){
+    const d = new Date(Number(ms));
+    return d.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
+           d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+  function leerLicencia(){
+    return window.__fbDb.ref('licencias/' + room).once('value').then(snap => { licencia = snap.val(); return licencia; });
+  }
+
+  function esperarUsuarioActual(){
+    return new Promise(resolve => {
+      let cancelar = null;
+      cancelar = window.__fbAuth.onAuthStateChanged(u => {
+        if(cancelar) cancelar();
+        resolve(u);
+      });
+    });
+  }
+  // sesión anónima: identifica este dispositivo sin pedir correo ni contraseña
+  async function asegurarSesion(){
+    let u = await esperarUsuarioActual();
+    if(!u){
+      const cred = await window.__fbAuth.signInAnonymously();
+      u = (cred && cred.user) || window.__fbAuth.currentUser;
+    }
+    return u;
+  }
+  function tieneAcceso(uid){
+    return window.__fbDb.ref('claims/' + room + '/' + uid).once('value').then(snap => snap.exists()).catch(() => false);
+  }
+  // Envía el código a la base de datos. Las reglas de seguridad lo comparan con el código real
+  // y solo lo aceptan si el acceso del bingo está vigente.
+  async function reclamarAcceso(uid, clave){
+    // el código se puede escribir con minúsculas o espacios sin problema
+    const intentos = [clave];
+    const mayus = clave.toUpperCase().replace(/\s+/g, '');
+    if(mayus !== clave) intentos.push(mayus);
+    let guardado = false;
+    for(const c of intentos){
+      try{ await window.__fbDb.ref('claims/' + room + '/' + uid).set(c); guardado = true; break; } catch(e){}
+    }
+    try{
+      if(!guardado) throw new Error('denegado');
+      try{ localStorage.setItem(llaveAcceso(), uid); } catch(e){}
+      return { ok: true };
+    } catch(e){
+      let lic = null;
+      try{ lic = await leerLicencia(); } catch(e2){}
+      if(!lic) return { ok: false, motivo: 'No existe un bingo llamado «' + room + '».' };
+      if(Number(lic.vence) <= Date.now()) return { ok: false, motivo: 'El acceso de este bingo venció el ' + fechaCorta(lic.vence) + '.' };
+      return { ok: false, motivo: 'Código incorrecto. Revísalo e intenta de nuevo.' };
+    }
+  }
+  function pedirAcceso(uid){
+    return new Promise(resolve => {
+      const modal = $('accesoModal'), inp = $('accesoClave'), err = $('accesoError'), btn = $('accesoEntrar');
+      $('accesoSala').textContent = room;
+      if(licencia && !accesoVigente()) err.textContent = 'El acceso de este bingo venció el ' + fechaCorta(licencia.vence) + '.';
+      else if(!licencia) err.textContent = 'No existe un bingo llamado «' + room + '».';
+      modal.classList.add('abierto');
+      setTimeout(() => inp.focus(), 80);
+      let ocupado = false;
+      async function entrar(){
+        if(ocupado) return;
+        const clave = inp.value.trim();
+        if(!clave){ err.textContent = 'Escribe el código de acceso.'; return; }
+        ocupado = true; btn.disabled = true; err.textContent = '';
+        const r = await reclamarAcceso(uid, clave);
+        ocupado = false; btn.disabled = false;
+        if(r.ok){ modal.classList.remove('abierto'); resolve(true); }
+        else { err.textContent = r.motivo; inp.select(); }
+      }
+      btn.onclick = entrar;
+      inp.onkeydown = (e) => { if(e.key === 'Enter') entrar(); };
+      $('accesoPublico').onclick = () => { modal.classList.remove('abierto'); resolve(false); };
+    });
+  }
+
+  // Si eres organizador: celular -> panel de control; computador/proyector -> tablero.
+  // Se puede forzar con ?modo=control o ?modo=proyector.
+  function elegirPanelAdmin(){
+    const forzado = params.get('modo');
+    if(forzado === 'control' || forzado === 'proyector') return forzado;
+    const tactil = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    const esCelular = window.innerWidth < 600 ||
+      (tactil && Math.min(window.innerWidth, window.innerHeight) < 700);
+    return esCelular ? 'control' : 'proyector';
+  }
+
+  // Devuelve 'espectador' | 'proyector' | 'control'
+  async function decidirRol(){
+    if(esVistaMovilExplicita) return 'espectador';
+    const quiereAdmin = params.has('admin') || params.get('modo') === 'control' || params.get('modo') === 'proyector';
+    if(!quiereAdmin) return 'espectador';
+    if(!firebaseConfigurado || !window.__fbAuth || !window.__fbDb) return 'espectador';
+    let usuario;
+    try{ usuario = await asegurarSesion(); }
+    catch(e){
+      alert('No se pudo iniciar la sesión del organizador. Revisa tu conexión e intenta de nuevo.');
+      return 'espectador';
+    }
+    try{ await leerLicencia(); } catch(e){}
+    let guardado = null;
+    try{ guardado = localStorage.getItem(llaveAcceso()); } catch(e){}
+    if(guardado === usuario.uid && accesoVigente() && await tieneAcceso(usuario.uid)) return elegirPanelAdmin();
+    const ok = await pedirAcceso(usuario.uid);
+    return ok ? elegirPanelAdmin() : 'espectador';
+  }
+
+  // pantalla para escribir el nombre del bingo cuando la dirección no lo trae
+  function mostrarSinSala(){
+    $('sinSala').style.display = 'flex';
+    const inp = $('sinSalaNombre'), err = $('sinSalaError');
+    function entrar(){
+      const v = inp.value.trim().toLowerCase();
+      if(!esSalaValida(v)){ err.textContent = 'Usa solo letras, números y guiones (mínimo 2 caracteres).'; return; }
+      const u = new URL(location.href);
+      u.search = ''; u.hash = '';
+      u.searchParams.set('sala', v);
+      location.href = u.toString();
+    }
+    $('sinSalaEntrar').onclick = entrar;
+    inp.onkeydown = (e) => { if(e.key === 'Enter') entrar(); };
+    setTimeout(() => inp.focus(), 80);
+  }
+
+  // dirección que se comparte con el público (la del subdominio, o ?sala= si se usa así)
+  function urlPublica(){
+    const u = new URL(location.href);
+    u.search = ''; u.hash = '';
+    if(params.get('sala')) u.searchParams.set('sala', room);
+    return u.toString();
+  }
+  function urlOrganizador(){
+    const u = new URL(urlPublica());
+    u.searchParams.set('admin', '1');
+    return u.toString();
+  }
+
+  function marcarConexion(activa, texto){
+    const punto = document.getElementById('puntoConexion');
+    const textoEl = document.getElementById('textoConexion');
+    if(!punto) return;
+    punto.classList.toggle('on', activa);
+    textoEl.textContent = texto;
+  }
+
+  // ---------------------------------------------------------------------
+  // Utilidades compartidas
+  // ---------------------------------------------------------------------
+  // Firebase puede devolver listas como arreglo u objeto; esto las normaliza.
+  function aLista(valor){
+    if(!valor) return [];
+    const lista = Array.isArray(valor)
+      ? valor
+      : Object.keys(valor).sort((a, b) => a - b).map(k => valor[k]);
+    return lista.filter(x => x !== null && x !== undefined);
+  }
+
+  function debounce(fn, ms){
+    let t = null;
+    return function(){
+      const args = arguments;
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(null, args), ms);
+    };
+  }
+
+  // Pinta la bola actual, el número anterior y (opcional) las últimas 5 llamadas.
+  function pintarLlamadas(historial, els){
+    const total = historial.length;
+    if(total > 0){
+      const actual = historial[total - 1];
+      els.bola.className = 'bola grande bola-' + letraDeNumero(actual);
+      els.bola.textContent = actual;
+    } else {
+      els.bola.className = 'bola grande vacia';
+      els.bola.textContent = '-';
+    }
+    els.anterior.textContent = total > 1 ? historial[total - 2] : '--';
+    if(els.historial){
+      els.historial.innerHTML = '';
+      historial.slice(0, Math.max(total - 1, 0)).slice(-5).reverse()
+        .forEach(n => els.historial.appendChild(crearBola(n, 'chica')));
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Operaciones de administrador (las usan el proyector Y el celular).
+  // Cada una escribe SOLO lo que cambia, directamente en Firebase, así
+  // dos dispositivos admin nunca se pisan entre sí.
+  // ---------------------------------------------------------------------
+  const rutaSala = () => window.__fbDb.ref('salasBingo/' + room);
+  const rutaLogos = () => window.__fbDb.ref('logosBingo/' + room);
+
+  function errorEscritura(){
+    marcarConexion(false, 'Sin permiso para guardar');
+    if(licencia && Number(licencia.vence) <= Date.now()){
+      alert('El acceso de este bingo venció el ' + fechaCorta(licencia.vence) + '.\nYa no se pueden guardar cambios. Contacta a quien te lo entregó para renovarlo.');
+    }
+  }
+
+  function alternarNumero(n){
+    rutaSala().child('historial').transaction(actual => {
+      const lista = aLista(actual);
+      const i = lista.indexOf(n);
+      if(i === -1) lista.push(n); else lista.splice(i, 1);
+      return lista.length ? lista : null;
+    }).catch(errorEscritura);
+  }
+
+  function deshacerUltimo(){
+    rutaSala().child('historial').transaction(actual => {
+      const lista = aLista(actual);
+      if(!lista.length) return; // nada que deshacer
+      lista.pop();
+      return lista.length ? lista : null;
+    }).catch(errorEscritura);
+  }
+
+  function limpiarTodo(){
+    // al limpiar el tablero empieza un juego nuevo: el binguito vuelve a estar "en juego"
+    rutaSala().update({ historial: null, binguitoGanado: null }).catch(errorEscritura);
+  }
+
+  // El anfitrión avisa que el binguito ya se entregó: los celulares dejan de avisar de binguito
+  // (quienes completen la letra después ya no ganan nada; el juego sigue por el bingo).
+  function marcarBinguitoEntregado(valor){
+    rutaSala().update({ binguitoGanado: valor ? true : null }).catch(errorEscritura);
+  }
+
+  function guardarPremio(valor){
+    rutaSala().child('premio').set(valor).catch(errorEscritura);
+  }
+
+  function guardarTituloPremio(valor){
+    rutaSala().child('premioLabel').set(valor).catch(errorEscritura);
+  }
+
+  // ---------------------------------------------------------------------
+  // PROGRAMA DEL EVENTO: rondas y binguitos
+  // Si cambia el programa, edita esta lista. Cada ronda define el premio
+  // del bingo y la letra del "binguito" (la letra que hay que formar en
+  // el cartón). Si una ronda no tiene binguito, usa binguito: null.
+  // ---------------------------------------------------------------------
+  // Las rondas (hora, nombre, premio y letra del binguito) las define cada bingo en su configuración.
+  let RONDAS = [];
+
+  // BINGUITO: se juega solo con la LÍNEA de números de una letra. En el cartón, la letra B es la
+  // columna de la izquierda (números 1 a 15), la I la siguiente (16 a 30), la N (31 a 45), la G (46 a 60)
+  // y la O (61 a 75). Basta con que salgan los números de esa línea (en la N, el centro libre ya cuenta).
+  // X = casilla que cuenta para el binguito.
+  const FORMAS_BINGUITO = {
+    B: ['X....', 'X....', 'X....', 'X....', 'X....'],
+    I: ['.X...', '.X...', '.X...', '.X...', '.X...'],
+    N: ['..X..', '..X..', '..X..', '..X..', '..X..'],
+    G: ['...X.', '...X.', '...X.', '...X.', '...X.'],
+    O: ['....X', '....X', '....X', '....X', '....X']
+  };
+  const LETRAS_PROGRAMA = ['B', 'I', 'N', 'G', 'O'];
+
+  function formaValida(letra){
+    return typeof letra === 'string' && Object.prototype.hasOwnProperty.call(FORMAS_BINGUITO, letra);
+  }
+
+  // Dibuja un mini cartón de 5x5 con las letras B-I-N-G-O arriba y solo la línea del binguito iluminada.
+  function crearPatron(letra){
+    const cont = document.createElement('div');
+    cont.className = 'patron';
+    const col = LETRAS_PROGRAMA.indexOf(letra);
+    LETRAS_PROGRAMA.forEach((l, i) => {
+      const h = document.createElement('div');
+      h.className = 'pat-cab' + (i === col ? ' on' : '');
+      h.textContent = l;
+      cont.appendChild(h);
+    });
+    FORMAS_BINGUITO[letra].forEach(fila => {
+      fila.split('').forEach(c => {
+        const celda = document.createElement('div');
+        celda.className = 'pat-celda' + (c === 'X' ? ' on' : '');
+        cont.appendChild(celda);
+      });
+    });
+    return cont;
+  }
+
+  // Carrusel de auspiciadores: muestra un logo a la vez, grande, con animación, y los va rotando.
+  const TIEMPO_AUSPICIADOR = 4000;   // milisegundos que se muestra cada logo
+  function crearCarruselAuspiciadores(cont, puntosEl, tiempo){
+    let items = [], actual = 0, timer = null, firma = null;
+    function pintarPuntos(){
+      puntosEl.innerHTML = '';
+      if(items.length < 2) return;
+      items.forEach((_, i) => {
+        const p = document.createElement('span');
+        p.className = 'aus-punto' + (i === actual ? ' on' : '');
+        puntosEl.appendChild(p);
+      });
+    }
+    function mostrar(nuevo, previo){
+      items.forEach((el, k) => {
+        if(k === nuevo){ el.classList.remove('saliendo'); el.classList.add('activo'); }
+        else if(k === previo){
+          el.classList.remove('activo'); el.classList.add('saliendo');
+          setTimeout(() => el.classList.remove('saliendo'), 800);
+        }
+      });
+      Array.from(puntosEl.children).forEach((p, k) => p.classList.toggle('on', k === nuevo));
+    }
+    function arrancar(){
+      if(timer) clearInterval(timer);
+      timer = null;
+      if(items.length > 1){
+        timer = setInterval(() => {
+          const previo = actual;
+          actual = (actual + 1) % items.length;
+          mostrar(actual, previo);
+        }, tiempo);
+      }
+    }
+    function actualizar(srcs){
+      const f = srcs.length + '|' + srcs.map(x => x.length + ':' + x.slice(-24)).join(',');
+      if(f === firma) return;          // los mismos logos: no se reinicia la rotación
+      firma = f;
+      cont.innerHTML = '';
+      items = srcs.map(src => {
+        const d = document.createElement('div');
+        d.className = 'aus-item';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'Auspiciador';
+        d.appendChild(img);
+        cont.appendChild(d);
+        return d;
+      });
+      if(actual >= items.length) actual = 0;
+      if(items.length) items[actual].classList.add('activo');
+      pintarPuntos();
+      arrancar();
+    }
+    return { actualizar: actualizar };
+  }
+
+  // ---------------------------------------------------------------------
+  // CONFIGURACIÓN DEL BINGO (nombre, colores, rondas, motivos de pausa)
+  // Se guarda en la base de datos y se aplica en vivo en todas las pantallas.
+  // ---------------------------------------------------------------------
+  let configActual = {};
+  let firmaConfig = null;
+  const refrescadoresConfig = [];
+
+  function normalizarRondas(lista){
+    return aLista(lista).slice(0, 30).map((r, i) => ({
+      id: i + 1,
+      hora: String((r && r.hora) || '').slice(0, 8),
+      nombre: String((r && r.nombre) || 'Bingo').slice(0, 40),
+      premio: String((r && r.premio) || '').slice(0, 30),
+      binguito: r && formaValida(r.binguito) ? r.binguito : null
+    }));
+  }
+  function aplicarTitulo(t){
+    const titulo = (t && String(t).trim()) || 'Bingo';
+    document.title = titulo;
+    document.querySelectorAll('.js-titulo').forEach(e => { e.textContent = titulo; });
+  }
+
+  // Tema solo para este dispositivo (por ejemplo, modo claro en un proyector flojo).
+  // No cambia lo que ven los demás. ?tema=claro | oscuro | auto
+  function temaLocal(){
+    const p = params.get('tema');
+    try{
+      if(p === 'claro' || p === 'oscuro') localStorage.setItem('bingoTemaLocal:' + room, p);
+      else if(p === 'auto') localStorage.removeItem('bingoTemaLocal:' + room);
+      return localStorage.getItem('bingoTemaLocal:' + room);
+    } catch(e){ return (p === 'claro' || p === 'oscuro') ? p : null; }
+  }
+  function guardarTemaLocal(v){
+    try{ if(v) localStorage.setItem('bingoTemaLocal:' + room, v); else localStorage.removeItem('bingoTemaLocal:' + room); } catch(e){}
+  }
+  function temaEfectivo(t){
+    const base = { fondo: (t && t.fondo) || TEMA_BASE.fondo, acento: (t && t.acento) || TEMA_BASE.acento };
+    const local = temaLocal();
+    if(local === 'claro') return { fondo: '#f4f6fa', acento: base.acento };
+    if(local === 'oscuro') return { fondo: '#10151f', acento: base.acento };
+    return base;
+  }
+  // calcula la paleta y la aplica a toda la página
+  function pintarTema(t){
+    const p = calcularPaleta(t.fondo, t.acento);
+    const v = variablesDePaleta(p);
+    const st = document.documentElement.style;
+    Object.keys(v).forEach(k => st.setProperty(k, v[k]));
+    document.documentElement.dataset.claro = p.claro ? '1' : '0';
+    return p;
+  }
+
+  function aplicarConfig(cfg, forzar){
+    cfg = cfg || {};
+    const firma = JSON.stringify(cfg) + '|' + (temaLocal() || '');
+    if(firma === firmaConfig && !forzar) return;
+    firmaConfig = firma;
+    configActual = cfg;
+    aplicarTitulo(cfg.titulo);
+    pintarTema(temaEfectivo(cfg.tema));
+    RONDAS = normalizarRondas(cfg.rondas);
+    const motivos = aLista(cfg.pausas).map(x => String(x).trim()).filter(Boolean).slice(0, 8);
+    PAUSA_PRESETS = motivos.length ? motivos : ['Pausa', 'Descanso'];
+    refrescadoresConfig.forEach(f => { try{ f(); } catch(e){} });
+  }
+
+  // ventana para editar la configuración (la usan el proyector y el teléfono)
+  function iniciarModalConfig(){
+    const modal = $('configModal');
+    const elTitulo = $('cfgTitulo'), elFondo = $('cfgFondo'), elAcento = $('cfgAcento'), elNota = $('cfgNota');
+    const elRondas = $('cfgRondas'), elPausas = $('cfgPausas'), elErr = $('cfgError'), elLic = $('cfgLicencia'), elTemas = $('cfgTemas');
+    let rondas = [];
+
+    function vistaPrevia(){
+      const p = pintarTema({ fondo: elFondo.value, acento: elAcento.value });
+      elNota.textContent = p.ajustado ? 'Ajustamos un poco el fondo para que los números se lean bien.' : '';
+      Array.from(elTemas.children).forEach(b => {
+        b.classList.toggle('activo', b.dataset.fondo === elFondo.value.toLowerCase() && b.dataset.acento === elAcento.value.toLowerCase());
+      });
+    }
+    elTemas.innerHTML = '';
+    TEMAS_PREDEFINIDOS.forEach(t => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cfg-tema';
+      b.dataset.fondo = t.fondo; b.dataset.acento = t.acento;
+      b.innerHTML = '<i style="background: linear-gradient(135deg, ' + t.fondo + ' 50%, ' + t.acento + ' 50%)"></i>' + t.nombre;
+      b.addEventListener('click', () => { elFondo.value = t.fondo; elAcento.value = t.acento; vistaPrevia(); });
+      elTemas.appendChild(b);
+    });
+    elFondo.addEventListener('input', vistaPrevia);
+    elAcento.addEventListener('input', vistaPrevia);
+
+    function dibujarRondas(){
+      elRondas.innerHTML = '';
+      if(!rondas.length){
+        const v = document.createElement('p');
+        v.className = 'cfg-nota';
+        v.textContent = 'Aún no hay rondas. Agrega una para elegir la hora, el premio y la letra del binguito.';
+        elRondas.appendChild(v);
+      }
+      rondas.forEach((r, i) => {
+        const fila = document.createElement('div');
+        fila.className = 'cfg-ronda';
+        const campo = (clase, valor, ph, max, tipo) => {
+          const inp = document.createElement('input');
+          inp.className = 'mc-texto ' + clase; inp.type = 'text'; inp.value = valor; inp.placeholder = ph; inp.maxLength = max; inp.autocomplete = 'off';
+          inp.addEventListener('input', () => { r[tipo] = inp.value; });
+          return inp;
+        };
+        fila.appendChild(campo('cfg-r-hora', r.hora, '13:30', 8, 'hora'));
+        fila.appendChild(campo('cfg-r-nombre', r.nombre, 'Bingo', 40, 'nombre'));
+        fila.appendChild(campo('cfg-r-premio', r.premio, '$100.000', 30, 'premio'));
+        const sel = document.createElement('select');
+        sel.className = 'mc-texto';
+        sel.innerHTML = '<option value="">Sin binguito</option>' + LETRAS_PROGRAMA.map(l => '<option value="' + l + '">Binguito ' + l + '</option>').join('');
+        sel.value = r.binguito || '';
+        sel.addEventListener('change', () => { r.binguito = sel.value || null; });
+        fila.appendChild(sel);
+        const acc = document.createElement('div');
+        acc.className = 'cfg-acciones';
+        const mk = (txt, titulo, fn, clase, deshab) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.title = titulo; b.disabled = !!deshab; if(clase) b.className = clase; b.addEventListener('click', fn); return b; };
+        acc.appendChild(mk('↑', 'Subir', () => { rondas.splice(i - 1, 0, rondas.splice(i, 1)[0]); dibujarRondas(); }, '', i === 0));
+        acc.appendChild(mk('↓', 'Bajar', () => { rondas.splice(i + 1, 0, rondas.splice(i, 1)[0]); dibujarRondas(); }, '', i === rondas.length - 1));
+        acc.appendChild(mk('✕', 'Quitar ronda', () => { rondas.splice(i, 1); dibujarRondas(); }, 'borrar'));
+        fila.appendChild(acc);
+        elRondas.appendChild(fila);
+      });
+      $('cfgAgregar').style.display = rondas.length >= 30 ? 'none' : '';
+    }
+    $('cfgAgregar').addEventListener('click', () => { rondas.push({ hora: '', nombre: 'Bingo', premio: '', binguito: null }); dibujarRondas(); });
+
+    function cerrar(){
+      modal.classList.remove('abierto');
+      pintarTema(temaEfectivo(configActual.tema));          // descarta la vista previa
+    }
+    $('cfgCancelar').addEventListener('click', cerrar);
+    $('cfgCerrar').addEventListener('click', cerrar);
+
+    $('cfgGuardar').addEventListener('click', () => {
+      elErr.textContent = '';
+      const titulo = elTitulo.value.trim();
+      if(!titulo){ elErr.textContent = 'Escribe el nombre del bingo.'; elTitulo.focus(); return; }
+      const lista = rondas.map(r => ({ hora: String(r.hora || '').trim(), nombre: String(r.nombre || '').trim() || 'Bingo', premio: String(r.premio || '').trim(), binguito: r.binguito || null }));
+      const pausas = elPausas.value.split(',').map(x => x.trim()).filter(Boolean).slice(0, 8);
+      const cfg = { titulo: titulo.slice(0, 60), tema: { fondo: elFondo.value.toLowerCase(), acento: elAcento.value.toLowerCase() } };
+      if(lista.length) cfg.rondas = lista;
+      if(pausas.length) cfg.pausas = pausas;
+      rutaSala().child('config').set(cfg).then(() => {
+        modal.classList.remove('abierto');
+      }).catch(() => { elErr.textContent = 'No se pudo guardar. Revisa tu conexión o la vigencia de tu acceso.'; errorEscritura(); });
+    });
+
+    return {
+      abrir: function(){
+        const c = configActual || {};
+        elTitulo.value = c.titulo || '';
+        const t = temaEfectivo(c.tema);
+        const tc = c.tema || {};
+        elFondo.value = (tc.fondo || TEMA_BASE.fondo).toLowerCase();
+        elAcento.value = (tc.acento || TEMA_BASE.acento).toLowerCase();
+        rondas = normalizarRondas(c.rondas).map(r => ({ hora: r.hora, nombre: r.nombre, premio: r.premio, binguito: r.binguito }));
+        elPausas.value = aLista(c.pausas).join(', ');
+        elErr.textContent = '';
+        elLic.textContent = licencia && licencia.vence
+          ? (Number(licencia.vence) > Date.now() ? 'Tu acceso está vigente hasta el ' + fechaCorta(licencia.vence) + '.' : 'Tu acceso venció el ' + fechaCorta(licencia.vence) + '. Ya no puedes guardar cambios.')
+          : '';
+        dibujarRondas();
+        vistaPrevia();
+        modal.classList.add('abierto');
+        setTimeout(() => elTitulo.focus(), 80);
+      }
+    };
+  }
+
+  // ---------------------------------------------------------------------
+  // PAUSA DEL BINGO: pantalla de espera en el proyector mientras hay un descanso
+  // ---------------------------------------------------------------------
+  let ultimoEstadoAdmin = {};
+  let PAUSA_PRESETS = ['Pausa', 'Descanso'];
+
+  // el bingo que sigue después de la ronda actual (o el primero si aún no empieza)
+  function rondaSiguiente(rondaId){
+    const i = RONDAS.findIndex(r => r.id === Number(rondaId));
+    if(i < 0) return RONDAS[0];
+    return i < RONDAS.length - 1 ? RONDAS[i + 1] : null;
+  }
+  function textoProximaRonda(id){
+    const r = RONDAS.find(x => x.id === Number(id));
+    return r ? 'Próximo bingo · ' + r.hora + ' · ' + r.nombre + ' ' + r.premio + (r.binguito ? ' · Binguito letra ' + r.binguito : '') : '';
+  }
+  function ponerPausa(p){
+    rutaSala().update({ pausa: { titulo: p.titulo || 'Pausa', detalle: p.detalle || '', proxima: p.proxima || null } }).catch(errorEscritura);
+  }
+  function quitarPausa(){
+    rutaSala().update({ pausa: null }).catch(errorEscritura);
+  }
+
+  // ventana para elegir el motivo de la pausa (la usan el proyector y el teléfono)
+  function iniciarModalPausa(){
+    const modal = $('pausaModal'), chips = $('pausaChips'), tit = $('pausaTitulo'), det = $('pausaDetalle'), prox = $('pausaProxima');
+    function construirOpciones(){
+      chips.innerHTML = '';
+      PAUSA_PRESETS.forEach(t => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'pausa-chip';
+        b.textContent = t;
+        b.addEventListener('click', () => { tit.value = t; });
+        chips.appendChild(b);
+      });
+      const actual = prox.value;
+      prox.innerHTML = '<option value="">Sin indicar</option>' + RONDAS.map(r =>
+        '<option value="' + r.id + '">' + r.hora + ' · ' + r.nombre + ' ' + r.premio + (r.binguito ? ' · Binguito ' + r.binguito : '') + '</option>').join('');
+      prox.value = actual;
+    }
+    construirOpciones();
+    refrescadoresConfig.push(construirOpciones);
+    function cerrar(){ modal.classList.remove('abierto'); }
+    function poner(){
+      ponerPausa({ titulo: tit.value.trim(), detalle: det.value.trim(), proxima: prox.value ? Number(prox.value) : null });
+      cerrar();
+    }
+    $('pausaCancelar').addEventListener('click', cerrar);
+    $('pausaCerrar').addEventListener('click', cerrar);
+    $('pausaPoner').addEventListener('click', poner);
+    [tit, det].forEach(el => el.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); poner(); } }));
+    return {
+      abrir: function(){
+        const r = rondaSiguiente(ultimoEstadoAdmin.ronda);
+        tit.value = 'Pausa';
+        det.value = '';
+        prox.value = r ? String(r.id) : '';
+        modal.classList.add('abierto');
+        setTimeout(() => tit.focus(), 60);
+      }
+    };
+  }
+
+  function descripcionRonda(r){
+    return r.hora + ' · ' + r.nombre + ' ' + r.premio + (r.binguito ? ' · Binguito ' + r.binguito : '');
+  }
+
+  // Al elegir una ronda se cambian de una vez el premio, el título y el binguito.
+  function elegirRonda(r){
+    rutaSala().update({ ronda: r.id, premio: r.premio, premioLabel: r.nombre, binguito: r.binguito || null, binguitoGanado: null }).catch(errorEscritura);
+  }
+  function quitarRonda(){
+    rutaSala().update({ ronda: null, binguito: null, binguitoGanado: null }).catch(errorEscritura);
+  }
+  function guardarBinguito(letra){
+    rutaSala().update({ binguito: letra || null, binguitoGanado: null }).catch(errorEscritura);
+  }
+
+  // =======================================================================
+  // MIS CARTONES (solo en el celular del espectador)
+  // Los cartones se guardan en el propio teléfono (localStorage) y el
+  // chequeo se hace allí mismo con los números llamados que ya llegan para
+  // mostrar el tablero. NO se escribe nada en Firebase ni se piden más datos.
+  //
+  // Reglas (ajústalas aquí si cambian):
+  //  - BINGUITO: completar sobre el cartón la letra de la ronda.
+  //  - BINGO: cartón lleno (todas las casillas marcadas; el centro libre cuenta).
+  // =======================================================================
+  const MAX_CARTONES = 20;
+  const RANGOS_COLUMNA = [[1, 15], [16, 30], [31, 45], [46, 60], [61, 75]];
+  const CENTRO = 12;
+
+  // Marca el cartón con los números llamados y calcula cuánto le falta.
+  function evaluarCarton(carton, llamados, letra){
+    const marcadas = [];
+    let faltanBingo = 0;
+    for(let i = 0; i < 25; i++){
+      const m = (carton.libre && i === CENTRO) || llamados.has(carton.celdas[i]);
+      marcadas.push(m);
+      if(!m) faltanBingo++;
+    }
+    const patron = [];
+    let faltanBinguito = null;
+    if(letra && formaValida(letra)){
+      faltanBinguito = 0;
+      FORMAS_BINGUITO[letra].forEach((fila, r) => {
+        fila.split('').forEach((ch, c) => {
+          if(ch === 'X'){
+            const i = r * 5 + c;
+            patron.push(i);
+            if(!marcadas[i]) faltanBinguito++;
+          }
+        });
+      });
+    }
+    return {
+      marcadas: marcadas, patron: patron,
+      faltanBingo: faltanBingo, faltanBinguito: faltanBinguito,
+      bingo: faltanBingo === 0,
+      binguito: faltanBinguito !== null && faltanBinguito === 0
+    };
+  }
+
+  // Revisa un cartón a medio ingresar. "errores" impiden guardar; "avisos" solo advierten.
+  function validarCarton(celdas, libre){
+    const errores = [];
+    const avisos = [];
+    const vistos = {};
+    for(let i = 0; i < 25; i++){
+      if(libre && i === CENTRO) continue;
+      const n = celdas[i];
+      if(!Number.isInteger(n)){ errores.push({ i: i, tipo: 'vacio' }); continue; }
+      if(n < 1 || n > 75){ errores.push({ i: i, tipo: 'rango' }); continue; }
+      if(vistos[n] !== undefined){
+        errores.push({ i: i, tipo: 'repetido' });
+        errores.push({ i: vistos[n], tipo: 'repetido' });
+      } else {
+        vistos[n] = i;
+      }
+      const col = i % 5;
+      if(n < RANGOS_COLUMNA[col][0] || n > RANGOS_COLUMNA[col][1]) avisos.push({ i: i, col: col });
+    }
+    return { errores: errores, avisos: avisos };
+  }
+
+  // Convierte un texto pegado en un cartón. Acepta 24 números (sin el centro)
+  // o 25 (con el centro, que puede venir como * / libre / free).
+  function parsearLista(texto){
+    const fichas = String(texto || '').toLowerCase().match(/\d+|\*|libre|free/g) || [];
+    let valores;
+    let libre = true;
+    if(fichas.length === 24 && fichas.every(f => /^\d+$/.test(f))){
+      valores = fichas.map(Number);
+      valores.splice(CENTRO, 0, 0);
+    } else if(fichas.length === 25){
+      valores = fichas.map(f => /^\d+$/.test(f) ? Number(f) : 0);
+      const centro = fichas[CENTRO];
+      libre = !/^\d+$/.test(centro) || Number(centro) === 0;
+    } else {
+      return { error: 'Necesito 24 números (o 25 si incluyes el centro). Encontré ' + fichas.length + '.' };
+    }
+    return { celdas: valores, libre: libre };
+  }
+
+  function leerCartonesGuardados(clave){
+    try{
+      const lista = JSON.parse(localStorage.getItem(clave) || '[]');
+      if(!Array.isArray(lista)) return [];
+      return lista.filter(c => c && typeof c.id === 'string' && Array.isArray(c.celdas) && c.celdas.length === 25);
+    } catch(e){ return []; }
+  }
+  function guardarCartonesLocal(clave, lista){
+    try{ localStorage.setItem(clave, JSON.stringify(lista)); return true; } catch(e){ return false; }
+  }
+
+
+  // Genera un sonido de aviso (formato WAV, en memoria) con las notas dadas.
+  function generarWavURI(notas, opc){
+    opc = opc || {};
+    const sr = 22050, dur = opc.dur || 0.2, pausa = opc.pausa || 0.035, rep = opc.rep || 1, hueco = opc.hueco || 0.25;
+    const trozos = [];
+    let total = 0;
+    for(let r = 0; r < rep; r++){
+      notas.forEach(f => {
+        const n = Math.floor(sr * dur), a = new Float32Array(n);
+        for(let i = 0; i < n; i++){
+          const t = i / sr;
+          const env = Math.min(1, t / 0.006) * Math.exp(-3.0 * t / dur);
+          a[i] = (Math.sin(2 * Math.PI * f * t) + 0.5 * Math.sin(4 * Math.PI * f * t) + 0.25 * Math.sin(6 * Math.PI * f * t)) * env;
+        }
+        trozos.push(a); total += n;
+        const p = Math.floor(sr * pausa); trozos.push(new Float32Array(p)); total += p;
+      });
+      const h = Math.floor(sr * hueco); trozos.push(new Float32Array(h)); total += h;
+    }
+    const todo = new Float32Array(total);
+    let o = 0, pico = 0;
+    trozos.forEach(t => { todo.set(t, o); o += t.length; });
+    for(let i = 0; i < total; i++) pico = Math.max(pico, Math.abs(todo[i]));
+    const ganancia = pico ? 0.92 / pico : 1;
+    const buf = new ArrayBuffer(44 + total * 2), v = new DataView(buf);
+    const txt = (pos, str) => { for(let i = 0; i < str.length; i++) v.setUint8(pos + i, str.charCodeAt(i)); };
+    txt(0, 'RIFF'); v.setUint32(4, 36 + total * 2, true); txt(8, 'WAVE'); txt(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    txt(36, 'data'); v.setUint32(40, total * 2, true);
+    for(let i = 0; i < total; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, todo[i] * ganancia)) * 32767, true);
+    const bytes = new Uint8Array(buf);
+    let bin = '';
+    for(let i = 0; i < bytes.length; i += 8192) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+    return 'data:audio/wav;base64,' + btoa(bin);
+  }
+
+  function crearMisCartones(){
+    const CLAVE = 'bingoCartones:' + room;
+    const CLAVE_PREFS = 'bingoCartonesPrefs';
+    const lista = $('mcLista');
+    const resumen = $('mcResumen');
+    const ayuda = $('mcAyuda');
+    const chkSonido = $('mcSonido');
+    const chkPantalla = $('mcPantalla');
+    const modal = $('mcModal');
+    const grid = $('mcGrid');
+    const inpNombre = $('mcNombre');
+    const chkLibre = $('mcLibre');
+    const txtPegar = $('mcPegar');
+    const msgError = $('mcError');
+    const alerta = $('mcAlerta');
+    const seccion = $('mCartonesCard');
+
+    let cartones = leerCartonesGuardados(CLAVE);
+    let abiertos = {};            // id -> true/false (cartón desplegado)
+    let editandoId = null;
+    let estado = { llamados: new Set(), letra: null, clave: '', ganado: false };
+    let logradoAntes = {};         // cartones que completaron la letra ANTES de que se entregara el binguito
+    let alertados = {};           // evita avisar dos veces lo mismo en el mismo juego
+    let primeraVez = true;
+    let guardadoOk = true;
+    let ctxAudio = null;
+    let wakeLock = null;
+    let temporizadorAlerta = null;
+
+    let prefs = { sonido: true, pantalla: true };
+    try{ prefs = Object.assign(prefs, JSON.parse(localStorage.getItem(CLAVE_PREFS) || '{}')); } catch(e){}
+    chkSonido.checked = !!prefs.sonido;
+    chkPantalla.checked = !!prefs.pantalla;
+
+    // ---------- editor ----------
+    const inputs = [];
+    grid.innerHTML = '';
+    for(let i = 0; i < 25; i++){
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.setAttribute('inputmode', 'numeric');
+      inp.setAttribute('pattern', '[0-9]*');
+      inp.setAttribute('enterkeyhint', 'next');
+      inp.maxLength = 2;
+      inp.autocomplete = 'off';
+      inp.className = 'mc-in';
+      inp.addEventListener('input', () => {
+        inp.value = inp.value.replace(/\D/g, '').slice(0, 2);
+        revisarEditor(false);
+        if(debeAvanzar(i, inp.value)) enfocarSiguiente(i);
+      });
+      inp.addEventListener('focus', () => { try{ inp.select(); } catch(e){} });
+      inp.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); enfocarSiguiente(i); } });
+      inputs.push(inp);
+      grid.appendChild(inp);
+    }
+
+    // avanza solo cuando el número ya no puede alargarse dentro de su columna
+    function debeAvanzar(i, v){
+      if(v.length === 2) return true;
+      if(v.length !== 1) return false;
+      const col = i % 5;
+      const a = RANGOS_COLUMNA[col][0];
+      const b = RANGOS_COLUMNA[col][1];
+      const d = Number(v);
+      const unoValido = d >= a && d <= b;
+      let sigue = false;
+      for(let n = Math.max(a, 10); n <= b; n++){ if(Math.floor(n / 10) === d) sigue = true; }
+      return unoValido && !sigue;
+    }
+    function enfocarSiguiente(i){
+      for(let j = i + 1; j < 25; j++){
+        if(!inputs[j].disabled){ inputs[j].focus(); return; }
+      }
+      inputs[i].blur();
+    }
+
+    function leerEditor(){
+      const libre = chkLibre.checked;
+      const celdas = inputs.map((inp, i) => {
+        if(libre && i === CENTRO) return 0;
+        return inp.value === '' ? NaN : Number(inp.value);
+      });
+      return { celdas: celdas, libre: libre };
+    }
+
+    function aplicarLibre(){
+      const libre = chkLibre.checked;
+      inputs[CENTRO].disabled = libre;
+      inputs[CENTRO].placeholder = libre ? 'LIBRE' : '';
+      if(libre) inputs[CENTRO].value = '';
+    }
+    chkLibre.addEventListener('change', () => { aplicarLibre(); revisarEditor(false); });
+
+    function revisarEditor(mostrarMensaje){
+      const d = leerEditor();
+      const v = validarCarton(d.celdas, d.libre);
+      inputs.forEach(inp => { inp.classList.remove('err'); inp.classList.remove('aviso'); });
+      v.avisos.forEach(a => inputs[a.i].classList.add('aviso'));
+      v.errores.forEach(e => { if(e.tipo !== 'vacio') inputs[e.i].classList.add('err'); });
+      if(mostrarMensaje){
+        const rep = v.errores.filter(e => e.tipo === 'repetido').length;
+        const vacios = v.errores.filter(e => e.tipo === 'vacio').length;
+        const rango = v.errores.filter(e => e.tipo === 'rango').length;
+        const partes = [];
+        if(vacios) partes.push('faltan ' + vacios + ' casilla' + (vacios > 1 ? 's' : ''));
+        if(rep) partes.push('hay números repetidos (en rojo)');
+        if(rango) partes.push('hay números fuera de 1 a 75 (en rojo)');
+        msgError.className = 'mc-error';
+        msgError.textContent = partes.length ? 'Revisa: ' + partes.join(', ') + '.' : '';
+      }
+      return v;
+    }
+
+    function abrirEditor(carton){
+      editandoId = carton ? carton.id : null;
+      $('mcTituloEditor').textContent = carton ? 'Editar cartón' : 'Nuevo cartón';
+      inpNombre.value = carton ? carton.nombre : '';
+      chkLibre.checked = carton ? !!carton.libre : true;
+      aplicarLibre();
+      inputs.forEach((inp, i) => {
+        inp.value = '';
+        if(carton && !(carton.libre && i === CENTRO) && carton.celdas[i] > 0) inp.value = String(carton.celdas[i]);
+      });
+      txtPegar.value = '';
+      msgError.className = 'mc-error info';
+      msgError.textContent = 'Escribe los números tal como están en tu cartón, de izquierda a derecha y de arriba hacia abajo.';
+      revisarEditor(false);
+      modal.classList.add('abierto');
+      document.body.style.overflow = 'hidden';
+      desbloquearAudio();
+      if(!carton){ const primero = inputs[0]; setTimeout(() => primero.focus(), 60); }
+    }
+    function cerrarEditor(){
+      modal.classList.remove('abierto');
+      document.body.style.overflow = '';
+      editandoId = null;
+    }
+
+    $('mcAgregar').addEventListener('click', () => {
+      if(cartones.length >= MAX_CARTONES){ alert('Puedes guardar hasta ' + MAX_CARTONES + ' cartones.'); return; }
+      abrirEditor(null);
+    });
+    $('mcCerrar').addEventListener('click', cerrarEditor);
+    $('mcCancelar').addEventListener('click', cerrarEditor);
+
+    $('mcImportar').addEventListener('click', () => {
+      const r = parsearLista(txtPegar.value);
+      if(r.error){ msgError.className = 'mc-error'; msgError.textContent = r.error; return; }
+      chkLibre.checked = r.libre;
+      aplicarLibre();
+      inputs.forEach((inp, i) => {
+        inp.value = (r.libre && i === CENTRO) || !(r.celdas[i] > 0) ? '' : String(r.celdas[i]);
+      });
+      msgError.className = 'mc-error info';
+      msgError.textContent = 'Números cargados. Revisa que coincidan con tu cartón y guarda.';
+      revisarEditor(false);
+    });
+
+    $('mcGuardar').addEventListener('click', () => {
+      const d = leerEditor();
+      const v = revisarEditor(true);
+      if(v.errores.length) return;
+      if(v.avisos.length && !confirm('Hay ' + v.avisos.length + ' número(s) que no corresponden a su columna (por ejemplo, un 40 en la B). ¿Guardar igual?')) return;
+      const nombre = inpNombre.value.trim() || ('Cartón ' + (editandoId ? (cartones.findIndex(c => c.id === editandoId) + 1) : (cartones.length + 1)));
+      if(editandoId){
+        const c = cartones.find(x => x.id === editandoId);
+        if(c){ c.nombre = nombre; c.libre = d.libre; c.celdas = d.celdas; }
+      } else {
+        const id = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        cartones.push({ id: id, nombre: nombre, libre: d.libre, celdas: d.celdas });
+        abiertos[id] = true;
+      }
+      guardadoOk = guardarCartonesLocal(CLAVE, cartones);
+      cerrarEditor();
+      sincronizarSinAvisos();
+      pintar();
+      ajustarPantalla();
+    });
+
+    // ---------- sonido, vibración y pantalla ----------
+    // El sonido es un archivo de audio generado en el teléfono (suena aunque el iPhone esté en
+    // silencio, a diferencia del audio "sintético"). Se desbloquea con el primer toque en la página.
+    let audios = null;
+    let audioDesbloqueado = false;
+    let tiemposSonido = [];
+
+    function crearAudios(){
+      if(audios) return audios;
+      audios = {
+        binguito: new Audio(generarWavURI([880, 1175, 1480], { dur: 0.2, rep: 2, hueco: 0.2 })),
+        bingo: new Audio(generarWavURI([523, 659, 784, 1047, 784, 1047, 1319, 1047, 1319, 1568], { dur: 0.17 }))
+      };
+      Object.keys(audios).forEach(k => { audios[k].preload = 'auto'; });
+      return audios;
+    }
+
+    function desbloquearAudio(){
+      try{ if(navigator.audioSession) navigator.audioSession.type = 'playback'; } catch(e){}
+      try{
+        const a = crearAudios();
+        if(!audioDesbloqueado){
+          audioDesbloqueado = true;
+          Object.keys(a).forEach(k => {
+            const el = a[k];
+            el.__unl = true;
+            el.muted = true;
+            const p = el.play();
+            if(p && p.then){
+              p.then(() => { if(el.__unl){ el.pause(); el.currentTime = 0; } el.muted = false; el.__unl = false; })
+               .catch(() => { el.muted = false; el.__unl = false; });
+            } else { el.pause(); el.muted = false; el.__unl = false; }
+          });
+        }
+      } catch(e){}
+      try{
+        if(!ctxAudio){ const AC = window.AudioContext || window.webkitAudioContext; if(AC) ctxAudio = new AC(); }
+        if(ctxAudio && ctxAudio.state === 'suspended') ctxAudio.resume();
+      } catch(e){}
+    }
+    ['pointerdown', 'touchend', 'keydown'].forEach(ev => document.addEventListener(ev, desbloquearAudio, { passive: true }));
+
+    // respaldo si el navegador no deja reproducir el archivo
+    function sonarWebAudio(tipo){
+      try{
+        desbloquearAudio();
+        if(!ctxAudio) return;
+        const notas = tipo === 'bingo' ? [523, 659, 784, 1047, 784, 1047] : [660, 880];
+        let t = ctxAudio.currentTime;
+        notas.forEach((f) => {
+          const o = ctxAudio.createOscillator();
+          const g = ctxAudio.createGain();
+          o.type = 'triangle';
+          o.frequency.value = f;
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.5, t + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+          o.connect(g);
+          g.connect(ctxAudio.destination);
+          o.start(t);
+          o.stop(t + 0.24);
+          t += 0.2;
+        });
+      } catch(e){}
+    }
+
+    function sonarSolo(tipo){
+      try{
+        const el = crearAudios()[tipo];
+        el.__unl = false;
+        el.muted = false;
+        el.volume = 1;
+        try{ el.pause(); el.currentTime = 0; } catch(e){}
+        const p = el.play();
+        if(p && p.catch) p.catch(() => sonarWebAudio(tipo));
+      } catch(e){ sonarWebAudio(tipo); }
+    }
+
+    function sonar(tipo){
+      if(!prefs.sonido) return;
+      try{ if(navigator.vibrate) navigator.vibrate(tipo === 'bingo' ? [300, 120, 300, 120, 600] : [250, 100, 250]); } catch(e){}
+      sonarSolo(tipo);
+    }
+
+    function detenerSonidos(){
+      tiemposSonido.forEach(clearTimeout);
+      tiemposSonido = [];
+      try{ if(audios) Object.keys(audios).forEach(k => { audios[k].pause(); audios[k].currentTime = 0; }); } catch(e){}
+      try{ if(navigator.vibrate) navigator.vibrate(0); } catch(e){}
+    }
+
+    // el aviso suena tres veces (con pausa) hasta que se toque "Entendido"
+    function avisarConSonido(tipo){
+      detenerSonidos();
+      sonar(tipo);
+      [3600, 7200].forEach(ms => tiemposSonido.push(setTimeout(() => sonar(tipo), ms)));
+    }
+
+    $('mcProbar').addEventListener('click', () => {
+      sonarSolo('binguito');
+      try{ if(navigator.vibrate) navigator.vibrate(200); } catch(e){}
+    });
+
+    async function ajustarPantalla(){
+      try{
+        const quiere = prefs.pantalla && cartones.length > 0 && document.visibilityState === 'visible' && 'wakeLock' in navigator;
+        if(quiere && !wakeLock){
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', () => { wakeLock = null; });
+        } else if(!quiere && wakeLock){
+          await wakeLock.release();
+          wakeLock = null;
+        }
+      } catch(e){ wakeLock = null; }
+    }
+    document.addEventListener('visibilitychange', ajustarPantalla);
+
+    chkSonido.addEventListener('change', () => {
+      prefs.sonido = chkSonido.checked;
+      try{ localStorage.setItem(CLAVE_PREFS, JSON.stringify(prefs)); } catch(e){}
+      if(prefs.sonido) sonar('binguito');
+    });
+    chkPantalla.addEventListener('change', () => {
+      prefs.pantalla = chkPantalla.checked;
+      try{ localStorage.setItem(CLAVE_PREFS, JSON.stringify(prefs)); } catch(e){}
+      ajustarPantalla();
+    });
+
+    // ---------- aviso en pantalla ----------
+    function mostrarAlerta(nuevos){
+      const hayBingo = nuevos.some(n => n.tipo === 'bingo');
+      const tipo = hayBingo ? 'bingo' : 'binguito';
+      const dellos = nuevos.filter(n => n.tipo === tipo);
+      const nombres = dellos.map(n => n.carton.nombre).join(', ');
+      $('mcAlTit').textContent = hayBingo ? '🏆 ¡BINGO!' : '🎉 ¡BINGUITO!';
+      $('mcAlTxt').textContent = hayBingo
+        ? nombres + (dellos.length > 1 ? ' están llenos' : ' está lleno') + '. ¡Avisa a la organización ahora!'
+        : nombres + ' completó la línea de la ' + dellos[0].letra + '. ¡Avisa a la organización!';
+      alerta.classList.add('visible');
+      avisarConSonido(tipo);
+      clearTimeout(temporizadorAlerta);
+      temporizadorAlerta = setTimeout(() => { alerta.classList.remove('visible'); detenerSonidos(); }, 20000);
+    }
+    $('mcAlOk').addEventListener('click', () => { alerta.classList.remove('visible'); clearTimeout(temporizadorAlerta); detenerSonidos(); });
+
+    // ---------- evaluación ----------
+    function llaveAviso(c, tipo){ return estado.clave + '|' + c.id + '|' + tipo; }
+
+    // marca como "ya avisado" lo que ya está cumplido (cartón recién agregado, primer vistazo, cambio de ronda)
+    function sincronizarSinAvisos(){
+      cartones.forEach(c => {
+        const ev = evaluarCarton(c, estado.llamados, estado.letra);
+        if(ev.binguito) alertados[llaveAviso(c, 'binguito')] = true;
+        if(ev.bingo) alertados[llaveAviso(c, 'bingo')] = true;
+      });
+    }
+
+    function actualizar(est){
+      const llamados = new Set(aLista(est && est.historial));
+      const letra = est && formaValida(est.binguito) ? est.binguito : null;
+      const clave = String((est && est.ronda) || '') + '|' + (letra || '');
+      const ganado = !!(est && est.binguitoGanado) && !!letra;
+      if(llamados.size === 0){ alertados = {}; logradoAntes = {}; }
+      const reinicio = primeraVez || clave !== estado.clave || llamados.size < estado.llamados.size;
+      estado = { llamados: llamados, letra: letra, clave: clave, ganado: ganado };
+      primeraVez = false;
+
+      const nuevos = [];
+      cartones.forEach(c => {
+        const ev = evaluarCarton(c, llamados, letra);
+        [['binguito', ev.binguito], ['bingo', ev.bingo]].forEach(par => {
+          const tipo = par[0];
+          if(!par[1]) return;
+          if(tipo === 'binguito' && !ganado) logradoAntes[clave + '|' + c.id] = true;
+          const llave = llaveAviso(c, tipo);
+          if(!alertados[llave]){
+            alertados[llave] = true;
+            // si el binguito ya se entregó, completar la letra ya no da aviso (el juego sigue por el bingo)
+            const silenciar = tipo === 'binguito' && ganado;
+            if(!reinicio && !silenciar) nuevos.push({ tipo: tipo, carton: c, letra: letra });
+          }
+        });
+      });
+      pintar();
+      if(nuevos.length) mostrarAlerta(nuevos);
+    }
+
+    // ---------- lista de cartones ----------
+    function pintar(){
+      lista.innerHTML = '';
+      ayuda.style.display = cartones.length ? 'none' : 'block';
+      const total = cartones.length;
+      let ganados = 0;
+
+      cartones.forEach((c, idx) => {
+        const ev = evaluarCarton(c, estado.llamados, estado.letra);
+        // un binguito completado DESPUÉS de que se entregó ya no cuenta como "ganado"
+        const binguitoVigente = ev.binguito && (!estado.ganado || logradoAntes[estado.clave + '|' + c.id]);
+        const binguitoTarde = ev.binguito && !binguitoVigente;
+        const gano = ev.bingo || binguitoVigente;
+        if(gano) ganados++;
+        const det = document.createElement('details');
+        det.className = 'mc-carton' + (gano ? ' gano' : '');
+        const abierto = abiertos[c.id] !== undefined ? abiertos[c.id] : total <= 3;
+        if(abierto) det.open = true;
+        det.addEventListener('toggle', () => { abiertos[c.id] = det.open; });
+
+        const sum = document.createElement('summary');
+        const nom = document.createElement('span');
+        nom.className = 'mc-nombre';
+        nom.textContent = c.nombre;
+        sum.appendChild(nom);
+        const chip = document.createElement('span');
+        if(ev.bingo){ chip.className = 'mc-chip ok'; chip.textContent = '¡Bingo!'; }
+        else if(binguitoVigente){ chip.className = 'mc-chip ok'; chip.textContent = '¡Binguito!'; }
+        else if(binguitoTarde){ chip.className = 'mc-chip'; chip.textContent = 'Letra completa'; }
+        else if(ev.faltanBinguito !== null && !estado.ganado){
+          chip.className = 'mc-chip' + (ev.faltanBinguito <= 2 ? ' cerca' : '');
+          chip.textContent = 'Binguito: ' + (ev.faltanBinguito === 1 ? 'falta 1' : 'faltan ' + ev.faltanBinguito);
+        }
+        else { chip.className = 'mc-chip'; chip.textContent = 'Bingo: ' + (ev.faltanBingo === 1 ? 'falta 1' : 'faltan ' + ev.faltanBingo); }
+        sum.appendChild(chip);
+        det.appendChild(sum);
+
+        const cuerpo = document.createElement('div');
+        cuerpo.className = 'mc-cuerpo';
+        const celdas = document.createElement('div');
+        celdas.className = 'mc-celdas';
+        const patron = {};
+        ev.patron.forEach(i => { patron[i] = true; });
+        LETRAS_PROGRAMA.forEach(l => {
+          const h = document.createElement('div');
+          h.className = 'mc-ch' + (l === estado.letra ? ' on' : '');
+          h.textContent = l;
+          celdas.appendChild(h);
+        });
+        for(let i = 0; i < 25; i++){
+          const cel = document.createElement('div');
+          const esLibre = c.libre && i === CENTRO;
+          cel.className = 'mc-c' + (ev.marcadas[i] ? ' on' : '') + (patron[i] ? ' pat' : '') + (esLibre ? ' libre' : '');
+          cel.textContent = esLibre ? 'LIBRE' : c.celdas[i];
+          celdas.appendChild(cel);
+        }
+        cuerpo.appendChild(celdas);
+
+        const est = document.createElement('div');
+        est.className = 'mc-estado';
+        const lineas = [];
+        if(estado.letra){
+          lineas.push(binguitoVigente
+            ? '<strong>Binguito ' + estado.letra + ' completo</strong>'
+            : (estado.ganado ? 'Binguito ' + estado.letra + ': ya fue entregado'
+                             : 'Binguito ' + estado.letra + ': faltan <strong>' + ev.faltanBinguito + '</strong>'));
+        } else {
+          lineas.push('Esta ronda no tiene binguito');
+        }
+        lineas.push(ev.bingo ? '<strong>Cartón lleno: ¡bingo!</strong>' : 'Bingo (cartón lleno): faltan <strong>' + ev.faltanBingo + '</strong>');
+        est.innerHTML = lineas.join('<br>');
+        cuerpo.appendChild(est);
+
+        const acc = document.createElement('div');
+        acc.className = 'mc-acciones';
+        const bEd = document.createElement('button');
+        bEd.type = 'button';
+        bEd.textContent = 'Editar';
+        bEd.addEventListener('click', () => abrirEditor(c));
+        const bBo = document.createElement('button');
+        bBo.type = 'button';
+        bBo.className = 'borrar';
+        bBo.textContent = 'Borrar';
+        bBo.addEventListener('click', () => {
+          if(!confirm('¿Borrar "' + c.nombre + '"?')) return;
+          cartones = cartones.filter(x => x.id !== c.id);
+          guardadoOk = guardarCartonesLocal(CLAVE, cartones);
+          pintar();
+          ajustarPantalla();
+        });
+        acc.appendChild(bEd);
+        acc.appendChild(bBo);
+        cuerpo.appendChild(acc);
+
+        det.appendChild(cuerpo);
+        lista.appendChild(det);
+      });
+
+      resumen.classList.toggle('gano', ganados > 0);
+      if(!total){
+        resumen.textContent = 'Agregar';
+      } else {
+        const hayBingo = cartones.some(c => evaluarCarton(c, estado.llamados, estado.letra).bingo);
+        resumen.textContent = total + (total === 1 ? ' cartón' : ' cartones') + (ganados ? (hayBingo ? ' · 🏆 ¡Bingo!' : ' · 🎉 ¡Binguito!') : '');
+      }
+      if(!guardadoOk && total){
+        const aviso = document.createElement('p');
+        aviso.className = 'mc-aviso';
+        aviso.textContent = 'No pude guardar tus cartones en este teléfono (¿modo privado?). Se perderán al cerrar la página.';
+        lista.appendChild(aviso);
+      }
+    }
+
+
+    // ---------- sección plegable: recordar si estaba abierta ----------
+    try{ seccion.open = localStorage.getItem('bingoCartonesAbierto') === '1'; } catch(e){}
+    seccion.addEventListener('toggle', (e) => {
+      if(e.target !== seccion) return;
+      try{ localStorage.setItem('bingoCartonesAbierto', seccion.open ? '1' : '0'); } catch(err){}
+    });
+
+    pintar();
+    ajustarPantalla();
+    return { actualizar: actualizar };
+  }
+
+  // Se suscribe al estado compartido: así todos los dispositivos admin
+  // muestran lo mismo y, al recargar, NO se pierde nada.
+  function conectarAdmin(alCambiarEstado, alCambiarLogos){
+    const db = window.__fbDb;
+    if(!db){ alert('Firebase no está configurado.'); return; }
+    db.ref('.info/connected').on('value', (snap) => {
+      const ok = snap.val() === true;
+      marcarConexion(ok, ok ? 'En vivo · sala ' + room : 'Sin conexión');
+    });
+    db.ref('licencias/' + room).on('value', (snap) => { licencia = snap.val(); });
+    rutaSala().on('value',
+      (snap) => alCambiarEstado(snap.val() || {}),
+      () => marcarConexion(false, 'Sin permiso de lectura'));
+    if(alCambiarLogos){
+      rutaLogos().on('value', (snap) => alCambiarLogos(snap.val() || {}));
+    }
+  }
+
+  function procesarImagenLogo(file, callback){
+    const lector = new FileReader();
+    lector.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 400;
+        let w = img.width, h = img.height;
+        if(w > maxDim || h > maxDim){
+          if(w > h){ h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        callback(canvas.toDataURL('image/png'));
+      };
+      img.src = ev.target.result;
+    };
+    lector.readAsDataURL(file);
+  }
+
+  function arrancar(rol){
+    document.body.className = rol === 'proyector' ? 'host' : (rol === 'control' ? 'control' : 'mobile');
+
+    if(rol === 'proyector') iniciarProyector();
+    else if(rol === 'control') iniciarControl();
+    else iniciarEspectador();
+  }
+
+  // =======================================================================
+  // VISTA PROYECTOR (admin en el computador)
+  // =======================================================================
+  function iniciarProyector(){
+    const board = $('board');
+    const contadorEl = $('contadorNum');
+    const premioValor = $('premioValor');
+    const premioLabel = $('premioLabel');
+    const panelBin = $('panelBinguito');
+    const binPatron = $('binPatron');
+    const binLetra = $('binLetra');
+    const selRonda = $('selRonda');
+    const celdas = {};
+    let letraBinActual = null;
+    let logoColegioSrc = null;
+    let binguitoEntregado = false;
+
+    rangos.forEach(({letra, inicio, fin}) => {
+      const fila = document.createElement('div');
+      fila.className = 'fila';
+
+      const label = document.createElement('div');
+      label.className = 'letra-label L-' + letra;
+      label.textContent = letra;
+      fila.appendChild(label);
+
+      for(let n = inicio; n <= fin; n++){
+        const celda = document.createElement('div');
+        celda.className = 'celda';
+        celda.textContent = n;
+        celda.addEventListener('click', () => alternarNumero(n));
+        celdas[n] = celda;
+        fila.appendChild(celda);
+      }
+      board.appendChild(fila);
+    });
+
+    const elsLlamadas = { bola: $('bolaActual'), anterior: $('numAnterior'), historial: $('historyBalls') };
+
+    function renderProyector(estado){
+      ultimoEstadoAdmin = estado;
+      aplicarConfig(estado.config);
+      const historial = aLista(estado.historial);
+      const marcados = new Set(historial);
+      Object.keys(celdas).forEach(k => celdas[k].classList.toggle('marcada', marcados.has(Number(k))));
+      contadorEl.textContent = historial.length;
+      pintarLlamadas(historial, elsLlamadas);
+      // no pisar el texto mientras se está escribiendo en el campo
+      if(document.activeElement !== premioValor && typeof estado.premio === 'string') premioValor.textContent = estado.premio;
+      if(document.activeElement !== premioLabel && typeof estado.premioLabel === 'string') premioLabel.textContent = estado.premioLabel;
+
+      // binguito: letra que hay que formar en el cartón
+      const letra = formaValida(estado.binguito) ? estado.binguito : null;
+      if(letra !== letraBinActual){
+        letraBinActual = letra;
+        panelBin.style.display = letra ? 'flex' : 'none';
+        binPatron.innerHTML = '';
+        if(letra){
+          binPatron.appendChild(crearPatron(letra));
+          binLetra.textContent = 'Letra ' + letra;
+        }
+      }
+      if(document.activeElement !== selRonda) selRonda.value = estado.ronda ? String(estado.ronda) : '';
+
+      // binguito ya entregado
+      binguitoEntregado = !!estado.binguitoGanado && !!letra;
+      if(letra) binLetra.textContent = binguitoEntregado ? 'Entregado ✓' : 'Letra ' + letra;   // misma línea: el encabezado no cambia de alto
+      panelBin.classList.toggle('entregado', binguitoEntregado);
+      const btnBin = $('btnBinguito');
+      btnBin.style.display = letra ? '' : 'none';
+      btnBin.textContent = binguitoEntregado ? 'Binguito entregado ✓ (deshacer)' : 'Marcar binguito entregado';
+      btnBin.classList.toggle('activo', binguitoEntregado);
+
+      aplicarPausa(estado.pausa);
+    }
+
+    // ---- modo claro / oscuro SOLO en este computador (no cambia lo que ven los demás) ----
+    function claroAhora(){ return document.documentElement.dataset.claro === '1'; }
+    function textoBotonTema(){ $('btnTema').textContent = claroAhora() ? '🌙 Modo oscuro' : '☀ Modo claro'; }
+    function alternarTemaLocal(){
+      guardarTemaLocal(claroAhora() ? 'oscuro' : 'claro');
+      aplicarConfig(configActual, true);
+    }
+    refrescadoresConfig.push(textoBotonTema);
+    $('btnTema').addEventListener('click', alternarTemaLocal);
+    document.addEventListener('keydown', (e) => {
+      if(e.key.toLowerCase() === 'l' && !e.ctrlKey && !e.metaKey && !e.altKey){
+        const activo = document.activeElement;
+        if(!(activo && (activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA' || activo.isContentEditable))) alternarTemaLocal();
+      }
+    });
+
+    // configuración del bingo (nombre, colores, rondas)
+    const modalConfig = iniciarModalConfig();
+    $('btnConfig').addEventListener('click', () => modalConfig.abrir());
+
+    // selector de ronda (barra inferior)
+    function construirSelectorRondas(){
+      const actual = selRonda.value;
+      selRonda.innerHTML = '<option value="">Sin ronda</option>' +
+        RONDAS.map(r => '<option value="' + r.id + '">' + descripcionRonda(r) + '</option>').join('');
+      selRonda.value = actual;
+    }
+    construirSelectorRondas();
+    refrescadoresConfig.push(construirSelectorRondas);
+    selRonda.addEventListener('change', () => {
+      const r = RONDAS.find(x => String(x.id) === selRonda.value);
+      if(r) elegirRonda(r); else quitarRonda();
+      selRonda.blur();
+    });
+
+    $('btnBinguito').addEventListener('click', () => marcarBinguitoEntregado(!binguitoEntregado));
+
+    $('btnLimpiar').addEventListener('click', () => {
+      if(confirm('¿Limpiar todos los números marcados? Esto también se verá en los celulares.')) limpiarTodo();
+    });
+
+    const guardarPremioDif = debounce(() => guardarPremio(premioValor.textContent.trim()), 400);
+    const guardarTituloDif = debounce(() => guardarTituloPremio(premioLabel.textContent.trim()), 400);
+    premioValor.addEventListener('input', guardarPremioDif);
+    premioLabel.addEventListener('input', guardarTituloDif);
+    premioValor.addEventListener('blur', () => guardarPremio(premioValor.textContent.trim()));
+    premioLabel.addEventListener('blur', () => guardarTituloPremio(premioLabel.textContent.trim()));
+
+    // ---- logos (colegio y auspiciadores): se guardan en Firebase y se
+    // cargan de vuelta al abrir, así no se pierden al recargar ----
+    const cajaColegio = $('logoColegio');
+
+    function habilitarSubidaLogo(el, ruta){
+      el.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if(!file) return;
+          procesarImagenLogo(file, (dataUrl) => {
+            if(ruta.indexOf('auspiciadores') === 0) editandoAus = true;   // al subir un auspiciador se sigue en modo edición hasta tocar "Listo"
+            rutaLogos().child(ruta).set(dataUrl).catch(errorEscritura);
+          });
+        });
+        document.body.appendChild(input);
+        input.click();
+        input.remove();
+      });
+    }
+    habilitarSubidaLogo(cajaColegio, 'colegio');
+
+    // ---- auspiciadores: siempre hay un casillero "+" libre después del
+    // último logo, así se pueden agregar más (hasta MAX_AUSPICIADORES).
+    // Con más de 8 los casilleros se achican para que quepan en el encabezado. ----
+    const MAX_AUSPICIADORES = 18;
+    const MIN_CASILLEROS = 4;
+    const contenedorAus = $('sponsorSlots');
+    let logosAus = {};   // posición -> imagen
+
+    function dibujarAuspiciadores(){
+      const posiciones = Object.keys(logosAus).map(Number);
+      const ultima = posiciones.length ? Math.max.apply(null, posiciones) : -1;
+      const visibles = Math.min(MAX_AUSPICIADORES, Math.max(MIN_CASILLEROS, ultima + 2));
+      const compacto = visibles > 8;
+      contenedorAus.style.setProperty('--cols', compacto ? 6 : 4);
+      contenedorAus.style.setProperty('--aus-escala', compacto ? 0.66 : 1);
+      contenedorAus.innerHTML = '';
+      for(let i = 0; i < visibles; i++){
+        const caja = document.createElement('div');
+        caja.className = 'logo-box chico';
+        const src = logosAus[i];
+        if(src){
+          const img = document.createElement('img');
+          img.src = src;
+          caja.appendChild(img);
+          caja.classList.add('con-logo');
+          const quitar = document.createElement('button');
+          quitar.type = 'button';
+          quitar.className = 'quitar';
+          quitar.title = 'Quitar este auspiciador';
+          quitar.textContent = '×';
+          quitar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if(confirm('¿Quitar este auspiciador?')) rutaLogos().child('auspiciadores/' + i).remove().catch(errorEscritura);
+          });
+          caja.appendChild(quitar);
+        } else {
+          caja.textContent = '+';
+        }
+        habilitarSubidaLogo(caja, 'auspiciadores/' + i);
+        contenedorAus.appendChild(caja);
+      }
+    }
+    dibujarAuspiciadores();
+
+    function pintarLogoEnCaja(el, src){
+      if(!src || el.dataset.src === src) return;
+      el.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = src;
+      el.appendChild(img);
+      el.classList.add('con-logo');
+      el.dataset.src = src;
+    }
+
+    // Los auspiciadores rotan de a uno. "Editar" muestra la grilla para subir o quitar logos.
+    const carruselProy = crearCarruselAuspiciadores($('ausCarrusel'), $('ausPuntos'), TIEMPO_AUSPICIADOR);
+    let editandoAus = false;
+    function vistaAuspiciadores(){
+      const hay = Object.keys(logosAus).length > 0;
+      const grilla = editandoAus || !hay;
+      $('sponsorSlots').style.display = grilla ? '' : 'none';
+      $('ausCarrusel').style.display = grilla ? 'none' : '';
+      $('ausPuntos').style.display = grilla ? 'none' : '';
+      const btn = $('ausEditar');
+      btn.style.display = hay ? '' : 'none';
+      btn.textContent = editandoAus ? '✓ Listo' : '✎ Editar';
+      btn.classList.toggle('activo', editandoAus);
+    }
+    function alternarEdicionAus(){ editandoAus = !editandoAus; vistaAuspiciadores(); }
+    $('ausEditar').addEventListener('click', alternarEdicionAus);
+    document.addEventListener('keydown', (e) => {
+      if(e.key.toLowerCase() === 'a' && !e.ctrlKey && !e.metaKey && !e.altKey){
+        const activo = document.activeElement;
+        if(!(activo && (activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA' || activo.isContentEditable)) && Object.keys(logosAus).length) alternarEdicionAus();
+      }
+    });
+
+    function renderLogosProyector(logos){
+      logoColegioSrc = logos.colegio || null;
+      pintarLogoEnCaja(cajaColegio, logos.colegio);
+      const aus = logos.auspiciadores || {};
+      logosAus = {};
+      Object.keys(aus).forEach(k => { if(aus[k]) logosAus[Number(k)] = aus[k]; });
+      dibujarAuspiciadores();
+      carruselProy.actualizar(Object.keys(logosAus).map(Number).sort((a, b) => a - b).map(k => logosAus[k]));
+      vistaAuspiciadores();
+      actualizarContenidoPausa();
+    }
+
+    // ---- abrir página imprimible del QR, ya enlazada a esta sala ----
+    $('qrRoomTexto').textContent = 'Sala ' + room;
+    $('btnImprimirQR').addEventListener('click', () => {
+      const urlQr = new URL('qr.html', location.href);
+      urlQr.searchParams.set('u', urlPublica());
+      urlQr.searchParams.set('t', (configActual && configActual.titulo) || '');
+      window.open(urlQr.toString(), '_blank');
+    });
+
+    // ---- el panel de "Imprimir QR" está oculto por defecto para no
+    // ocupar espacio en el proyector. Se muestra/oculta con la tecla Q. ----
+    $('qrPanel').classList.remove('visible');
+    document.addEventListener('keydown', (e) => {
+      if(e.key.toLowerCase() === 'q' && !e.ctrlKey && !e.metaKey && !e.altKey){
+        const activo = document.activeElement;
+        const escribiendo = activo && (activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA' || activo.isContentEditable);
+        if(!escribiendo) $('qrPanel').classList.toggle('visible');
+      }
+    });
+
+    // ---- pantalla de espera (pausa) ----
+    const modalPausa = iniciarModalPausa();
+    const carruselPausa = crearCarruselAuspiciadores($('pausaAus'), $('pausaAusPuntos'), TIEMPO_AUSPICIADOR);
+    let pausaActiva = false;
+    let relojPausa = null;
+    let qrIniciado = false;
+
+    function actualizarRelojPausa(){
+      $('pausaReloj').textContent = new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+    }
+    // código QR para que el público siga los números desde el celular
+    function cargarQR(){
+      if(qrIniciado) return;
+      qrIniciado = true;
+      const url = new URL(urlPublica());
+      const montar = () => {
+        try{
+          const caja = $('pausaQr');
+          caja.innerHTML = '';
+          new QRCode(caja, { text: url.toString(), width: 200, height: 200, colorDark: '#10141c', colorLight: '#ffffff' });
+          $('pausaQrCaja').style.display = '';
+        } catch(e){}
+      };
+      if(window.QRCode){ montar(); return; }
+      const sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+      sc.onload = montar;
+      sc.onerror = () => { qrIniciado = false; };
+      document.head.appendChild(sc);
+    }
+    function actualizarContenidoPausa(){
+      const logo = $('pausaLogo');
+      if(logoColegioSrc){ logo.src = logoColegioSrc; logo.style.display = 'block'; } else { logo.style.display = 'none'; }
+      const lista = Object.keys(logosAus).map(Number).sort((a, b) => a - b).map(k => logosAus[k]);
+      $('pausaAusCaja').style.display = lista.length ? 'flex' : 'none';
+      carruselPausa.actualizar(lista);
+    }
+    function aplicarPausa(p){
+      const activa = !!p;
+      if(activa){
+        $('pausaTituloGrande').textContent = p.titulo || 'Pausa';
+        const d = $('pausaDetalleGrande');
+        d.textContent = p.detalle || '';
+        d.style.display = p.detalle ? '' : 'none';
+        const tp = p.proxima ? textoProximaRonda(p.proxima) : '';
+        const pp = $('pausaProximaTxt');
+        pp.textContent = tp;
+        pp.style.display = tp ? '' : 'none';
+      }
+      if(activa !== pausaActiva){
+        pausaActiva = activa;
+        $('pausaPantalla').style.display = activa ? 'flex' : 'none';
+        if(activa){
+          actualizarContenidoPausa();
+          actualizarRelojPausa();
+          relojPausa = setInterval(actualizarRelojPausa, 15000);
+          cargarQR();
+        } else {
+          clearInterval(relojPausa);
+          relojPausa = null;
+        }
+      }
+      const btn = $('btnPausa');
+      btn.textContent = pausaActiva ? '▶ Reanudar' : '⏸ Pausa';
+      btn.classList.toggle('activo', pausaActiva);
+    }
+    function alternarPausa(){ if(pausaActiva) quitarPausa(); else modalPausa.abrir(); }
+    $('btnPausa').addEventListener('click', alternarPausa);
+    $('pausaVolver').addEventListener('click', quitarPausa);
+    // el botón "Volver al bingo" solo se ve cuando se mueve el mouse (y se esconde a los 2,5 s)
+    let temporizadorVolver = null;
+    $('pausaPantalla').addEventListener('mousemove', () => {
+      const bv = $('pausaVolver');
+      bv.classList.add('visible');
+      clearTimeout(temporizadorVolver);
+      temporizadorVolver = setTimeout(() => bv.classList.remove('visible'), 2500);
+    });
+    document.addEventListener('keydown', (e) => {
+      if(e.key.toLowerCase() === 'p' && !e.ctrlKey && !e.metaKey && !e.altKey){
+        const activo = document.activeElement;
+        if(!(activo && (activo.tagName === 'INPUT' || activo.tagName === 'TEXTAREA' || activo.tagName === 'SELECT' || activo.isContentEditable))) alternarPausa();
+      }
+    });
+
+    conectarAdmin(renderProyector, renderLogosProyector);
+  }
+
+  // =======================================================================
+  // VISTA CONTROL (admin desde el celular)
+  // =======================================================================
+  function iniciarControl(){
+    const cTabs = $('cTabs');
+    const cGrid = $('cGrid');
+    const cContador = $('cContador');
+    const cBarra = $('cBarra');
+    const cDeshacer = $('cDeshacer');
+    const cPremioLabel = $('cPremioLabel');
+    const cPremioValor = $('cPremioValor');
+    const cPremioResumen = $('cPremioResumen');
+    const cCallout = $('cCallout');
+    const cChips = $('cChips');
+    const cHistCount = $('cHistCount');
+    const cLogo = $('cLogo');
+    const cToast = $('cToast');
+    const elsLlamadas = { bola: $('cBolaActual'), anterior: $('cNumAnterior'), historial: $('cUltimas') };
+
+    // el indicador de conexión pasa a la barra superior
+    $('cEstado').appendChild($('estadoConexion'));
+
+    let letraActiva = 'B';
+    let historialActual = [];
+    let temporizadorToast = null;
+
+    const etiqueta = (n) => letraDeNumero(n) + '-' + n;
+
+    function mostrarToast(msg){
+      cToast.textContent = msg;
+      cToast.classList.add('visible');
+      clearTimeout(temporizadorToast);
+      temporizadorToast = setTimeout(() => cToast.classList.remove('visible'), 1600);
+    }
+
+    function pintarTabs(){
+      cTabs.innerHTML = '';
+      rangos.forEach(r => {
+        const enLetra = historialActual.filter(n => n >= r.inicio && n <= r.fin).length;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'c-tab L-' + r.letra + (r.letra === letraActiva ? ' activa' : '');
+        b.innerHTML = r.letra + '<small>' + enLetra + '/15</small>';
+        b.addEventListener('click', () => { letraActiva = r.letra; pintarTabs(); pintarGrid(); });
+        cTabs.appendChild(b);
+      });
+    }
+
+    function pintarGrid(){
+      const r = rangos.find(x => x.letra === letraActiva);
+      const actual = historialActual[historialActual.length - 1];
+      cGrid.innerHTML = '';
+      for(let n = r.inicio; n <= r.fin; n++){
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'c-num' + (historialActual.includes(n) ? ' marcada' : '') + (n === actual ? ' actual' : '');
+        b.textContent = n;
+        b.addEventListener('click', () => {
+          const yaMarcado = historialActual.includes(n);
+          // quitar un número ya llamado pide confirmación (evita toques por error)
+          if(yaMarcado && !confirm('¿Quitar el ' + etiqueta(n) + ' de los números llamados?')) return;
+          if(navigator.vibrate) navigator.vibrate(15);
+          alternarNumero(n);
+          mostrarToast(yaMarcado ? etiqueta(n) + ' quitado' : '✔ ' + etiqueta(n) + ' marcado');
+        });
+        cGrid.appendChild(b);
+      }
+    }
+
+    function pintarHistorial(){
+      cChips.innerHTML = '';
+      historialActual.slice().reverse().forEach(n => {
+        const chip = document.createElement('span');
+        chip.className = 'c-chip L-' + letraDeNumero(n);
+        chip.textContent = etiqueta(n);
+        cChips.appendChild(chip);
+      });
+      cHistCount.textContent = historialActual.length;
+    }
+
+    // ---- ronda y binguito ----
+    const cRondas = $('cRondas');
+    const cBinLet = $('cBinLet');
+    const cBinPrev = $('cBinPrev');
+    const cRondaResumen = $('cRondaResumen');
+
+    function pintarRondas(estado){
+      const activa = estado.ronda ? Number(estado.ronda) : null;
+      const letra = formaValida(estado.binguito) ? estado.binguito : null;
+
+      cRondas.innerHTML = '';
+      if(!RONDAS.length){
+        const vacio = document.createElement('p');
+        vacio.className = 'c-vacio';
+        vacio.textContent = 'Aún no hay rondas. Toca ⚙ arriba para crearlas (hora, premio y letra del binguito).';
+        cRondas.appendChild(vacio);
+      }
+      RONDAS.forEach(r => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'c-ronda' + (r.id === activa ? ' activa' : '');
+        b.innerHTML = '<span class="c-ronda-hora">' + r.hora + '</span>' +
+          '<span class="c-ronda-nombre">' + r.nombre + '<b>' + r.premio + '</b></span>' +
+          '<span class="c-ronda-bin">' + (r.binguito ? 'Binguito<br>letra ' + r.binguito : 'Sin<br>binguito') + '</span>';
+        b.addEventListener('click', () => {
+          if(r.id === activa) return;
+          if(!confirm('¿Cambiar a la ronda de las ' + r.hora + '?\n' + r.nombre + ' ' + r.premio + (r.binguito ? ' · Binguito ' + r.binguito : '') +
+            '\n\nLos números marcados no se borran (usa "Limpiar" si empieza un juego nuevo).')) return;
+          if(navigator.vibrate) navigator.vibrate(15);
+          elegirRonda(r);
+          mostrarToast('Ronda ' + r.hora + (r.binguito ? ' · Binguito ' + r.binguito : ''));
+        });
+        cRondas.appendChild(b);
+      });
+
+      cBinLet.innerHTML = '';
+      LETRAS_PROGRAMA.forEach(l => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'c-binbtn' + (l === letra ? ' activa' : '');
+        b.textContent = l;
+        b.addEventListener('click', () => { guardarBinguito(l === letra ? null : l); });
+        cBinLet.appendChild(b);
+      });
+      const ninguno = document.createElement('button');
+      ninguno.type = 'button';
+      ninguno.className = 'c-binbtn ninguno' + (!letra ? ' activa' : '');
+      ninguno.textContent = 'Ninguno';
+      ninguno.addEventListener('click', () => guardarBinguito(null));
+      cBinLet.appendChild(ninguno);
+
+      cBinPrev.innerHTML = '';
+      if(letra) cBinPrev.appendChild(crearPatron(letra));
+
+      const rondaActiva = RONDAS.find(r => r.id === activa);
+      cRondaResumen.textContent = rondaActiva
+        ? rondaActiva.hora + ' · ' + (letra ? 'Letra ' + letra : 'sin binguito')
+        : (letra ? 'Letra ' + letra : 'Sin ronda');
+    }
+
+    // ---- configuración del bingo ----
+    const modalConfigCtl = iniciarModalConfig();
+    $('cConfig').addEventListener('click', () => modalConfigCtl.abrir());
+
+    // ---- pausa ----
+    const modalPausaCtl = iniciarModalPausa();
+    let pausaActivaCtl = false;
+    $('cPausa').addEventListener('click', () => {
+      if(pausaActivaCtl){ quitarPausa(); mostrarToast('▶ Bingo reanudado'); }
+      else modalPausaCtl.abrir();
+    });
+
+    // ---- binguito entregado ----
+    let binguitoEntregadoCtl = false;
+    function pintarBinEstado(estado){
+      const letra = formaValida(estado.binguito) ? estado.binguito : null;
+      binguitoEntregadoCtl = !!estado.binguitoGanado && !!letra;
+      const caja = $('cBinEstado');
+      caja.style.display = letra ? '' : 'none';
+      caja.classList.toggle('entregado', binguitoEntregadoCtl);
+      $('cBinEstadoTxt').textContent = letra ? 'Letra ' + letra + (binguitoEntregadoCtl ? ' · ¡entregado!' : ' · en juego') : '';
+      $('cBinEntregado').textContent = binguitoEntregadoCtl ? 'Deshacer' : 'Marcar entregado';
+    }
+    $('cBinEntregado').addEventListener('click', () => {
+      if(!binguitoEntregadoCtl && !confirm('¿Marcar el binguito como entregado? Los celulares dejarán de avisar de binguito.')) return;
+      marcarBinguitoEntregado(!binguitoEntregadoCtl);
+    });
+
+    function renderControl(estado){
+      ultimoEstadoAdmin = estado;
+      aplicarConfig(estado.config);
+      historialActual = aLista(estado.historial);
+      pintarLlamadas(historialActual, elsLlamadas);
+      const total = historialActual.length;
+      cCallout.textContent = total ? etiqueta(historialActual[total - 1]) : 'Sin llamadas';
+      cContador.textContent = total;
+      cBarra.style.width = Math.round(total / 75 * 100) + '%';
+      cDeshacer.disabled = total === 0;
+      pintarTabs();
+      pintarGrid();
+      pintarHistorial();
+      pintarRondas(estado);
+      pintarBinEstado(estado);
+      pausaActivaCtl = !!estado.pausa;
+      $('cPausa').textContent = pausaActivaCtl ? '▶ Reanudar' : '⏸ Pausa';
+      $('cPausa').classList.toggle('activo', pausaActivaCtl);
+      if(typeof estado.premio === 'string') cPremioResumen.textContent = estado.premio;
+      if(document.activeElement !== cPremioLabel && typeof estado.premioLabel === 'string') cPremioLabel.value = estado.premioLabel;
+      if(document.activeElement !== cPremioValor && typeof estado.premio === 'string') cPremioValor.value = estado.premio;
+    }
+
+    function renderLogoControl(logos){
+      if(logos.colegio){
+        cLogo.src = logos.colegio;
+        cLogo.style.display = 'block';
+      }
+    }
+
+    cDeshacer.addEventListener('click', () => {
+      if(!historialActual.length) return;
+      mostrarToast('↩ ' + etiqueta(historialActual[historialActual.length - 1]) + ' deshecho');
+      deshacerUltimo();
+    });
+    $('cLimpiar').addEventListener('click', () => {
+      if(confirm('¿Limpiar todos los números marcados? Esto también se verá en el proyector y en los celulares.')) limpiarTodo();
+    });
+    cPremioLabel.addEventListener('input', debounce(() => guardarTituloPremio(cPremioLabel.value.trim()), 400));
+    cPremioValor.addEventListener('input', debounce(() => guardarPremio(cPremioValor.value.trim()), 400));
+
+    conectarAdmin(renderControl, renderLogoControl);
+  }
+
+  // =======================================================================
+  // VISTA ESPECTADOR (celulares via QR, solo lectura)
+  // =======================================================================
+  function iniciarEspectador(){
+    const mBoard = $('mBoard');
+    const mPremioValor = $('mPremioValor');
+    const mPremioLabel = $('mPremioLabel');
+    const mLogoColegio = $('mLogoColegio');
+    const mSponsorsCard = $('mSponsorsCard');
+    const mSponsorRow = $('mSponsorRow');
+    const carruselAus = crearCarruselAuspiciadores(mSponsorRow, $('mAusPuntos'), TIEMPO_AUSPICIADOR);
+    const mBinguitoCard = $('mBinguitoCard');
+    const mPatron = $('mPatron');
+    let letraBinEsp = null;
+    const misCartones = crearMisCartones();
+    const elsLlamadas = { bola: $('mBolaActual'), anterior: $('mNumAnterior'), historial: $('mHistoryBalls') };
+
+    const celdasMobile = {};
+
+    rangos.forEach(({letra, inicio, fin}) => {
+      const fila = document.createElement('div');
+      fila.className = 'm-fila';
+
+      const label = document.createElement('div');
+      label.className = 'm-letra L-' + letra;
+      label.textContent = letra;
+      fila.appendChild(label);
+
+      for(let n = inicio; n <= fin; n++){
+        const celda = document.createElement('div');
+        celda.className = 'm-celda';
+        celda.textContent = n;
+        fila.appendChild(celda);
+        celdasMobile[n] = celda;
+      }
+      mBoard.appendChild(fila);
+    });
+
+    function renderEstado(estado){
+      aplicarConfig(estado && estado.config);
+      const historial = aLista(estado && estado.historial);
+      const marcados = new Set(historial);
+      Object.keys(celdasMobile).forEach(n => celdasMobile[n].classList.toggle('marcada', marcados.has(Number(n))));
+      pintarLlamadas(historial, elsLlamadas);
+      mPremioValor.textContent = (estado && estado.premio) || '—';
+      mPremioLabel.textContent = (estado && estado.premioLabel) || 'Premio de este bingo';
+
+      const letra = estado && formaValida(estado.binguito) ? estado.binguito : null;
+      if(letra !== letraBinEsp){
+        letraBinEsp = letra;
+        mBinguitoCard.style.display = letra ? 'block' : 'none';
+        mPatron.innerHTML = '';
+        if(letra){
+          mPatron.appendChild(crearPatron(letra));
+        }
+      }
+      const entregado = !!(estado && estado.binguitoGanado) && !!letra;
+      $('mBinEstado').style.display = entregado ? 'inline' : 'none';
+      mBinguitoCard.classList.toggle('entregado', entregado);
+      misCartones.actualizar(estado);
+    }
+
+    function renderLogos(logos){
+      logos = logos || {};
+
+      if(logos.colegio){
+        mLogoColegio.src = logos.colegio;
+        mLogoColegio.style.display = 'block';
+      } else {
+        mLogoColegio.style.display = 'none';
+      }
+
+      const auspiciadores = aLista(logos.auspiciadores);
+      mSponsorsCard.style.display = auspiciadores.length ? 'block' : 'none';
+      carruselAus.actualizar(auspiciadores);
+    }
+
+    $('mAdminLink').href = urlOrganizador();
+
+    if(firebaseConfigurado && window.__fbDb){
+      marcarConexion(true, 'Conectado');
+      window.__fbDb.ref('salasBingo/' + room).on('value', (snap) => {
+        renderEstado(snap.val());
+        marcarConexion(true, 'En vivo');
+      }, () => marcarConexion(false, 'Sin conexión'));
+      window.__fbDb.ref('logosBingo/' + room).on('value', (snap) => {
+        renderLogos(snap.val());
+      });
+    } else {
+      marcarConexion(false, 'Configura Firebase');
+      renderEstado(null);
+      renderLogos(null);
+    }
+  }
+
+  if(!room) mostrarSinSala();
+  else decidirRol().then(arrancar);
+</script>
+</body>
+</html>

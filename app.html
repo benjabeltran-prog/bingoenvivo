@@ -1114,8 +1114,7 @@
   }
   .c-vacio{ font-size: 0.88rem; color: var(--gris-suave); padding: 6px 2px 10px; line-height: 1.4; }
   .c-gear{ margin-left: auto; flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid rgb(var(--tinta) / 0.18); background: transparent; color: var(--gris-texto); font-size: 1.15rem; cursor: pointer; }
-  .m-admin{ text-align: center; margin-top: 10px; }
-  .m-admin a{ color: var(--gris-suave); font-size: 0.78rem; text-decoration: underline; }
+  .m-header h1{ -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 
   /* ===== acceso del organizador: tarjeta centrada ===== */
   #accesoModal.acc-modal{ inset:0; overflow:hidden;
@@ -1365,7 +1364,6 @@
     </details>
 
     <p class="m-footer-nota">Esta pantalla se actualiza sola a medida que se cantan los números.<br>No necesitas recargar ni marcar nada aquí.</p>
-    <p class="m-admin"><a id="mAdminLink" href="#">Acceso organizador</a></p>
   </div>
 
 
@@ -1984,7 +1982,7 @@
   // Devuelve 'espectador' | 'proyector' | 'control'
   async function decidirRol(){
     if(esVistaMovilExplicita) return 'espectador';
-    const quiereAdmin = params.has('admin') || params.get('modo') === 'control' || params.get('modo') === 'proyector';
+    const quiereAdmin = params.has('admin') || /\/organizador\/?$/i.test(location.pathname) || params.get('modo') === 'control' || params.get('modo') === 'proyector';
     if(!quiereAdmin) return 'espectador';
     if(!firebaseConfigurado || !window.__fbAuth || !window.__fbDb) return 'espectador';
     let usuario;
@@ -2021,6 +2019,7 @@
   // dirección que se comparte con el público (la del subdominio, o ?sala= si se usa así)
   function urlPublica(){
     const u = new URL(location.href);
+    u.pathname = u.pathname.replace(/\/organizador\/?$/i, '/');          // la ruta del organizador nunca se comparte con el público
     u.search = ''; u.hash = '';
     if(params.get('sala')) u.searchParams.set('sala', room);
     return u.toString();
@@ -3504,7 +3503,8 @@
     // ---- abrir página imprimible del QR, ya enlazada a esta sala ----
     $('qrRoomTexto').textContent = 'Sala ' + room;
     $('btnImprimirQR').addEventListener('click', () => {
-      const urlQr = new URL('qr.html', location.href);
+      const baseQr = new URL(location.href); baseQr.pathname = baseQr.pathname.replace(/\/organizador\/?$/i, '/');
+      const urlQr = new URL('qr.html', baseQr);
       urlQr.searchParams.set('u', urlPublica());
       urlQr.searchParams.set('t', (configActual && configActual.titulo) || '');
       window.open(urlQr.toString(), '_blank');
@@ -3897,7 +3897,18 @@
       carruselAus.actualizar(auspiciadores);
     }
 
-    $('mAdminLink').href = urlOrganizador();
+    // Acceso del organizador: no hay ningún botón a la vista. Se entra con el enlace que se le entrega (?admin=1),
+    // con la ruta /organizador, o tocando 5 veces seguidas el título del bingo.
+    (function(){
+      const titulo = document.querySelector('#vistaMobile .m-header h1');
+      if(!titulo) return;
+      let toques = [];
+      titulo.addEventListener('click', () => {
+        const ahora = Date.now();
+        toques = toques.filter(t => ahora - t < 2500); toques.push(ahora);
+        if(toques.length >= 5){ toques = []; location.href = urlOrganizador(); }
+      });
+    })();
 
     if(firebaseConfigurado && window.__fbDb){
       marcarConexion(true, 'Conectado');

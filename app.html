@@ -963,28 +963,155 @@
   .sin-sala-caja h1{ font-family:'Archivo Black', sans-serif; font-weight: 400; font-size: 1.8rem; color: var(--blanco); margin-bottom: 8px; }
   .sin-sala-caja p{ color: var(--gris-texto); margin-bottom: 14px; }
   .sin-sala-caja .mc-btn{ width: 100%; }
-  .cfg-hoja{ max-width: 600px; }
-  .cfg-temas{ display:flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 12px; }
-  .cfg-tema{ display:flex; align-items:center; gap: 8px; border: 1.5px solid rgb(var(--tinta) / 0.18); background: transparent; color: var(--gris-texto); border-radius: 999px; padding: 5px 13px 5px 5px; font-family:'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.82rem; cursor: pointer; }
-  .cfg-tema i{ display:block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgb(var(--tinta) / 0.25); }
-  .cfg-tema.activo{ border-color: var(--verde-acento); box-shadow: 0 0 0 1px var(--verde-acento); }
-  .cfg-colores{ display:flex; flex-wrap: wrap; gap: 18px; margin-bottom: 6px; }
-  .cfg-colores label{ display:flex; align-items:center; gap: 8px; font-size: 0.88rem; color: var(--gris-texto); }
-  .cfg-colores input[type=color]{ width: 46px; height: 34px; padding: 0; border: 1px solid rgb(var(--tinta) / 0.25); border-radius: 8px; background: none; cursor: pointer; }
-  .cfg-nota{ font-size: 0.78rem; color: var(--gris-suave); min-height: 1.1em; margin: 2px 0 8px; }
-  .cfg-ronda{ display:grid; grid-template-columns: 66px 1fr 1fr 96px auto; gap: 6px; align-items: center; margin-bottom: 8px; }
-  .cfg-ronda .mc-texto{ margin: 0; padding: 8px 8px; font-size: 0.9rem; min-width: 0; }
-  .cfg-ronda .cfg-acciones{ display:flex; gap: 4px; }
-  .cfg-ronda .cfg-acciones button{ width: 30px; height: 34px; border: 1px solid rgb(var(--tinta) / 0.2); background: transparent; color: var(--gris-texto); border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
-  .cfg-ronda .cfg-acciones button.borrar{ color: var(--peligro-texto); border-color: var(--peligro); }
-  .cfg-ronda .cfg-acciones button:disabled{ opacity: 0.3; cursor: default; }
-  @media (max-width: 560px){
-    .cfg-ronda{ grid-template-columns: 66px 1fr 96px; }
-    .cfg-ronda .cfg-r-premio{ grid-column: 1 / 3; }
-    .cfg-ronda .cfg-acciones{ grid-column: 3; justify-content: flex-end; }
+  /* ===== configuración del tablero: tarjeta centrada ===== */
+  #configModal.cfg-modal{ inset:0; overflow:hidden;
+    background: radial-gradient(90% 60% at 50% 0%, rgb(var(--acento-rgb) / 0.22), transparent 70%), rgba(6,10,24,0.52);
+    -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); }
+  #configModal.abierto{ animation: accFondo .3s ease-out both; }
+  #configModal .acc-fondo i{ opacity:.32; }
+  .cfg-zona{ position:absolute; left:0; width:100%; top:var(--vv-top, 0px); height:var(--vv-alto, 100%); box-sizing:border-box; padding:18px; display:flex; align-items:center; justify-content:center; }
+  .cfg-tarjeta{ position:relative; display:flex; flex-direction:column; width:100%; max-width:660px; max-height:100%; overflow:hidden; border-radius:28px; background: var(--verde-panel); color: var(--gris-texto);
+    box-shadow: 0 34px 90px rgba(0,0,0,0.5), 0 0 0 1px rgb(var(--tinta) / 0.09), inset 0 1px 0 rgba(255,255,255,0.35); animation: accEntra .5s cubic-bezier(.2,.9,.25,1.1) both; }
+  .cfg-tarjeta.sacude{ animation: accEntra .5s cubic-bezier(.2,.9,.25,1.1) both, accSacude .5s cubic-bezier(.36,.07,.19,.97) both; }
+  .cfg-cab{ position:relative; display:flex; align-items:center; gap:14px; padding:20px 20px 16px 22px; flex:none;
+    background: radial-gradient(120% 140% at 0% 0%, rgb(var(--acento-rgb) / 0.18), transparent 60%); border-bottom:1px solid rgb(var(--tinta) / 0.08); }
+  .cfg-insignia{ flex:none; width:48px; height:48px; border-radius:16px; display:grid; place-items:center; color: var(--sobre-acento);
+    background: var(--verde-acento); background: linear-gradient(150deg, var(--verde-acento), color-mix(in srgb, var(--verde-acento) 70%, #000)); box-shadow: 0 10px 22px rgb(var(--acento-rgb) / 0.35), inset 0 2px 0 rgba(255,255,255,0.3); }
+  .cfg-cab-txt{ flex:1; min-width:0; }
+  .cfg-cab h2{ margin:0; font-family:'Archivo Black', sans-serif; font-weight:400; font-size:1.25rem; line-height:1.15; color: var(--blanco); }
+  .cfg-cab p{ margin:3px 0 0; font-size:.84rem; color: var(--gris-suave); }
+  .cfg-x{ flex:none; width:44px; height:44px; display:grid; place-items:center; border:0; border-radius:14px; background: rgb(var(--tinta) / 0.07); color: var(--gris-texto); cursor:pointer; transition: background .2s, color .2s, transform .15s; }
+  .cfg-x:hover{ background: rgb(var(--tinta) / 0.14); color: var(--blanco); }
+  .cfg-x:active{ transform: scale(.94); }
+  .cfg-cuerpo{ flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:16px 18px 6px; display:flex; flex-direction:column; gap:14px; }
+  .cfg-sec{ border-radius:22px; padding:16px; background: rgb(var(--tinta) / 0.045); border:1px solid rgb(var(--tinta) / 0.07); animation: cfgSube .5s cubic-bezier(.2,.9,.25,1.05) both; animation-delay: calc(var(--i, 0) * 70ms + 140ms); }
+  @keyframes cfgSube{ from{ opacity:0; transform: translateY(14px); } to{ opacity:1; transform:none; } }
+  .cfg-sec-cab{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .cfg-sec-cab h3{ flex:1; margin:0; font-family:'Archivo Black', sans-serif; font-weight:400; font-size:.98rem; color: var(--blanco); }
+  .cfg-ico{ flex:none; width:32px; height:32px; border-radius:11px; display:grid; place-items:center; color: var(--verde-acento); background: rgb(var(--acento-rgb) / 0.13); }
+  .cfg-cuenta{ font-size:.78rem; font-weight:700; color: var(--gris-texto); font-variant-numeric: tabular-nums; }
+  .cfg-in{ display:block; width:100%; height:48px; box-sizing:border-box; padding:0 14px; border-radius:14px; border:2px solid rgb(var(--tinta) / 0.12); background: var(--verde-panel); color: var(--blanco);
+    font-family:'Space Grotesk', sans-serif; font-size:.98rem; font-weight:600; outline:none; transition: border-color .2s, box-shadow .2s; min-width:0; }
+  .cfg-in::placeholder{ color: var(--gris-suave); font-weight:500; }
+  .cfg-in:focus{ border-color: var(--verde-acento); box-shadow: 0 0 0 4px rgb(var(--acento-rgb) / 0.18); }
+  .cfg-in-grande{ height:54px; font-size:1.08rem; }
+
+  .cfg-temas{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:14px; }
+  .cfg-tema{ position:relative; display:flex; flex-direction:column; align-items:stretch; gap:8px; padding:8px 8px 10px; border-radius:16px; border:2px solid rgb(var(--tinta) / 0.1); background: var(--verde-panel); color: var(--gris-texto); cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; font-size:.8rem; font-weight:700; text-align:center; transition: transform .18s, border-color .2s, box-shadow .2s; }
+  .cfg-tema:hover{ transform: translateY(-2px); border-color: rgb(var(--tinta) / 0.25); }
+  .cfg-tema.activo{ border-color: var(--verde-acento); box-shadow: 0 0 0 3px rgb(var(--acento-rgb) / 0.2); color: var(--blanco); }
+  .cfg-tema.activo::after{ content:'✓'; position:absolute; top:-8px; right:-8px; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; background: var(--verde-acento); color: var(--sobre-acento); font-size:.8rem; box-shadow: 0 4px 10px rgb(var(--acento-rgb) / 0.4); animation: accPop .35s cubic-bezier(.3,1.8,.5,1) both; }
+  @keyframes accPop{ from{ transform: scale(0); } to{ transform: scale(1); } }
+  .cfg-mini{ display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; padding:7px; border-radius:11px; background: var(--f); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
+  .cfg-mini i{ display:block; aspect-ratio:1.5; border-radius:4px; background: rgba(255,255,255,0.75); }
+  .cfg-mini i:nth-child(2), .cfg-mini i:nth-child(4), .cfg-mini i:nth-child(6){ background: var(--a); }
+  .cfg-colores{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+  .cfg-color{ position:relative; display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:16px; border:2px solid rgb(var(--tinta) / 0.1); background: var(--verde-panel); cursor:pointer; transition: border-color .2s, box-shadow .2s, transform .15s; }
+  .cfg-color:hover{ border-color: rgb(var(--tinta) / 0.25); }
+  .cfg-color:focus-within{ border-color: var(--verde-acento); box-shadow: 0 0 0 4px rgb(var(--acento-rgb) / 0.18); }
+  .cfg-color input{ position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; border:0; padding:0; }
+  .cfg-muestra{ flex:none; width:38px; height:38px; border-radius:12px; background: var(--c, #888); box-shadow: inset 0 0 0 2px rgba(0,0,0,0.14), 0 4px 10px rgba(0,0,0,0.12); }
+  .cfg-color-txt{ display:flex; flex-direction:column; min-width:0; line-height:1.25; }
+  .cfg-color-txt b{ font-size:.86rem; color: var(--blanco); font-weight:700; }
+  .cfg-color-txt em{ font-style:normal; font-size:.76rem; color: var(--gris-suave); font-variant-numeric: tabular-nums; letter-spacing:.04em; }
+  .cfg-nota{ margin:8px 0 0; min-height:1.1em; font-size:.8rem; color: var(--gris-suave); line-height:1.35; }
+
+  #cfgRondas{ display:flex; flex-direction:column; gap:12px; }
+  #cfgRondas > .cfg-nota{ margin:0; padding:14px; text-align:center; border-radius:16px; border:2px dashed rgb(var(--tinta) / 0.16); font-size:.88rem; }
+  .cfg-ronda{ position:relative; display:grid; grid-template-columns: 96px 1fr 1fr auto; grid-template-areas: "h nom prem acc" "let let let let"; gap:10px; align-items:center; padding:16px 12px 12px; margin-top:4px; border-radius:18px; background: var(--verde-panel); border:2px solid rgb(var(--tinta) / 0.08); }
+  .cfg-ronda.nueva{ animation: cfgNueva .45s cubic-bezier(.2,.9,.25,1.1) both; }
+  .cfg-ronda.movida{ animation: cfgMovida .7s ease-out both; }
+  @keyframes cfgNueva{ from{ opacity:0; transform: translateY(-12px) scale(.96); } to{ opacity:1; transform:none; } }
+  @keyframes cfgMovida{ 0%{ box-shadow: 0 0 0 0 rgb(var(--acento-rgb) / 0.55); border-color: var(--verde-acento); } 100%{ box-shadow: 0 0 0 12px rgb(var(--acento-rgb) / 0); } }
+  .cfg-num{ position:absolute; left:-8px; top:-12px; min-width:26px; height:26px; padding:0 7px; border-radius:99px; display:grid; place-items:center; font-family:'Archivo Black', sans-serif; font-size:.78rem; color: var(--sobre-acento); background: var(--verde-acento); box-shadow: 0 4px 10px rgb(var(--acento-rgb) / 0.4); }
+  .cfg-ronda .cfg-in{ height:44px; font-size:.92rem; padding:0 11px; }
+  .cfg-r-hora{ grid-area:h; text-align:center; }
+  .cfg-r-nombre{ grid-area:nom; }
+  .cfg-r-premio{ grid-area:prem; }
+  .cfg-acciones{ grid-area:acc; display:flex; gap:6px; }
+  .cfg-acciones button{ width:40px; height:40px; display:grid; place-items:center; border-radius:12px; border:2px solid rgb(var(--tinta) / 0.12); background:transparent; color: var(--gris-texto); cursor:pointer; transition: background .15s, color .15s, border-color .15s, transform .12s; }
+  .cfg-acciones button:hover:not(:disabled){ background: rgb(var(--tinta) / 0.08); color: var(--blanco); }
+  .cfg-acciones button:active:not(:disabled){ transform: scale(.92); }
+  .cfg-acciones button.borrar{ color: var(--peligro-texto); border-color: rgba(192,57,43,0.35); }
+  .cfg-acciones button.borrar:hover:not(:disabled){ background: var(--peligro-fondo); color: var(--peligro-texto); }
+  .cfg-acciones button:disabled{ opacity:.28; cursor:default; }
+  .cfg-letras{ grid-area:let; display:flex; align-items:center; gap:7px; flex-wrap:wrap; padding-top:2px; }
+  .cfg-letras-et{ font-size:.78rem; font-weight:700; color: var(--gris-suave); margin-right:2px; }
+  .cfg-letra{ --lc: #888; --lt: #fff; width:40px; height:40px; border-radius:50%; border:2px solid rgb(var(--tinta) / 0.16); background:transparent; color: var(--gris-texto); font-family:'Archivo Black', sans-serif; font-size:.9rem; cursor:pointer; display:grid; place-items:center; transition: transform .18s cubic-bezier(.3,1.6,.5,1), background .2s, color .2s, border-color .2s, box-shadow .2s; }
+  .cfg-letra.sin{ width:auto; padding:0 14px; border-radius:99px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:.82rem; }
+  .cfg-letra:hover{ transform: translateY(-2px); border-color: var(--lc); }
+  .cfg-letra.sin:hover{ border-color: rgb(var(--tinta) / 0.4); }
+  .cfg-letra.on{ background: var(--lc); border-color: var(--lc); color: var(--lt); transform: scale(1.1); box-shadow: 0 6px 14px rgb(0 0 0 / 0.22); }
+  .cfg-letra.sin.on{ background: rgb(var(--tinta) / 0.12); border-color: rgb(var(--tinta) / 0.3); color: var(--blanco); box-shadow:none; transform:none; }
+  .cfg-agregar{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; min-height:52px; margin-top:12px; border-radius:16px; border:2px dashed rgb(var(--tinta) / 0.22); background:transparent; color: var(--gris-texto); font-family:'Space Grotesk', sans-serif; font-size:.95rem; font-weight:700; cursor:pointer; transition: border-color .2s, color .2s, background .2s, transform .15s; }
+  .cfg-agregar:hover{ border-color: var(--verde-acento); color: var(--verde-acento); background: rgb(var(--acento-rgb) / 0.07); }
+  .cfg-agregar:active{ transform: scale(.985); }
+  .cfg-mas{ width:26px; height:26px; border-radius:50%; display:grid; place-items:center; background: rgb(var(--acento-rgb) / 0.16); color: var(--verde-acento); font-size:1.2rem; line-height:1; transition: transform .25s cubic-bezier(.3,1.6,.5,1); }
+  .cfg-agregar:hover .cfg-mas{ transform: rotate(90deg) scale(1.1); }
+  .cfg-chips{ display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; min-height:2px; }
+  .cfg-chips span{ padding:6px 13px; border-radius:99px; font-size:.82rem; font-weight:700; color: var(--verde-acento); background: rgb(var(--acento-rgb) / 0.12); animation: accPop .3s cubic-bezier(.3,1.6,.5,1) both; }
+  .cfg-ayuda{ margin:8px 0 0; font-size:.78rem; color: var(--gris-suave); }
+  .cfg-lic{ display:flex; align-items:center; gap:9px; margin:2px 2px 8px; padding:10px 14px; border-radius:14px; font-size:.84rem; font-weight:600; color: var(--gris-texto); background: rgb(var(--tinta) / 0.045); }
+  .cfg-lic:empty{ display:none; }
+  .cfg-lic::before{ content:''; flex:none; width:9px; height:9px; border-radius:50%; background:#12a06e; box-shadow: 0 0 0 4px rgba(18,160,110,0.18); }
+  .cfg-lic.vencida{ color: var(--peligro-texto); background: var(--peligro-fondo); }
+  .cfg-lic.vencida::before{ background: var(--peligro); box-shadow: 0 0 0 4px rgba(192,57,43,0.18); }
+
+  .cfg-pie{ flex:none; padding:12px 18px 16px; border-top:1px solid rgb(var(--tinta) / 0.08); background: var(--verde-panel); }
+  .cfg-error{ min-height:1.3em; margin:0 0 10px; font-size:.86rem; font-weight:600; color: var(--peligro-texto); opacity:0; transform: translateY(-3px); transition: opacity .2s, transform .2s; }
+  .cfg-error:not(:empty){ opacity:1; transform:none; }
+  .cfg-botones{ display:flex; gap:10px; }
+  .cfg-cancelar{ flex:none; min-height:54px; padding:0 22px; border-radius:16px; border:2px solid rgb(var(--tinta) / 0.14); background:transparent; color: var(--gris-texto); font-family:'Space Grotesk', sans-serif; font-size:.95rem; font-weight:700; cursor:pointer; transition: background .15s, color .15s, transform .12s; }
+  .cfg-cancelar:hover{ background: rgb(var(--tinta) / 0.07); color: var(--blanco); }
+  .cfg-cancelar:active{ transform: scale(.97); }
+  .cfg-guardar{ position:relative; overflow:hidden; flex:1; min-height:54px; border:0; border-radius:16px; cursor:pointer; color: var(--sobre-acento); font-family:'Archivo Black', sans-serif; font-size:1rem; letter-spacing:.02em;
+    background: var(--verde-acento); background: linear-gradient(135deg, var(--verde-acento), color-mix(in srgb, var(--verde-acento) 74%, #000)); box-shadow: 0 12px 26px rgb(var(--acento-rgb) / 0.36); transition: transform .15s, box-shadow .2s, filter .2s, background .3s; }
+  .cfg-guardar::after{ content:''; position:absolute; top:0; bottom:0; left:-60%; width:40%; transform: skewX(-20deg); pointer-events:none; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent); animation: accBrillo 3.4s ease-in-out infinite; }
+  .cfg-guardar:hover{ filter: brightness(1.07); }
+  .cfg-guardar:active{ transform: scale(.985); }
+  .cfg-guardar:disabled{ cursor:default; }
+  .cfg-txt{ display:inline-block; transition: opacity .15s; }
+  .cfg-giro{ position:absolute; inset:0; margin:auto; width:22px; height:22px; border-radius:50%; border:3px solid currentColor; border-top-color:transparent; opacity:0; animation: accGira .7s linear infinite; }
+  #configModal.cargando .cfg-giro{ opacity:1; }
+  #configModal.cargando .cfg-txt{ opacity:0; }
+  #configModal.ok .cfg-guardar{ background:#12a06e; color:#fff; box-shadow: 0 12px 26px rgba(18,160,110,0.4); }
+  .cfg-x:focus-visible, .cfg-tema:focus-visible, .cfg-letra:focus-visible, .cfg-agregar:focus-visible, .cfg-cancelar:focus-visible, .cfg-guardar:focus-visible, .cfg-acciones button:focus-visible{ outline:3px solid var(--verde-acento); outline-offset:2px; }
+
+  @media (max-width: 640px){
+    .cfg-zona{ padding:8px; }
+    .cfg-tarjeta{ border-radius:24px; }
+    .cfg-cab{ padding:16px 14px 12px 16px; gap:11px; }
+    .cfg-insignia{ width:42px; height:42px; border-radius:14px; }
+    .cfg-cab h2{ font-size:1.08rem; }
+    .cfg-cab p{ display:none; }
+    .cfg-cuerpo{ padding:12px 12px 4px; gap:12px; }
+    .cfg-sec{ padding:14px 12px; border-radius:20px; }
+    .cfg-temas{ grid-template-columns: repeat(2, 1fr); }
+    .cfg-colores{ grid-template-columns: 1fr; }
+    .cfg-ronda{ grid-template-columns: 1fr 1fr; grid-template-areas: "h acc" "nom prem" "let let"; padding:18px 10px 10px; }
+    .cfg-letras{ gap:6px; }
+    .cfg-letras-et{ flex:0 0 100%; }
+    .cfg-letra{ width:38px; height:38px; }
+    .cfg-letra.sin{ width:auto; }
+    .cfg-acciones{ justify-content:flex-end; }
+    .cfg-pie{ padding:10px 12px 12px; }
+    .cfg-cancelar{ padding:0 16px; }
   }
-  .cfg-agregar{ width: 100%; border: 1.5px dashed rgb(var(--tinta) / 0.3); background: transparent; color: var(--gris-texto); border-radius: 10px; padding: 10px; font-family:'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; margin: 2px 0 14px; }
-  .cfg-lic{ font-size: 0.82rem; color: var(--gris-suave); margin: 2px 0 10px; }
+  @media (max-width: 380px){
+    .cfg-letras{ gap:4px; }
+    .cfg-letra{ width:34px; height:34px; font-size:.82rem; }
+    .cfg-letra.sin{ padding:0 12px; }
+  }
+  @media (max-width: 340px){
+    .cfg-letra{ width:30px; height:30px; font-size:.76rem; }
+    .cfg-letra.sin{ padding:0 10px; font-size:.76rem; }
+  }
+  #configModal.compacto .cfg-cab p{ display:none; }
+  #configModal.compacto .cfg-cab{ padding-top:12px; padding-bottom:10px; }
+  @media (prefers-reduced-motion: reduce){
+    #configModal, #configModal *, #configModal *::after{ animation: none !important; transition: none !important; }
+  }
   .c-vacio{ font-size: 0.88rem; color: var(--gris-suave); padding: 6px 2px 10px; line-height: 1.4; }
   .c-gear{ margin-left: auto; flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid rgb(var(--tinta) / 0.18); background: transparent; color: var(--gris-texto); font-size: 1.15rem; cursor: pointer; }
   .m-admin{ text-align: center; margin-top: 10px; }
@@ -1352,28 +1479,49 @@
     </div>
   </div>
 
-  <div class="mc-modal" id="configModal">
-    <div class="mc-hoja cfg-hoja">
-      <div class="mc-hoja-cab"><strong>Configurar tu bingo</strong><button class="mc-x" id="cfgCerrar" type="button" aria-label="Cerrar">✕</button></div>
-      <span class="pausa-etq">Nombre del bingo</span>
-      <input class="mc-texto" id="cfgTitulo" type="text" maxlength="60" placeholder="Ej. Bingo de la Junta de Vecinos" autocomplete="off">
-      <span class="pausa-etq">Colores</span>
-      <div class="cfg-temas" id="cfgTemas"></div>
-      <div class="cfg-colores">
-        <label>Fondo <input type="color" id="cfgFondo" value="#f4f6fa"></label>
-        <label>Color principal <input type="color" id="cfgAcento" value="#2f5bff"></label>
-      </div>
-      <p class="cfg-nota" id="cfgNota"></p>
-      <span class="pausa-etq">Rondas del bingo</span>
-      <div id="cfgRondas"></div>
-      <button class="cfg-agregar" id="cfgAgregar" type="button">+ Agregar ronda</button>
-      <span class="pausa-etq">Motivos de pausa frecuentes (separados por coma)</span>
-      <input class="mc-texto" id="cfgPausas" type="text" maxlength="200" placeholder="Pausa, Descanso, Show" autocomplete="off">
-      <p class="cfg-lic" id="cfgLicencia"></p>
-      <p class="acc-error" id="cfgError" role="alert"></p>
-      <div class="mc-pie">
-        <button class="mc-btn sec" id="cfgCancelar" type="button">Cancelar</button>
-        <button class="mc-btn prim" id="cfgGuardar" type="button">Guardar cambios</button>
+  <div class="mc-modal cfg-modal" id="configModal" role="dialog" aria-modal="true" aria-labelledby="cfgTitulo2">
+    <div class="acc-fondo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="cfg-zona" id="cfgZona">
+      <div class="cfg-tarjeta" id="cfgTarjeta">
+        <div class="cfg-cab">
+          <span class="cfg-insignia" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span>
+          <div class="cfg-cab-txt"><h2 id="cfgTitulo2">Configurar tu bingo</h2><p>Los colores se ven en vivo mientras eliges.</p></div>
+          <button class="cfg-x" id="cfgCerrar" type="button" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="cfg-cuerpo" id="cfgCuerpo">
+          <section class="cfg-sec" style="--i:0">
+            <div class="cfg-sec-cab"><span class="cfg-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></span><h3>Nombre del bingo</h3><span class="cfg-cuenta" id="cfgTituloCuenta">0/60</span></div>
+            <input class="cfg-in cfg-in-grande" id="cfgTitulo" type="text" maxlength="60" placeholder="Ej. Bingo de la Junta de Vecinos" autocomplete="off" aria-label="Nombre del bingo">
+          </section>
+          <section class="cfg-sec" style="--i:1">
+            <div class="cfg-sec-cab"><span class="cfg-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".6"/><circle cx="17.5" cy="10.5" r=".6"/><circle cx="8.5" cy="7.5" r=".6"/><circle cx="6.5" cy="12.5" r=".6"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg></span><h3>Colores</h3></div>
+            <div class="cfg-temas" id="cfgTemas" role="group" aria-label="Temas listos para elegir"></div>
+            <div class="cfg-colores">
+              <label class="cfg-color" id="cfgFondoCaja"><input type="color" id="cfgFondo" value="#f4f6fa" aria-label="Color de fondo"><span class="cfg-muestra" aria-hidden="true"></span><span class="cfg-color-txt"><b>Fondo</b><em id="cfgFondoHex">#F4F6FA</em></span></label>
+              <label class="cfg-color" id="cfgAcentoCaja"><input type="color" id="cfgAcento" value="#2f5bff" aria-label="Color principal"><span class="cfg-muestra" aria-hidden="true"></span><span class="cfg-color-txt"><b>Color principal</b><em id="cfgAcentoHex">#2F5BFF</em></span></label>
+            </div>
+            <p class="cfg-nota" id="cfgNota"></p>
+          </section>
+          <section class="cfg-sec" style="--i:2">
+            <div class="cfg-sec-cab"><span class="cfg-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span><h3>Rondas y premios</h3><span class="cfg-cuenta" id="cfgRondasCuenta">0/30</span></div>
+            <div id="cfgRondas"></div>
+            <button class="cfg-agregar" id="cfgAgregar" type="button"><span class="cfg-mas" aria-hidden="true">+</span>Agregar ronda</button>
+          </section>
+          <section class="cfg-sec" style="--i:3">
+            <div class="cfg-sec-cab"><span class="cfg-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></span><h3>Motivos de pausa frecuentes</h3></div>
+            <input class="cfg-in" id="cfgPausas" type="text" maxlength="200" placeholder="Pausa, Descanso, Show" autocomplete="off" aria-label="Motivos de pausa frecuentes, separados por coma">
+            <div class="cfg-chips" id="cfgPausasVista" aria-hidden="true"></div>
+            <p class="cfg-ayuda">Sepáralos con comas. Aparecen como botones al poner una pausa.</p>
+          </section>
+          <p class="cfg-lic" id="cfgLicencia"></p>
+        </div>
+        <div class="cfg-pie">
+          <p class="cfg-error" id="cfgError" role="alert"></p>
+          <div class="cfg-botones">
+            <button class="cfg-cancelar" id="cfgCancelar" type="button">Cancelar</button>
+            <button class="cfg-guardar" id="cfgGuardar" type="button"><span class="cfg-txt">Guardar cambios</span><span class="cfg-giro" aria-hidden="true"></span></button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -2156,17 +2304,31 @@
 
   // ventana para editar la configuración (la usan el proyector y el teléfono)
   function iniciarModalConfig(){
-    const modal = $('configModal');
+    const modal = $('configModal'), tarjeta = $('cfgTarjeta');
     const elTitulo = $('cfgTitulo'), elFondo = $('cfgFondo'), elAcento = $('cfgAcento'), elNota = $('cfgNota');
     const elRondas = $('cfgRondas'), elPausas = $('cfgPausas'), elErr = $('cfgError'), elLic = $('cfgLicencia'), elTemas = $('cfgTemas');
-    let rondas = [];
+    const btnGuardar = $('cfgGuardar'), txtGuardar = btnGuardar.querySelector('.cfg-txt');
+    const calmado = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const COLOR_LETRA = { B: ['#2f5bff', '#ffffff'], I: ['#f5b400', '#10151f'], N: ['#aeb8c5', '#10151f'], G: ['#1b3384', '#ffffff'], O: ['#5b6676', '#ffffff'] };
+    const SVG = (d) => '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+    const ICONO = {
+      subir: SVG('<polyline points="18 15 12 9 6 15"/>'),
+      bajar: SVG('<polyline points="6 9 12 15 18 9"/>'),
+      borrar: SVG('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/>')
+    };
+    let rondas = [], abridor = null, guardando = false, nueva = -1, movida = -1;
+    const vv = window.visualViewport;
 
+    // ----- colores -----
     function vistaPrevia(){
       const p = pintarTema({ fondo: elFondo.value, acento: elAcento.value });
       elNota.textContent = p.ajustado ? 'Ajustamos un poco el fondo para que los números se lean bien.' : '';
       Array.from(elTemas.children).forEach(b => {
-        b.classList.toggle('activo', b.dataset.fondo === elFondo.value.toLowerCase() && b.dataset.acento === elAcento.value.toLowerCase());
+        const on = b.dataset.fondo === elFondo.value.toLowerCase() && b.dataset.acento === elAcento.value.toLowerCase();
+        b.classList.toggle('activo', on); b.setAttribute('aria-pressed', String(on));
       });
+      $('cfgFondoCaja').style.setProperty('--c', elFondo.value); $('cfgAcentoCaja').style.setProperty('--c', elAcento.value);
+      $('cfgFondoHex').textContent = elFondo.value.toUpperCase(); $('cfgAcentoHex').textContent = elAcento.value.toUpperCase();
     }
     elTemas.innerHTML = '';
     TEMAS_PREDEFINIDOS.forEach(t => {
@@ -2174,15 +2336,52 @@
       b.type = 'button';
       b.className = 'cfg-tema';
       b.dataset.fondo = t.fondo; b.dataset.acento = t.acento;
-      b.innerHTML = '<i style="background: linear-gradient(135deg, ' + t.fondo + ' 50%, ' + t.acento + ' 50%)"></i>' + t.nombre;
+      b.innerHTML = '<span class="cfg-mini" style="--f:' + t.fondo + ';--a:' + t.acento + '"><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="cfg-tema-n"></span>';
+      b.querySelector('.cfg-tema-n').textContent = t.nombre;
       b.addEventListener('click', () => { elFondo.value = t.fondo; elAcento.value = t.acento; vistaPrevia(); });
       elTemas.appendChild(b);
     });
     elFondo.addEventListener('input', vistaPrevia);
     elAcento.addEventListener('input', vistaPrevia);
 
+    // ----- nombre y pausas -----
+    elTitulo.addEventListener('input', () => { $('cfgTituloCuenta').textContent = elTitulo.value.length + '/60'; });
+    function pintarPausas(){
+      const caja = $('cfgPausasVista'); caja.innerHTML = '';
+      elPausas.value.split(',').map(x => x.trim()).filter(Boolean).slice(0, 8).forEach(t => { const c = document.createElement('span'); c.textContent = t; caja.appendChild(c); });
+    }
+    elPausas.addEventListener('input', pintarPausas);
+
+    // ----- rondas -----
+    function selectorLetras(r){
+      const caja = document.createElement('div');
+      caja.className = 'cfg-letras'; caja.setAttribute('role', 'radiogroup'); caja.setAttribute('aria-label', 'Letra del binguito');
+      const et = document.createElement('span'); et.className = 'cfg-letras-et'; et.textContent = 'Binguito'; caja.appendChild(et);
+      const botones = [''].concat(LETRAS_PROGRAMA).map(l => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'cfg-letra' + (l ? '' : ' sin'); b.dataset.l = l; b.textContent = l || 'Sin'; b.setAttribute('role', 'radio');
+        if(l){ b.style.setProperty('--lc', COLOR_LETRA[l][0]); b.style.setProperty('--lt', COLOR_LETRA[l][1]); b.setAttribute('aria-label', 'Binguito letra ' + l); }
+        else b.setAttribute('aria-label', 'Sin binguito');
+        return b;
+      });
+      function marcar(l, enfocar){
+        r.binguito = l || null;
+        botones.forEach(b => { const on = b.dataset.l === (l || ''); b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1; if(on && enfocar) b.focus(); });
+      }
+      botones.forEach((b, k) => {
+        b.addEventListener('click', () => marcar(b.dataset.l));
+        b.addEventListener('keydown', (e) => {
+          if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){ e.preventDefault(); marcar(botones[(k + 1) % botones.length].dataset.l, true); }
+          else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ e.preventDefault(); marcar(botones[(k - 1 + botones.length) % botones.length].dataset.l, true); }
+        });
+        caja.appendChild(b);
+      });
+      marcar(r.binguito || '');
+      return caja;
+    }
     function dibujarRondas(){
       elRondas.innerHTML = '';
+      $('cfgRondasCuenta').textContent = rondas.length + '/30';
       if(!rondas.length){
         const v = document.createElement('p');
         v.className = 'cfg-nota';
@@ -2191,74 +2390,121 @@
       }
       rondas.forEach((r, i) => {
         const fila = document.createElement('div');
-        fila.className = 'cfg-ronda';
-        const campo = (clase, valor, ph, max, tipo) => {
+        fila.className = 'cfg-ronda' + (i === nueva ? ' nueva' : '') + (i === movida ? ' movida' : '');
+        const num = document.createElement('span'); num.className = 'cfg-num'; num.textContent = String(i + 1); num.setAttribute('aria-hidden', 'true'); fila.appendChild(num);
+        const campo = (clase, valor, ph, max, tipo, etiqueta) => {
           const inp = document.createElement('input');
-          inp.className = 'mc-texto ' + clase; inp.type = 'text'; inp.value = valor; inp.placeholder = ph; inp.maxLength = max; inp.autocomplete = 'off';
+          inp.className = 'cfg-in ' + clase; inp.type = 'text'; inp.value = valor; inp.placeholder = ph; inp.maxLength = max; inp.autocomplete = 'off';
+          inp.setAttribute('aria-label', etiqueta + ' de la ronda ' + (i + 1));
           inp.addEventListener('input', () => { r[tipo] = inp.value; });
           return inp;
         };
-        fila.appendChild(campo('cfg-r-hora', r.hora, '13:30', 8, 'hora'));
-        fila.appendChild(campo('cfg-r-nombre', r.nombre, 'Bingo', 40, 'nombre'));
-        fila.appendChild(campo('cfg-r-premio', r.premio, '$100.000', 30, 'premio'));
-        const sel = document.createElement('select');
-        sel.className = 'mc-texto';
-        sel.innerHTML = '<option value="">Sin binguito</option>' + LETRAS_PROGRAMA.map(l => '<option value="' + l + '">Binguito ' + l + '</option>').join('');
-        sel.value = r.binguito || '';
-        sel.addEventListener('change', () => { r.binguito = sel.value || null; });
-        fila.appendChild(sel);
+        fila.appendChild(campo('cfg-r-hora', r.hora, '13:30', 8, 'hora', 'Hora'));
+        fila.appendChild(campo('cfg-r-nombre', r.nombre, 'Bingo', 40, 'nombre', 'Nombre'));
+        fila.appendChild(campo('cfg-r-premio', r.premio, '$100.000', 30, 'premio', 'Premio'));
         const acc = document.createElement('div');
         acc.className = 'cfg-acciones';
-        const mk = (txt, titulo, fn, clase, deshab) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.title = titulo; b.disabled = !!deshab; if(clase) b.className = clase; b.addEventListener('click', fn); return b; };
-        acc.appendChild(mk('↑', 'Subir', () => { rondas.splice(i - 1, 0, rondas.splice(i, 1)[0]); dibujarRondas(); }, '', i === 0));
-        acc.appendChild(mk('↓', 'Bajar', () => { rondas.splice(i + 1, 0, rondas.splice(i, 1)[0]); dibujarRondas(); }, '', i === rondas.length - 1));
-        acc.appendChild(mk('✕', 'Quitar ronda', () => { rondas.splice(i, 1); dibujarRondas(); }, 'borrar'));
+        const mk = (icono, titulo, fn, clase, deshab) => { const b = document.createElement('button'); b.type = 'button'; b.innerHTML = icono; b.title = titulo; b.setAttribute('aria-label', titulo + ' (ronda ' + (i + 1) + ')'); b.disabled = !!deshab; if(clase) b.className = clase; b.addEventListener('click', fn); return b; };
+        acc.appendChild(mk(ICONO.subir, 'Subir', () => { rondas.splice(i - 1, 0, rondas.splice(i, 1)[0]); movida = i - 1; dibujarRondas(); }, '', i === 0));
+        acc.appendChild(mk(ICONO.bajar, 'Bajar', () => { rondas.splice(i + 1, 0, rondas.splice(i, 1)[0]); movida = i + 1; dibujarRondas(); }, '', i === rondas.length - 1));
+        acc.appendChild(mk(ICONO.borrar, 'Quitar ronda', () => { rondas.splice(i, 1); dibujarRondas(); }, 'borrar'));
         fila.appendChild(acc);
+        fila.appendChild(selectorLetras(r));
         elRondas.appendChild(fila);
       });
+      nueva = -1; movida = -1;
       $('cfgAgregar').style.display = rondas.length >= 30 ? 'none' : '';
     }
-    $('cfgAgregar').addEventListener('click', () => { rondas.push({ hora: '', nombre: 'Bingo', premio: '', binguito: null }); dibujarRondas(); });
+    $('cfgAgregar').addEventListener('click', () => {
+      rondas.push({ hora: '', nombre: 'Bingo', premio: '', binguito: null });
+      nueva = rondas.length - 1; dibujarRondas();
+      const f = elRondas.lastElementChild;
+      if(f){ const h = f.querySelector('.cfg-r-hora'); if(h) h.focus({ preventScroll: true }); f.scrollIntoView({ block: 'nearest', behavior: calmado ? 'auto' : 'smooth' }); }
+    });
 
-    function cerrar(){
-      modal.classList.remove('abierto');
-      pintarTema(temaEfectivo(configActual.tema));          // descarta la vista previa
+    // ----- ajuste a la parte visible de la pantalla (teclado del celular) -----
+    function ajustar(){
+      const alto = vv ? vv.height : window.innerHeight;
+      if(vv){ modal.style.setProperty('--vv-top', vv.offsetTop + 'px'); modal.style.setProperty('--vv-alto', vv.height + 'px'); }
+      modal.classList.toggle('compacto', alto < 640);
     }
-    $('cfgCancelar').addEventListener('click', cerrar);
-    $('cfgCerrar').addEventListener('click', cerrar);
+    function quitarAjuste(){
+      if(vv){ vv.removeEventListener('resize', ajustar); vv.removeEventListener('scroll', ajustar); } else window.removeEventListener('resize', ajustar);
+      modal.style.removeProperty('--vv-top'); modal.style.removeProperty('--vv-alto'); modal.classList.remove('compacto');
+    }
+    function sacudir(){
+      tarjeta.classList.remove('sacude'); void tarjeta.offsetWidth; tarjeta.classList.add('sacude');
+      setTimeout(() => tarjeta.classList.remove('sacude'), 650);
+    }
 
-    $('cfgGuardar').addEventListener('click', () => {
+    // ----- cerrar -----
+    function cerrar(conTema){
+      modal.classList.remove('abierto', 'ok', 'cargando');
+      if(conTema !== false) pintarTema(temaEfectivo(configActual.tema));          // descarta la vista previa
+      quitarAjuste();
+      if(abridor && abridor.focus){ try{ abridor.focus(); } catch(e){} }
+    }
+    $('cfgCancelar').addEventListener('click', () => cerrar());
+    $('cfgCerrar').addEventListener('click', () => cerrar());
+    function enfocables(){ return Array.from(tarjeta.querySelectorAll('button:not([disabled]), input:not([disabled])')).filter(e => e.tabIndex >= 0 && e.getClientRects().length); }
+    modal.addEventListener('keydown', (e) => {
+      if(!modal.classList.contains('abierto')) return;
+      if(e.key === 'Escape'){ e.preventDefault(); cerrar(); return; }
+      if(e.key !== 'Tab') return;
+      const f = enfocables(); if(!f.length) return;
+      const k = f.indexOf(document.activeElement);
+      if(e.shiftKey && k <= 0){ e.preventDefault(); f[f.length - 1].focus(); }
+      else if(!e.shiftKey && k === f.length - 1){ e.preventDefault(); f[0].focus(); }
+    });
+
+    // ----- guardar -----
+    btnGuardar.addEventListener('click', () => {
+      if(guardando) return;
       elErr.textContent = '';
       const titulo = elTitulo.value.trim();
-      if(!titulo){ elErr.textContent = 'Escribe el nombre del bingo.'; elTitulo.focus(); return; }
+      if(!titulo){ elErr.textContent = 'Escribe el nombre del bingo.'; sacudir(); elTitulo.focus(); return; }
       const lista = rondas.map(r => ({ hora: String(r.hora || '').trim(), nombre: String(r.nombre || '').trim() || 'Bingo', premio: String(r.premio || '').trim(), binguito: r.binguito || null }));
       const pausas = elPausas.value.split(',').map(x => x.trim()).filter(Boolean).slice(0, 8);
       const cfg = { titulo: titulo.slice(0, 60), tema: { fondo: elFondo.value.toLowerCase(), acento: elAcento.value.toLowerCase() } };
       if(lista.length) cfg.rondas = lista;
       if(pausas.length) cfg.pausas = pausas;
-      rutaSala().child('config').set(cfg).then(() => {
-        modal.classList.remove('abierto');
-      }).catch(() => { elErr.textContent = 'No se pudo guardar. Revisa tu conexión o la vigencia de tu acceso.'; errorEscritura(); });
+      guardando = true; btnGuardar.disabled = true; modal.classList.add('cargando');
+      rutaSala().child('config').set(cfg).then(async () => {
+        guardando = false; modal.classList.remove('cargando'); modal.classList.add('ok'); txtGuardar.textContent = '¡Guardado!';
+        await new Promise(r => setTimeout(r, calmado ? 0 : 420));
+        cerrar(false);
+      }).catch(() => {
+        guardando = false; btnGuardar.disabled = false; modal.classList.remove('cargando');
+        elErr.textContent = 'No se pudo guardar. Revisa tu conexión o la vigencia de tu acceso.'; sacudir(); errorEscritura();
+      });
     });
 
     return {
       abrir: function(){
         const c = configActual || {};
+        abridor = document.activeElement;
+        modal.classList.remove('ok', 'cargando'); guardando = false; btnGuardar.disabled = false; txtGuardar.textContent = 'Guardar cambios';
         elTitulo.value = c.titulo || '';
-        const t = temaEfectivo(c.tema);
+        $('cfgTituloCuenta').textContent = elTitulo.value.length + '/60';
         const tc = c.tema || {};
         elFondo.value = (tc.fondo || TEMA_BASE.fondo).toLowerCase();
         elAcento.value = (tc.acento || TEMA_BASE.acento).toLowerCase();
         rondas = normalizarRondas(c.rondas).map(r => ({ hora: r.hora, nombre: r.nombre, premio: r.premio, binguito: r.binguito }));
         elPausas.value = aLista(c.pausas).join(', ');
+        pintarPausas();
         elErr.textContent = '';
+        const vigente = !!(licencia && licencia.vence && Number(licencia.vence) > Date.now());
         elLic.textContent = licencia && licencia.vence
-          ? (Number(licencia.vence) > Date.now() ? 'Tu acceso está vigente hasta el ' + fechaCorta(licencia.vence) + '.' : 'Tu acceso venció el ' + fechaCorta(licencia.vence) + '. Ya no puedes guardar cambios.')
+          ? (vigente ? 'Tu acceso está vigente hasta el ' + fechaCorta(licencia.vence) + '.' : 'Tu acceso venció el ' + fechaCorta(licencia.vence) + '. Ya no puedes guardar cambios.')
           : '';
-        dibujarRondas();
+        elLic.classList.toggle('vencida', !!licencia && !!licencia.vence && !vigente);
+        nueva = -1; movida = -1; dibujarRondas();
         vistaPrevia();
+        if(vv){ vv.addEventListener('resize', ajustar); vv.addEventListener('scroll', ajustar); } else window.addEventListener('resize', ajustar);
+        ajustar();
         modal.classList.add('abierto');
-        setTimeout(() => elTitulo.focus(), 80);
+        const cuerpo = $('cfgCuerpo'); if(cuerpo) cuerpo.scrollTop = 0;
+        setTimeout(() => elTitulo.focus({ preventScroll: true }), 140);
       }
     };
   }

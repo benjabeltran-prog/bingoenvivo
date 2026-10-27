@@ -532,10 +532,15 @@
     const c = Array.from(buf, n => alfabeto[n % alfabeto.length]).join('');
     return c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8, 12);
   }
-  function mensajeCliente(sala, codigo, vence){
-    return '¡Hola! Tu bingo está listo.\n\n' +
-      'Enlace para el público (compártelo o imprímelo en un QR):\n' + urlPublica(sala) + '\n\n' +
-      'Panel del organizador (solo para ti):\n' + urlOrganizador(sala) + '\n' +
+  // dirección de la página del QR de este bingo (la que se imprime o se proyecta); el título es el nombre del cliente
+  function urlQr(sala, nombre){ return urlPublica(sala) + 'qr.html?u=' + encodeURIComponent(urlPublica(sala)) + '&t=' + encodeURIComponent(nombre || ''); }
+  // mensaje con TODOS los accesos del evento: público, QR y organizador (con su código)
+  function mensajeCliente(sala, codigo, vence, nombre){
+    const n = nombre !== undefined ? nombre : ((clientes[sala] || {}).nombre || '');
+    return '¡Hola! Tu bingo está listo. Aquí tienes todos los accesos:\n\n' +
+      '📲 Enlace para tus asistentes (compártelo por WhatsApp o redes):\n' + urlPublica(sala) + '\n\n' +
+      '🖨️ Código QR para imprimir o mostrar en el proyector:\n' + urlQr(sala, n) + '\n\n' +
+      '🔐 Panel del organizador (solo para ti):\n' + urlOrganizador(sala) + '\n' +
       'Código de acceso: ' + codigo + '\n\n' +
       'Tu acceso está vigente hasta el ' + fecha(vence) + '.\n' +
       'Dentro del panel toca ⚙ para poner el nombre, los colores, las rondas y los premios.';
@@ -809,7 +814,7 @@
       await db.ref('clientes/' + sala).set({ nombre: cliente, contacto: $('nuevoContacto').value.trim(), creada: Date.now() });
       $('entregaTitulo').textContent = '';
       $('entregaTitulo').appendChild(icono('check')); $('entregaTitulo').appendChild(document.createTextNode('Listo: ' + sala + '.' + DOMINIO + ' · mensaje para tu cliente'));
-      const msg = mensajeCliente(sala, codigo, vence);
+      const msg = mensajeCliente(sala, codigo, vence, cliente);
       $('entregaTexto').value = msg;
       $('enviarWsp').href = 'https://wa.me/?text=' + encodeURIComponent(msg);
       $('entrega').hidden = false; confeti();

@@ -25,6 +25,9 @@ Cotizaciones: formulario en https://bingoenvivo.cl/#pedir
 ## Para quién
 Colegios, clubes, juntas de vecinos, empresas y campañas solidarias. Se usó por primera vez en el Bingo Oxford School 2026.
 
+## Video
+Video de 1 minuto y 28 segundos, con subtítulos, que muestra cómo lo usa cada asistente desde su celular: https://benjabeltran-prog.github.io/bingoenvivo/tutorial.mp4 (portada: https://benjabeltran-prog.github.io/bingoenvivo/tutorial-poster.jpg). Viene dentro de cada bingo, en el botón «¿Cómo se usa?».
+
 ## Cómo contratar
 Se cotiza según las fechas de acceso y el tamaño del evento. Se solicita con el formulario de https://bingoenvivo.cl/#pedir.
 
